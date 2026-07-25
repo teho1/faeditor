@@ -40,6 +40,10 @@ open build/FAEditor.app
 - SysEx only — no proprietary binary reverse engineering.
 - FA exposes Studio Set *data* only as Temporary (`18 00 00 00`); User/Preset slots are recalled via Setup Bank Select (`01 00 00 04`).
 
+## Privacy
+
+See [`PRIVACY.md`](PRIVACY.md). The app does not collect personal data.
+
 ## License
 
 FA Editor source code is licensed under the **MIT License** — see [`LICENSE`](LICENSE).
