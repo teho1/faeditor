@@ -63,6 +63,13 @@ public:
     Q_INVOKABLE void startScanNames(bool userOnly = false);
     Q_INVOKABLE void cancelScan();
     Q_INVOKABLE QVariantMap slotAt(int row) const;
+    /** True if any slot already has a cached/scanned name. */
+    Q_INVOKABLE bool hasCachedNames() const;
+    /**
+     * Read Temporary Studio Set name from the FA and update the currently
+     * selected slot + on-disk name cache (e.g. when the dropdown opens).
+     */
+    Q_INVOKABLE bool syncCurrentNameFromDevice();
 
 signals:
     void filterChanged();
@@ -79,6 +86,9 @@ private:
     bool readTemporaryName(QString *outName, QString *error);
     void scanStep();
     int absoluteIndexFromFiltered(int row) const;
+    QString namesCachePath() const;
+    void loadCachedNames();
+    void saveCachedNames() const;
 
     SysexEngine *m_engine = nullptr;
     StudioSetModel *m_studioSet = nullptr;

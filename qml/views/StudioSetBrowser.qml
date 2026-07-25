@@ -74,6 +74,14 @@ Rectangle {
                         }
                     }
 
+                    // When the list opens, refresh this slot’s name from Temporary (device edits).
+                    Connections {
+                        target: setCombo.popup
+                        function onOpened() {
+                            App.studioSets.syncCurrentNameFromDevice()
+                        }
+                    }
+
                     onActivated: function (index) {
                         App.openStudioSet(index)
                     }
@@ -115,23 +123,14 @@ Rectangle {
                     onTextChanged: App.studioSets.filterText = text
                 }
 
-                Button {
-                    text: "Open"
-                    enabled: App.studioSets.currentRow >= 0
-                    font.pixelSize: LogicTheme.fontSizeSmall
-                    onClicked: App.openStudioSet(App.studioSets.currentRow)
-                }
-
-                ToolButton {
-                    text: App.studioSets.scanning ? "✕" : "Scan"
-                    font.pixelSize: LogicTheme.fontSizeSmall
-                    ToolTip.visible: hovered
-                    ToolTip.text: App.studioSets.scanning ? "Cancel scan" : "Scan User names from the FA"
+                FaButton {
+                    glyph: ""
+                    text: App.studioSets.scanning ? "Cancel" : "Scan"
                     onClicked: {
                         if (App.studioSets.scanning)
                             App.studioSets.cancelScan()
                         else
-                            App.studioSets.startScanNames(true)
+                            scanConfirm.openFor(true)
                     }
                 }
             }
@@ -206,14 +205,14 @@ Rectangle {
                     if (App.studioSets.scanning)
                         App.studioSets.cancelScan()
                     else
-                        App.studioSets.startScanNames(true)
+                        scanConfirm.openFor(true)
                 }
             }
 
             Button {
                 text: "Scan All Names"
                 enabled: !App.studioSets.scanning
-                onClicked: App.studioSets.startScanNames(false)
+                onClicked: scanConfirm.openFor(false)
             }
         }
 
@@ -289,10 +288,6 @@ Rectangle {
                             font.pixelSize: LogicTheme.fontSizeSmall
                             Layout.preferredWidth: 50
                         }
-                        Button {
-                            text: "Open"
-                            onClicked: App.openStudioSet(index)
-                        }
                     }
 
                     MouseArea {
@@ -312,5 +307,32 @@ Rectangle {
             Layout.fillWidth: true
             elide: Text.ElideRight
         }
+    }
+
+    Dialog {
+        id: scanConfirm
+        property bool userOnly: true
+        parent: Overlay.overlay
+        modal: true
+        anchors.centerIn: parent
+        title: "Scan Studio Set Names"
+        standardButtons: Dialog.Ok | Dialog.Cancel
+        width: 420
+
+        function openFor(usersOnly) {
+            userOnly = usersOnly
+            open()
+        }
+
+        Label {
+            width: parent ? parent.width : 380
+            wrapMode: Text.WordWrap
+            color: LogicTheme.textSecondary
+            text: scanConfirm.userOnly
+                  ? "Reading User Studio Set names from the FA can take several minutes (hundreds of slots). Names are saved locally so you only need to do this once; running Scan again overwrites the saved list."
+                  : "Reading all User and Preset Studio Set names from the FA can take a long time. Names are saved locally so you only need to do this once; running Scan again overwrites the saved list."
+        }
+
+        onAccepted: App.studioSets.startScanNames(scanConfirm.userOnly)
     }
 }

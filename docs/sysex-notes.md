@@ -26,8 +26,8 @@ Example (Reverb Type = Room 2):
 | Offset | Block |
 |--------|-------|
 | `00 00 00` | Common (name at `00`–`0F`, Solo Part at `39`) |
-| `00 01 00` | Chorus |
-| `00 02 00` | Reverb (Type at `01`) |
+| `00 01 00` | Chorus (Switch at `00`, Type at `01`, Level at `02`) |
+| `00 02 00` | Reverb (Switch at `00`, Type at `01`, Level at `02`) |
 | `00 05 00` | Master Comp |
 | `00 20 00`–`00 2F 00` | Parts 1–16 (size `4C`) |
 | `00 40 00`–`00 4F 00` | Zones 1–16 (key range / Keyboard Switch) |

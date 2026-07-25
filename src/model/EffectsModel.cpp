@@ -41,7 +41,7 @@ void EffectsModel::emitEdit(const QString &section, const QString &param, int va
 
 void EffectsModel::setChorusType(int v)
 {
-    v = std::clamp(v, 0, 127);
+    v = std::clamp(v, 0, 3);
     if (m_chorusType == v)
         return;
     m_chorusType = v;
@@ -132,10 +132,13 @@ void EffectsModel::loadChorus(const QByteArray &data)
 {
     m_rawChorus = data;
     m_fromDevice = true;
-    if (data.size() > 0)
-        m_chorusType = static_cast<quint8>(data[0]);
+    // MIDI Imple: 00 Switch, 01 Type (0–3), 02 Level — same layout as Reverb.
     if (data.size() > 1)
-        m_chorusLevel = static_cast<quint8>(data[1]);
+        m_chorusType = static_cast<quint8>(data[1]);
+    else if (data.size() > 0)
+        m_chorusType = static_cast<quint8>(data[0]);
+    if (data.size() > 2)
+        m_chorusLevel = static_cast<quint8>(data[2]);
     m_fromDevice = false;
     emit effectsChanged();
 }
@@ -178,10 +181,11 @@ void EffectsModel::loadMasterComp(const QByteArray &data)
 QByteArray EffectsModel::chorusBytes() const
 {
     QByteArray d = m_rawChorus.isEmpty() ? QByteArray(0x20, char(0)) : m_rawChorus;
-    if (d.size() < 2)
-        d.resize(2);
-    d[0] = static_cast<char>(m_chorusType);
-    d[1] = static_cast<char>(m_chorusLevel);
+    if (d.size() < 3)
+        d.resize(3);
+    // Preserve Switch at [0]; Type/Level match Reverb offsets.
+    d[1] = static_cast<char>(m_chorusType);
+    d[2] = static_cast<char>(m_chorusLevel);
     return d;
 }
 

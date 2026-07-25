@@ -185,6 +185,41 @@ bool ProjectStore::duplicate(int row)
     return true;
 }
 
+bool ProjectStore::duplicateCurrent()
+{
+    if (m_currentPath.isEmpty())
+        return false;
+    const QFileInfo cur(m_currentPath);
+    for (int i = 0; i < m_entries.size(); ++i) {
+        if (QFileInfo(m_entries.at(i).path) == cur)
+            return duplicate(i);
+    }
+    if (!cur.exists())
+        return false;
+
+    QString baseName = m_currentName.isEmpty() ? cur.completeBaseName() : m_currentName;
+    QString newName = sanitizeName(baseName + QStringLiteral(" Copy"));
+    auto dest = libraryDir() + QLatin1Char('/') + newName + QStringLiteral(".json");
+    int n = 2;
+    while (QFile::exists(dest)) {
+        newName = sanitizeName(baseName + QStringLiteral(" Copy %1").arg(n++));
+        dest = libraryDir() + QLatin1Char('/') + newName + QStringLiteral(".json");
+    }
+    if (!QFile::copy(m_currentPath, dest))
+        return false;
+    QFile f(dest);
+    if (f.open(QIODevice::ReadWrite)) {
+        auto doc = QJsonDocument::fromJson(f.readAll());
+        auto root = doc.object();
+        root.insert(QStringLiteral("name"), newName);
+        root.insert(QStringLiteral("modified"), QDateTime::currentDateTimeUtc().toString(Qt::ISODate));
+        f.resize(0);
+        f.write(QJsonDocument(root).toJson(QJsonDocument::Indented));
+    }
+    refresh();
+    return true;
+}
+
 bool ProjectStore::rename(int row, const QString &newName)
 {
     if (row < 0 || row >= m_entries.size())

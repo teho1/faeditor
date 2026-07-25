@@ -14,6 +14,18 @@ Rectangle {
     property bool embedded: false
     readonly property real implicitContentWidth: contentColumn.implicitWidth
         + (embedded ? 16 : 24)
+    readonly property bool hasProject: App.library.currentPath.length > 0
+
+    property int _pendingLoadRow: -1
+    property int _pendingDeleteRow: -1
+    property string _pendingDeleteName: ""
+
+    function proposedNewName() {
+        const base = App.studioSet.name && App.studioSet.name.length
+                     ? App.studioSet.name
+                     : "Untitled"
+        return base
+    }
 
     function openNameDialog(title, initialName, onAccept) {
         nameDialog.title = title
@@ -22,6 +34,30 @@ Rectangle {
         nameDialog.open()
         nameField.forceActiveFocus()
         nameField.selectAll()
+    }
+
+    function requestLoad(row) {
+        if (row < 0)
+            return
+        _pendingLoadRow = row
+        if (App.studioSet.dirty) {
+            unsavedDialog.open()
+            return
+        }
+        finishLoad()
+    }
+
+    function finishLoad() {
+        const row = _pendingLoadRow
+        _pendingLoadRow = -1
+        if (row < 0)
+            return
+        if (App.library.load(row))
+            pushAfterLoadDialog.open()
+    }
+
+    function cancelPendingLoad() {
+        _pendingLoadRow = -1
     }
 
     ColumnLayout {
@@ -44,16 +80,23 @@ Rectangle {
                 elide: Text.ElideRight
             }
             FaButton {
+                glyph: FaIcons.add
+                text: root.embedded ? "" : "New"
+                onClicked: openNameDialog("New Library File", root.proposedNewName(), function(n) {
+                    App.library.saveAs(n)
+                })
+            }
+            FaButton {
+                visible: root.hasProject
                 glyph: FaIcons.save
                 text: root.embedded ? "" : "Save"
                 onClicked: App.saveToLibrary()
             }
             FaButton {
+                visible: root.hasProject
                 glyph: FaIcons.copy
-                text: root.embedded ? "" : "Save As…"
-                onClicked: openNameDialog("Save As", App.studioSet.name + " Copy", function(n) {
-                    App.library.saveAs(n)
-                })
+                text: root.embedded ? "" : "Dup"
+                onClicked: App.library.duplicateCurrent()
             }
             FaButton {
                 glyph: FaIcons.refresh
@@ -65,8 +108,13 @@ Rectangle {
         Label {
             Layout.fillWidth: true
             elide: Text.ElideMiddle
-            text: App.library.currentPath.length ? ("Current: " + App.library.currentName) : "No project file"
-            color: LogicTheme.textSecondary
+            text: {
+                if (!root.hasProject)
+                    return "No project file" + (App.studioSet.dirty ? " · unsaved edits" : "")
+                return "Current: " + App.library.currentName
+                       + (App.studioSet.dirty ? " · unsaved" : "")
+            }
+            color: App.studioSet.dirty ? LogicTheme.warning : LogicTheme.textSecondary
             font.pixelSize: LogicTheme.fontSizeSmall
         }
 
@@ -77,15 +125,20 @@ Rectangle {
             model: App.library
             spacing: root.embedded ? 1 : 2
             delegate: Rectangle {
+                id: rowRoot
                 required property int index
                 required property string name
                 required property string modified
                 required property string path
 
+                readonly property bool isCurrent: root.hasProject && path === App.library.currentPath
+
                 width: ListView.view.width
                 height: root.embedded ? 32 : 40
-                color: LogicTheme.panelBg
+                color: isCurrent ? LogicTheme.selectedBg : LogicTheme.panelBg
                 radius: root.embedded ? 3 : 4
+                border.width: isCurrent ? 1 : 0
+                border.color: LogicTheme.accent
 
                 RowLayout {
                     anchors.fill: parent
@@ -106,6 +159,7 @@ Rectangle {
                         text: name
                         color: LogicTheme.textPrimary
                         font.pixelSize: root.embedded ? LogicTheme.fontSizeSmall : LogicTheme.fontSize
+                        font.bold: rowRoot.isCurrent
                         Layout.fillWidth: true
                         Layout.minimumWidth: 0
                         elide: Text.ElideRight
@@ -117,11 +171,6 @@ Rectangle {
                         font.pixelSize: LogicTheme.fontSizeSmall
                         Layout.preferredWidth: implicitWidth
                         elide: Text.ElideRight
-                    }
-                    FaButton {
-                        glyph: FaIcons.download
-                        text: root.embedded ? "" : "Load"
-                        onClicked: App.library.load(index)
                     }
                     FaButton {
                         glyph: FaIcons.edit
@@ -137,15 +186,25 @@ Rectangle {
                         }
                     }
                     FaButton {
-                        glyph: FaIcons.copy
-                        text: root.embedded ? "" : "Dup"
-                        onClicked: App.library.duplicate(index)
-                    }
-                    FaButton {
                         glyph: FaIcons.trash
                         text: root.embedded ? "" : "Delete"
                         glyphColor: LogicTheme.danger
-                        onClicked: App.library.remove(index)
+                        onClicked: {
+                            root._pendingDeleteRow = index
+                            root._pendingDeleteName = name
+                            deleteConfirmDialog.open()
+                        }
+                    }
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    z: -1
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        if (rowRoot.isCurrent)
+                            return
+                        root.requestLoad(index)
                     }
                 }
             }
@@ -189,5 +248,106 @@ Rectangle {
             if (n.length && typeof _onAccept === "function")
                 _onAccept(n)
         }
+    }
+
+    Dialog {
+        id: unsavedDialog
+        parent: Overlay.overlay
+        modal: true
+        anchors.centerIn: parent
+        title: "Unsaved changes"
+        width: 420
+        standardButtons: Dialog.NoButton
+
+        ColumnLayout {
+            anchors.fill: parent
+            spacing: 14
+
+            Label {
+                Layout.fillWidth: true
+                wrapMode: Text.WordWrap
+                color: LogicTheme.textSecondary
+                text: root.hasProject
+                      ? "You have unsaved changes to “" + App.library.currentName + "”. Save before loading another project?"
+                      : "You have unsaved edits in the editor. Discard them and load this library project?"
+            }
+
+            RowLayout {
+                Layout.alignment: Qt.AlignRight
+                spacing: 8
+
+                FaButton {
+                    text: "Cancel"
+                    onClicked: {
+                        root.cancelPendingLoad()
+                        unsavedDialog.close()
+                    }
+                }
+                FaButton {
+                    text: "Discard"
+                    onClicked: {
+                        unsavedDialog.close()
+                        root.finishLoad()
+                    }
+                }
+                FaButton {
+                    visible: root.hasProject
+                    text: "Save"
+                    onClicked: {
+                        if (App.saveToLibrary()) {
+                            unsavedDialog.close()
+                            root.finishLoad()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    Dialog {
+        id: deleteConfirmDialog
+        parent: Overlay.overlay
+        modal: true
+        anchors.centerIn: parent
+        title: "Delete library file?"
+        standardButtons: Dialog.Yes | Dialog.No
+        width: 400
+
+        Label {
+            width: parent ? parent.width : 360
+            wrapMode: Text.WordWrap
+            color: LogicTheme.textSecondary
+            text: "Delete “" + root._pendingDeleteName + "”? This cannot be undone."
+        }
+
+        onAccepted: {
+            if (root._pendingDeleteRow >= 0)
+                App.library.remove(root._pendingDeleteRow)
+            root._pendingDeleteRow = -1
+            root._pendingDeleteName = ""
+        }
+        onRejected: {
+            root._pendingDeleteRow = -1
+            root._pendingDeleteName = ""
+        }
+    }
+
+    Dialog {
+        id: pushAfterLoadDialog
+        parent: Overlay.overlay
+        modal: true
+        anchors.centerIn: parent
+        title: "Push to FA?"
+        standardButtons: Dialog.Yes | Dialog.No
+        width: 400
+
+        Label {
+            width: parent ? parent.width : 360
+            wrapMode: Text.WordWrap
+            color: LogicTheme.textSecondary
+            text: "Library project “" + App.library.currentName + "” is loaded in the editor. Push it to the FA Temporary Studio Set now?"
+        }
+
+        onAccepted: App.push()
     }
 }

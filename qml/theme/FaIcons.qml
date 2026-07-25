@@ -25,6 +25,7 @@ QtObject {
     readonly property string download: "\uf090"
     readonly property string upload: "\uf09b"
     readonly property string save: "\ue161"
+    readonly property string add: "\ue145"            // add — new library file
     readonly property string copy: "\ue14d"
     readonly property string trash: "\ue872"
     readonly property string refresh: "\ue5d5"

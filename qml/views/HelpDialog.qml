@@ -65,7 +65,8 @@ Dialog {
                 color: LogicTheme.textSecondary
                 font.pixelSize: LogicTheme.fontSize
                 text:
-                    "Save stores the current Temporary Studio Set as a local JSON project and shows it in the Library panel on Sets & Tones. "
+                    "New creates a local JSON project (name defaults to the current Studio Set). "
+                    + "Save updates the open library file; Dup copies that file. "
                     + "Star tones in the browser to keep favourites. Library files live in the app’s Application Support folder."
             }
 

@@ -437,10 +437,11 @@ void StudioSetModel::writeEffectParam(const QString &section, const QString &par
     Address a{};
     QByteArray d(1, static_cast<char>(value & 0x7F));
     if (section == QLatin1String("chorus")) {
+        // MIDI Imple Studio Set Chorus: 00 Switch, 01 Type, 02 Level
         if (param == QLatin1String("type"))
-            a = addr::chorusParam(0x00);
-        else if (param == QLatin1String("level"))
             a = addr::chorusParam(0x01);
+        else if (param == QLatin1String("level"))
+            a = addr::chorusParam(0x02);
         else
             return;
     } else if (section == QLatin1String("reverb")) {

@@ -4,6 +4,13 @@
 #include "model/StudioSetModel.h"
 
 #include <QThread>
+#include <QDir>
+#include <QFile>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QStandardPaths>
+#include <QDateTime>
 
 namespace {
 
@@ -37,6 +44,12 @@ QString defaultLabel(const StudioSetSlot &s)
     return QStringLiteral("Preset %1").arg(s.number, 2, 10, QChar('0'));
 }
 
+QString slotKey(const StudioSetSlot &s)
+{
+    return (s.kind == StudioSetSlot::Kind::User ? QStringLiteral("U") : QStringLiteral("P"))
+           + QString::number(s.number);
+}
+
 } // namespace
 
 StudioSetBrowserModel::StudioSetBrowserModel(SysexEngine *engine, StudioSetModel *studioSet,
@@ -46,6 +59,7 @@ StudioSetBrowserModel::StudioSetBrowserModel(SysexEngine *engine, StudioSetModel
     , m_studioSet(studioSet)
 {
     buildSlots();
+    loadCachedNames();
     rebuildFiltered();
     m_scanTimer.setSingleShot(true);
     connect(&m_scanTimer, &QTimer::timeout, this, &StudioSetBrowserModel::scanStep);
@@ -266,6 +280,7 @@ bool StudioSetBrowserModel::recallRow(int row, bool pullAfter)
         const auto idx = index(row);
         emit dataChanged(idx, idx, {NameRole, HasNameRole});
         emit currentChanged();
+        saveCachedNames();
     }
 
     if (pullAfter && m_studioSet) {
@@ -324,7 +339,8 @@ void StudioSetBrowserModel::cancelScan()
     m_scanTimer.stop();
     m_scanning = false;
     emit scanningChanged();
-    setStatus(QStringLiteral("Scan cancelled (%1/%2)").arg(m_scanProgress).arg(m_scanTotal));
+    saveCachedNames(); // keep whatever was read so far
+    setStatus(QStringLiteral("Scan cancelled (%1/%2) — names saved").arg(m_scanProgress).arg(m_scanTotal));
 }
 
 void StudioSetBrowserModel::scanStep()
@@ -334,7 +350,8 @@ void StudioSetBrowserModel::scanStep()
     if (m_scanIndex >= m_scanQueue.size()) {
         m_scanning = false;
         emit scanningChanged();
-        setStatus(QStringLiteral("Scan complete — %1 names").arg(m_scanProgress));
+        saveCachedNames();
+        setStatus(QStringLiteral("Scan complete — %1 names (saved)").arg(m_scanProgress));
         rebuildFiltered();
         return;
     }
@@ -359,4 +376,110 @@ void StudioSetBrowserModel::scanStep()
     }
 
     m_scanTimer.start(20);
+}
+
+bool StudioSetBrowserModel::hasCachedNames() const
+{
+    for (const auto &s : m_all) {
+        if (!s.name.isEmpty())
+            return true;
+    }
+    return false;
+}
+
+bool StudioSetBrowserModel::syncCurrentNameFromDevice()
+{
+    if (m_scanning)
+        return false;
+    if (!m_engine || !m_engine->isOpen())
+        return false;
+    const int abs = absoluteIndexFromFiltered(m_currentRow);
+    if (abs < 0)
+        return false;
+
+    QString name;
+    QString err;
+    if (!readTemporaryName(&name, &err))
+        return false;
+
+    auto &slot = m_all[abs];
+    if (slot.name == name) {
+        // Still refresh editor Temporary name if the model drifted.
+        if (m_studioSet && m_studioSet->name() != name.left(16))
+            m_studioSet->setName(name.left(16));
+        return true;
+    }
+
+    slot.name = name;
+    const auto idx = index(m_currentRow);
+    emit dataChanged(idx, idx, {NameRole, HasNameRole});
+    emit currentChanged();
+    if (m_studioSet)
+        m_studioSet->setName(name.left(16));
+    saveCachedNames();
+    setStatus(QStringLiteral("Updated %1 — %2").arg(defaultLabel(slot), name));
+    return true;
+}
+
+QString StudioSetBrowserModel::namesCachePath() const
+{
+    const auto dir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QDir().mkpath(dir);
+    return dir + QStringLiteral("/studio_set_names.json");
+}
+
+void StudioSetBrowserModel::loadCachedNames()
+{
+    QFile f(namesCachePath());
+    if (!f.open(QIODevice::ReadOnly))
+        return;
+    const auto doc = QJsonDocument::fromJson(f.readAll());
+    if (!doc.isObject())
+        return;
+    const auto arr = doc.object().value(QStringLiteral("slots")).toArray();
+    QHash<QString, QString> byKey;
+    byKey.reserve(arr.size());
+    for (const auto &v : arr) {
+        const auto o = v.toObject();
+        const auto kind = o.value(QStringLiteral("kind")).toString();
+        const int number = o.value(QStringLiteral("number")).toInt();
+        const auto name = o.value(QStringLiteral("name")).toString().trimmed();
+        if (name.isEmpty() || number < 1)
+            continue;
+        const auto key = (kind == QLatin1String("Preset") ? QStringLiteral("P") : QStringLiteral("U"))
+                         + QString::number(number);
+        byKey.insert(key, name);
+    }
+    if (byKey.isEmpty())
+        return;
+    for (auto &s : m_all) {
+        const auto it = byKey.constFind(slotKey(s));
+        if (it != byKey.cend())
+            s.name = it.value();
+    }
+    setStatus(QStringLiteral("Loaded %1 cached Studio Set names").arg(byKey.size()));
+}
+
+void StudioSetBrowserModel::saveCachedNames() const
+{
+    QJsonArray arr;
+    for (const auto &s : m_all) {
+        if (s.name.isEmpty())
+            continue;
+        QJsonObject o;
+        o.insert(QStringLiteral("kind"),
+                 s.kind == StudioSetSlot::Kind::User ? QStringLiteral("User")
+                                                     : QStringLiteral("Preset"));
+        o.insert(QStringLiteral("number"), s.number);
+        o.insert(QStringLiteral("name"), s.name);
+        arr.append(o);
+    }
+    QJsonObject root;
+    root.insert(QStringLiteral("version"), 1);
+    root.insert(QStringLiteral("savedAt"), QDateTime::currentDateTimeUtc().toString(Qt::ISODate));
+    root.insert(QStringLiteral("slots"), arr);
+    QFile f(namesCachePath());
+    if (!f.open(QIODevice::WriteOnly | QIODevice::Truncate))
+        return;
+    f.write(QJsonDocument(root).toJson(QJsonDocument::Compact));
 }

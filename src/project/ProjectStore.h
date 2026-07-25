@@ -41,6 +41,8 @@ public:
     Q_INVOKABLE bool load(int row);
     Q_INVOKABLE bool loadPath(const QString &path);
     Q_INVOKABLE bool duplicate(int row);
+    /** Duplicate the currently open library file on disk (does not switch the editor to the copy). */
+    Q_INVOKABLE bool duplicateCurrent();
     Q_INVOKABLE bool rename(int row, const QString &newName);
     Q_INVOKABLE bool remove(int row);
     Q_INVOKABLE bool importFile(const QString &path);
