@@ -1,0 +1,27 @@
+# Build
+/build/
+/cmake-build-*/
+CMakeUserPresets.json
+compile_commands.json
+
+# Qt / IDE
+.qt/
+.qmlls.ini
+*.user
+*.autosave
+.idea/
+.vscode/
+*.qmlc
+*.jsc
+
+# OS
+.DS_Store
+.AppleDouble
+.LSCustomIcon
+
+# Roland reference materials (copyrighted; keep local only)
+roland_specs/
+
+# Local/editor scratch
+*.swp
+*~
