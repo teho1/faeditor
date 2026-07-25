@@ -11,7 +11,7 @@ Dialog {
     title: "Help"
     standardButtons: Dialog.Ok
     width: Math.min(560, Overlay.overlay ? Overlay.overlay.width - 40 : 560)
-    height: Math.min(560, Overlay.overlay ? Overlay.overlay.height - 40 : 560)
+    height: Math.min(580, Overlay.overlay ? Overlay.overlay.height - 40 : 580)
 
     contentItem: ScrollView {
         clip: true
@@ -32,8 +32,9 @@ Dialog {
                 text:
                     "1. On the FA: System → USB Driver → Vendor (MIDI+Audio), and install Roland’s USB driver if needed.\n"
                     + "2. In FA Editor: MIDI → Auto-connect FA (or pick ports — skip DAW CTRL).\n"
-                    + "3. Tab 1 Sets & Tones: pick a User/Preset slot from the FA Set dropdown (top), select a part, click a tone to assign (instrument icon previews). Local projects live in the Library panel on the same tab.\n"
-                    + "4. Use Pull Temp / Push Temp for a full Temporary read/write. To store a User slot permanently, use Write on the FA — SysEx only edits Temporary."
+                    + "3. Tab 1 Sets & Tones: choose a User/Preset from the FA Set dropdown (opens that Temporary set). "
+                    + "Select a part, click a tone to assign (instrument icon previews). Library projects sit in the right panel.\n"
+                    + "4. Pull Temp / Push Temp for a full Temporary read/write. Permanent User store is Write on the FA — SysEx only edits Temporary."
             }
 
             Label {
@@ -54,6 +55,23 @@ Dialog {
             }
 
             Label {
+                text: "FA Set dropdown & Scan"
+                font.bold: true
+                color: LogicTheme.textPrimary
+                Layout.topMargin: 6
+            }
+            Label {
+                Layout.fillWidth: true
+                wrapMode: Text.WordWrap
+                color: LogicTheme.textSecondary
+                font.pixelSize: LogicTheme.fontSize
+                text:
+                    "Picking a slot in the FA Set list loads it into Temporary. "
+                    + "Scan reads Studio Set names from the FA (can take several minutes); results are cached in a local JSON file so you only need to scan once. "
+                    + "Scanning again overwrites the cache. Opening the dropdown refreshes the current slot’s name from Temporary if you renamed it on the FA."
+            }
+
+            Label {
                 text: "Library & favourites"
                 font.bold: true
                 color: LogicTheme.textPrimary
@@ -65,9 +83,28 @@ Dialog {
                 color: LogicTheme.textSecondary
                 font.pixelSize: LogicTheme.fontSize
                 text:
-                    "New creates a local JSON project (name defaults to the current Studio Set). "
-                    + "Save updates the open library file; Dup copies that file. "
-                    + "Star tones in the browser to keep favourites. Library files live in the app’s Application Support folder."
+                    "New creates a local JSON project (suggested name = current Studio Set). "
+                    + "Save and Dup appear only when a library file is open. "
+                    + "Click a row to load it (you’ll be warned if there are unsaved edits; delete asks for confirmation). "
+                    + "After load you can push the project to the FA Temporary. "
+                    + "In the tone list, use the star next to Search to show favourites only, or star individual tones. "
+                    + "Library files live in the app’s Application Support folder."
+            }
+
+            Label {
+                text: "Mixer"
+                font.bold: true
+                color: LogicTheme.textPrimary
+                Layout.topMargin: 6
+            }
+            Label {
+                Layout.fillWidth: true
+                wrapMode: Text.WordWrap
+                color: LogicTheme.textSecondary
+                font.pixelSize: LogicTheme.fontSize
+                text:
+                    "Channel strips stay on the left. The Tone row opens a tone picker that replaces part details in the inspector; use ^ to close. "
+                    + "Chorus/Reverb sends and Main/Sub output are edited on the Effects tab."
             }
 
             Label {
@@ -82,10 +119,11 @@ Dialog {
                 color: LogicTheme.textSecondary
                 font.pixelSize: LogicTheme.fontSize
                 text:
-                    "Tab 3 shows the FA EFFECTS EDIT signal flow: Part → Chorus/Reverb → Master Comp, plus Audio Input → NS → TFX → MIC Reverb. "
-                    + "Click a block to edit. Pick a part from the Part box dropdown. Input Gain lives on Audio Input; TFX Location on the TFX block. "
-                    + "MFX is shown for routing only (not SysEx yet — edit on the FA). "
-                    + "Some USB Audio routing options are not SysEx-controllable "
+                    "Tab 3 is an FA-style EFFECTS EDIT diagram: Part → Chorus/Reverb → Master Comp → Output, "
+                    + "plus Audio Input → NS → TFX → MIC Reverb (TFX moves between Input and Main paths from TFX Location). "
+                    + "Click a block to edit it. Part picker and Output Main/Sub are on the diagram. "
+                    + "Input Gain is on Audio Input. MFX is routing context only (not SysEx yet — edit on the FA). "
+                    + "Some USB Audio options are not SysEx-controllable "
                     + "(System → System Effects → USB Audio / USB Driver)."
             }
 
