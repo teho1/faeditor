@@ -5,8 +5,8 @@ import FAEditor
 
 ApplicationWindow {
     id: root
-    width: 1440
-    height: 900
+    width: 2880
+    height: 1800
     visible: true
     title: "FA Editor — " + (App.studioSet.name || "Studio Set")
     color: LogicTheme.windowBg
