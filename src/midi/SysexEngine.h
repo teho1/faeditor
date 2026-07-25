@@ -22,6 +22,8 @@ public:
     bool openPorts(int inIndex, int outIndex, QString *error = nullptr);
     void closePorts();
     bool isOpen() const;
+    /** True if ports are open and RtMidi still reports them open (unplug / power-off). */
+    bool portsHealthy() const;
 
     void setDeviceId(quint8 id);
     quint8 deviceId() const { return m_deviceId; }

@@ -7,6 +7,31 @@ EffectsModel::EffectsModel(QObject *parent)
 {
 }
 
+QStringList EffectsModel::chorusTypeNames() const
+{
+    // FA Parameter Guide — Studio Set Chorus Type (panel 00–03).
+    return {
+        QStringLiteral("00: OFF"),
+        QStringLiteral("01: Chorus"),
+        QStringLiteral("02: Delay"),
+        QStringLiteral("03: GM2 Chorus")
+    };
+}
+
+QStringList EffectsModel::reverbTypeNames() const
+{
+    // FA Parameter Guide — Studio Set Reverb Type (panel 00–06).
+    return {
+        QStringLiteral("00: OFF"),
+        QStringLiteral("01: Room 1"),
+        QStringLiteral("02: Room 2"),
+        QStringLiteral("03: Hall 1"),
+        QStringLiteral("04: Hall 2"),
+        QStringLiteral("05: Plate"),
+        QStringLiteral("06: GM2 Reverb")
+    };
+}
+
 void EffectsModel::emitEdit(const QString &section, const QString &param, int value)
 {
     emit effectsChanged();

@@ -52,7 +52,7 @@ public:
     Q_INVOKABLE bool push();
     Q_INVOKABLE bool openStudioSet(int row);
     Q_INVOKABLE void goChangeToneForPart(int partIndex);
-    /** Save current Studio Set to the local library and show the Library tab. */
+    /** Save current Studio Set to the local library and show Sets & Tones. */
     Q_INVOKABLE bool saveToLibrary();
     /** Open MIDI dialog (refreshes ports; clears stale connection). */
     Q_INVOKABLE void openMidiDialog();

@@ -1,6 +1,6 @@
 # FA Editor SysEx Notes
 
-Primary reference: Roland FA-06/07/08 MIDI Implementation (local copy; not in this repo)
+Primary reference: `roland_specs/FA-06_07_08_MIDI_Imple_eng01_W.pdf`
 
 ## Framing
 

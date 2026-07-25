@@ -23,11 +23,11 @@ Rectangle {
         FaIcon {
             icon: FaIcons.circle
             size: LogicTheme.fontSizeSmall - 1
-            iconColor: App.midi.connected ? LogicTheme.success : LogicTheme.textMuted
+            iconColor: App.midi.connected ? LogicTheme.success : LogicTheme.danger
         }
         Label {
             text: App.workflowHint.length ? App.workflowHint : App.midi.statusText
-            color: App.midi.connected ? LogicTheme.textSecondary : LogicTheme.textMuted
+            color: App.midi.connected ? LogicTheme.textSecondary : LogicTheme.danger
             font.pixelSize: LogicTheme.fontSizeSmall
             elide: Text.ElideRight
             Layout.fillWidth: true

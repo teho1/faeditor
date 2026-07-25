@@ -2,6 +2,7 @@
 
 #include <QObject>
 #include <QByteArray>
+#include <QStringList>
 
 class EffectsModel : public QObject
 {
@@ -16,6 +17,8 @@ class EffectsModel : public QObject
     Q_PROPERTY(int masterCompThreshold READ masterCompThreshold WRITE setMasterCompThreshold NOTIFY effectsChanged)
     Q_PROPERTY(int masterCompRatio READ masterCompRatio WRITE setMasterCompRatio NOTIFY effectsChanged)
     Q_PROPERTY(int masterCompGain READ masterCompGain WRITE setMasterCompGain NOTIFY effectsChanged)
+    Q_PROPERTY(QStringList chorusTypeNames READ chorusTypeNames CONSTANT)
+    Q_PROPERTY(QStringList reverbTypeNames READ reverbTypeNames CONSTANT)
 
 public:
     explicit EffectsModel(QObject *parent = nullptr);
@@ -30,6 +33,8 @@ public:
     int masterCompThreshold() const { return m_masterCompThreshold; }
     int masterCompRatio() const { return m_masterCompRatio; }
     int masterCompGain() const { return m_masterCompGain; }
+    QStringList chorusTypeNames() const;
+    QStringList reverbTypeNames() const;
 
     void setChorusType(int v);
     void setChorusLevel(int v);

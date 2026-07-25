@@ -2,6 +2,7 @@
 
 #include <QAbstractListModel>
 #include <QStringList>
+#include <QTimer>
 #include <memory>
 
 class SysexEngine;
@@ -74,6 +75,10 @@ private:
     void setStatus(const QString &text);
     void preferFaSelection(bool force = false);
     bool indexInRange(int idx, int count) const;
+    void pollConnection();
+    void startConnectionPoll();
+    void stopConnectionPoll();
+    bool connectedPortStillPresent() const;
 
     SysexEngine *m_engine = nullptr;
     QVector<MidiPortInfo> m_inputs;
@@ -83,4 +88,5 @@ private:
     QString m_statusText = QStringLiteral("Disconnected");
     int m_selectedInput = -1;
     int m_selectedOutput = -1;
+    QTimer m_connectionPoll;
 };

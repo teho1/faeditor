@@ -6,121 +6,160 @@ import FAEditor
 Rectangle {
     color: LogicTheme.windowBg
 
-    RowLayout {
+    ColumnLayout {
         anchors.fill: parent
         spacing: 0
 
-        // Parts list — pick which part to revoice
-        Rectangle {
-            Layout.preferredWidth: parent.width * 0.42
+        // Device User/Preset recall — compact toolbar (not a left-column list)
+        StudioSetBrowser {
+            compact: true
+            Layout.fillWidth: true
+            Layout.preferredHeight: implicitHeight
+            Layout.maximumHeight: implicitHeight
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
             Layout.fillHeight: true
-            color: LogicTheme.windowBg
+            spacing: 0
 
-            ColumnLayout {
-                anchors.fill: parent
-                anchors.margins: 12
-                spacing: 8
+            // Left — parts list (equal third with Tones / Library)
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.preferredWidth: 1
+                Layout.minimumWidth: 0
+                Layout.fillHeight: true
+                clip: true
+                color: LogicTheme.windowBg
 
-                Label {
-                    text: "Parts — pick one to change"
-                    color: LogicTheme.textPrimary
-                    font.pixelSize: LogicTheme.fontSizeTitle
-                    font.bold: true
-                }
+                ColumnLayout {
+                    anchors.fill: parent
+                    anchors.margins: 8
+                    spacing: 4
+                    width: parent.width
 
-                Label {
-                    Layout.fillWidth: true
-                    wrapMode: Text.WordWrap
-                    color: LogicTheme.textSecondary
-                    font.pixelSize: LogicTheme.fontSizeSmall
-                    text: "Studio Set: “" + App.studioSet.name + "”. Click Change on a part, then double-click a tone on the right."
-                }
+                    Label {
+                        text: "Parts"
+                        color: LogicTheme.textPrimary
+                        font.pixelSize: LogicTheme.fontSizeTitle
+                        font.bold: true
+                    }
 
-                ListView {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    clip: true
-                    model: App.studioSet
-                    spacing: 2
-                    delegate: Rectangle {
-                        required property int index
-                        required property int partNumber
-                        required property string toneName
-                        required property int bankMsb
-                        required property int bankLsb
-                        required property int program
-                        required property bool keyboardSwitch
+                    Label {
+                        Layout.fillWidth: true
+                        Layout.minimumWidth: 0
+                        elide: Text.ElideRight
+                        color: LogicTheme.textSecondary
+                        font.pixelSize: LogicTheme.fontSizeSmall
+                        text: "“" + App.studioSet.name + "” — select, then pick a tone"
+                    }
 
-                        width: ListView.view.width
-                        height: 44
-                        radius: 4
-                        color: App.studioSet.selectedPart === index ? LogicTheme.selectedBg : LogicTheme.panelBg
-                        border.color: LogicTheme.hairline
+                    ListView {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        clip: true
+                        model: App.studioSet
+                        spacing: 1
+                        delegate: Rectangle {
+                            required property int index
+                            required property int partNumber
+                            required property string toneName
+                            required property int bankMsb
+                            required property int bankLsb
+                            required property int program
 
-                        RowLayout {
-                            anchors.fill: parent
-                            anchors.margins: 8
-                            spacing: 8
+                            width: ListView.view.width
+                            height: 28
+                            radius: 3
+                            color: App.studioSet.selectedPart === index ? LogicTheme.selectedBg : LogicTheme.panelBg
+                            border.color: LogicTheme.hairline
 
-                            Label {
-                                text: partNumber
-                                color: LogicTheme.textMuted
-                                font.pixelSize: LogicTheme.fontSizeSmall
-                                Layout.preferredWidth: 22
-                            }
-                            FaIcon {
-                                icon: FaIcons.forCategory(App.tones.resolveCategory(bankMsb, bankLsb, program))
-                                size: LogicTheme.fontSize + 2
-                                iconColor: LogicTheme.textSecondary
-                                Layout.preferredWidth: 22
-                            }
-                            ColumnLayout {
-                                Layout.fillWidth: true
-                                spacing: 2
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.leftMargin: 6
+                                anchors.rightMargin: 6
+                                spacing: 4
+
+                                Label {
+                                    text: partNumber
+                                    color: LogicTheme.textMuted
+                                    font.pixelSize: LogicTheme.fontSizeSmall
+                                    Layout.preferredWidth: 16
+                                }
+                                FaIcon {
+                                    icon: FaIcons.forCategory(App.tones.resolveCategory(bankMsb, bankLsb, program))
+                                    size: LogicTheme.fontSize
+                                    iconColor: LogicTheme.textSecondary
+                                    Layout.preferredWidth: 16
+                                }
                                 Label {
                                     text: toneName
                                     color: LogicTheme.textPrimary
-                                    font.pixelSize: LogicTheme.fontSize
+                                    font.pixelSize: LogicTheme.fontSizeSmall
                                     elide: Text.ElideRight
                                     Layout.fillWidth: true
                                 }
-                                Label {
-                                    text: bankMsb + ":" + bankLsb + ":" + (program + 1)
-                                          + (keyboardSwitch ? "" : "  · KB off")
-                                    color: LogicTheme.textMuted
-                                    font.pixelSize: LogicTheme.fontSizeSmall
-                                }
                             }
-                            FaButton {
-                                glyph: FaIcons.exchange
-                                text: "Change"
-                                onClicked: App.goChangeToneForPart(index)
-                            }
-                        }
 
-                        MouseArea {
-                            anchors.fill: parent
-                            z: -1
-                            onClicked: App.studioSet.selectedPart = index
-                            onDoubleClicked: App.goChangeToneForPart(index)
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: App.studioSet.selectedPart = index
+                            }
                         }
                     }
                 }
             }
-        }
 
-        Rectangle {
-            width: 1
-            Layout.fillHeight: true
-            color: LogicTheme.hairline
-        }
+            Rectangle {
+                width: 1
+                Layout.fillHeight: true
+                color: LogicTheme.hairline
+            }
 
-        // Tone browser for selected part
-        Item {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            ToneBrowser {
-                anchors.fill: parent
+            // Center — tone browser for selected part
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.preferredWidth: 1
+                Layout.minimumWidth: 0
+                Layout.fillHeight: true
+                clip: true
+                color: LogicTheme.windowBg
+
+                ColumnLayout {
+                    anchors.fill: parent
+                    anchors.margins: 8
+                    spacing: 6
+                    width: parent.width
+
+                    Label {
+                        text: "Tones"
+                        color: LogicTheme.textPrimary
+                        font.pixelSize: LogicTheme.fontSizeTitle
+                        font.bold: true
+                    }
+
+                    ToneBrowser {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        Layout.minimumWidth: 0
+                        narrow: true
+                    }
+                }
+            }
+
+            Rectangle {
+                width: 1
+                Layout.fillHeight: true
+                color: LogicTheme.hairline
+            }
+
+            // Right — local studio-set library (store / load)
+            LibraryView {
+                Layout.fillWidth: true
+                Layout.preferredWidth: 1
+                Layout.minimumWidth: 0
+                Layout.fillHeight: true
+                embedded: true
             }
         }
     }

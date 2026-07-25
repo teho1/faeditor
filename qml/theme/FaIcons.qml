@@ -37,6 +37,9 @@ QtObject {
     readonly property string check: "\ue86c"
     readonly property string circle: "\ue061"          // fiber_manual_record — MIDI LED
     readonly property string cable: "\uefe6"           // MIDI / connection
+    readonly property string chevronRight: "\ue5cc"    // disclosure / navigate next
+    readonly property string chevronUp: "\ue5ce"       // expand_less — collapse panel
+    readonly property string close: "\ue5cd"           // close
 
     // —— Instruments (Material) ——
     readonly property string piano: "\ue521"

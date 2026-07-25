@@ -63,6 +63,17 @@ bool SysexEngine::isOpen() const
     return m_open.load();
 }
 
+bool SysexEngine::portsHealthy() const
+{
+    if (!m_open.load() || !m_in || !m_out)
+        return false;
+    try {
+        return m_in->isPortOpen() && m_out->isPortOpen();
+    } catch (...) {
+        return false;
+    }
+}
+
 void SysexEngine::setDeviceId(quint8 id)
 {
     m_deviceId = id;

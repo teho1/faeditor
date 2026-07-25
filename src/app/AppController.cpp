@@ -27,13 +27,20 @@ AppController::AppController(QObject *parent)
     connect(&m_autosaveTimer, &QTimer::timeout, m_library, &ProjectStore::autosave);
 
     connect(m_studioSets, &StudioSetBrowserModel::recalled, this, [this](int) {
-        setHint(QStringLiteral("Set loaded. Select a part, click Change, double-click an instrument."));
-        setMainTab(1); // Change Tone workspace
+        setHint(QStringLiteral("Set loaded. Select a part, then click a tone to assign (icon previews)."));
+        setMainTab(0); // Stay on Sets & Tones workspace
     });
 
     connect(m_studioSets, &StudioSetBrowserModel::statusTextChanged, this, [this]() {
         if (!m_studioSets->statusText().isEmpty())
             setHint(m_studioSets->statusText());
+    });
+
+    connect(m_midi, &MidiDeviceModel::connectedChanged, this, [this]() {
+        if (!m_midi->connected())
+            setHint(m_midi->statusText().isEmpty()
+                        ? QStringLiteral("FA disconnected — cable unplugged or powered off")
+                        : m_midi->statusText());
     });
 
     m_library->recoverAutosaveIfNeeded();
@@ -96,13 +103,13 @@ void AppController::startupConnect()
 
 void AppController::setMainTab(int v)
 {
-    v = qBound(0, v, 5);
+    v = qBound(0, v, 2);
     if (m_mainTab == v)
         return;
     m_mainTab = v;
     emit mainTabChanged();
-    // 0 Studio Sets, 1 Change Tone, 2 Mixer, 3 Audio FX, 4 Studio FX, 5 Library
-    if (v == 3 && m_midi && m_midi->connected())
+    // 0 Sets & Tones (+ Library), 1 Mixer, 2 Effects (Audio + Studio)
+    if (v == 2 && m_midi && m_midi->connected())
         m_audioFx->pullFromDevice();
 }
 
@@ -180,8 +187,8 @@ bool AppController::openStudioSet(int row)
 void AppController::goChangeToneForPart(int partIndex)
 {
     m_studioSet->setSelectedPart(partIndex);
-    setMainTab(1); // Change Tone tab (same primary workspace)
-    setHint(QStringLiteral("Changing instrument for Part %1 — double-click a tone to assign.")
+    setMainTab(0); // Sets & Tones workspace
+    setHint(QStringLiteral("Changing instrument for Part %1 — click a tone to assign, or the icon to preview.")
                 .arg(partIndex + 1));
 }
 
@@ -189,7 +196,7 @@ bool AppController::saveToLibrary()
 {
     if (!m_library || !m_library->save())
         return false;
-    setMainTab(5); // Library tab
+    setMainTab(0); // Sets & Tones (library panel)
     setHint(QStringLiteral("Saved “%1” to library.").arg(m_library->currentName()));
     return true;
 }

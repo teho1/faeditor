@@ -10,6 +10,9 @@ Flickable {
     flickableDirection: Flickable.VerticalFlick
 
     readonly property var part: App.studioSet.selectedPartModel
+    property bool tonePickerOpen: false
+
+    signal tonePickerRequested()
 
     ColumnLayout {
         id: col
@@ -23,7 +26,34 @@ Flickable {
             Layout.fillWidth: true
 
             Label { text: "Tone"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
-            Label { text: part ? part.toneName : ""; color: LogicTheme.textPrimary; font.pixelSize: LogicTheme.fontSize; elide: Text.ElideRight; Layout.fillWidth: true }
+            Item {
+                Layout.fillWidth: true
+                Layout.preferredHeight: toneRow.implicitHeight
+                RowLayout {
+                    id: toneRow
+                    anchors.fill: parent
+                    spacing: 4
+                    Label {
+                        text: part ? part.toneName : ""
+                        color: LogicTheme.textPrimary
+                        font.pixelSize: LogicTheme.fontSize
+                        elide: Text.ElideRight
+                        Layout.fillWidth: true
+                    }
+                    FaIcon {
+                        icon: FaIcons.chevronRight
+                        size: LogicTheme.fontSize
+                        iconColor: root.tonePickerOpen ? LogicTheme.accent : LogicTheme.textMuted
+                        Layout.preferredWidth: 14
+                    }
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    anchors.margins: -2
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.tonePickerRequested()
+                }
+            }
 
             Label { text: "Bank MSB"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
             SpinBox {
@@ -86,30 +116,6 @@ Flickable {
                 textFromValue: (v) => (v - 64).toString()
                 valueFromText: (t) => parseInt(t) + 64
                 onValueModified: if (part) part.coarseTune = value
-            }
-
-            Label { text: "Chorus"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
-            Slider {
-                from: 0; to: 127
-                value: part ? part.chorusSend : 0
-                onMoved: if (part) part.chorusSend = Math.round(value)
-                Layout.fillWidth: true
-            }
-
-            Label { text: "Reverb"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
-            Slider {
-                from: 0; to: 127
-                value: part ? part.reverbSend : 0
-                onMoved: if (part) part.reverbSend = Math.round(value)
-                Layout.fillWidth: true
-            }
-
-            Label { text: "Output"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
-            ComboBox {
-                model: ["Main", "Sub"]
-                currentIndex: part ? part.outputAssign : 0
-                onActivated: if (part) part.outputAssign = currentIndex
-                Layout.fillWidth: true
             }
 
             Label { text: "Part Rx"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }

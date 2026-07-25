@@ -238,3 +238,13 @@ QVariantMap ToneBrowserModel::toneAt(int row) const
     m.insert(QStringLiteral("program"), t.program);
     return m;
 }
+
+int ToneBrowserModel::indexOfTone(int bankMsb, int bankLsb, int program) const
+{
+    for (int i = 0; i < m_filtered.size(); ++i) {
+        const auto &t = m_all.at(m_filtered.at(i));
+        if (t.bankMsb == bankMsb && t.bankLsb == bankLsb && t.program == program)
+            return i;
+    }
+    return -1;
+}

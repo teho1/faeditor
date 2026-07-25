@@ -4,12 +4,167 @@ import QtQuick.Layouts
 import FAEditor
 
 Rectangle {
+    id: root
     color: LogicTheme.windowBg
 
+    // When true: single toolbar row for Sets & Tones (no tall slot list).
+    property bool compact: false
+
+    implicitHeight: root.compact
+                    ? (compactBar.height + (App.studioSets.scanning ? compactProgress.implicitHeight + 8 : 0))
+                    : 400
+
+    // ── Compact: toolbar picker ─────────────────────────────────────────────
+    ColumnLayout {
+        id: compactRoot
+        width: parent.width
+        spacing: 0
+        visible: root.compact
+
+        Rectangle {
+            id: compactBar
+            Layout.fillWidth: true
+            height: barRow.implicitHeight + 12
+            color: LogicTheme.panelBg
+
+            RowLayout {
+                id: barRow
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.leftMargin: 10
+                anchors.rightMargin: 10
+                spacing: 8
+
+                Label {
+                    text: "FA Set"
+                    color: LogicTheme.textPrimary
+                    font.pixelSize: LogicTheme.fontSize
+                    font.bold: true
+                }
+
+                ComboBox {
+                    id: groupCombo
+                    model: ["All", "User", "Preset"]
+                    currentIndex: Math.max(0, model.indexOf(App.studioSets.groupFilter))
+                    onActivated: App.studioSets.groupFilter = currentText
+                    Layout.preferredWidth: 84
+                    font.pixelSize: LogicTheme.fontSizeSmall
+                }
+
+                ComboBox {
+                    id: setCombo
+                    Layout.fillWidth: true
+                    Layout.minimumWidth: 160
+                    Layout.preferredWidth: 280
+                    model: App.studioSets
+                    currentIndex: App.studioSets.currentRow
+                    font.pixelSize: LogicTheme.fontSizeSmall
+                    displayText: currentIndex < 0
+                                 ? "Select User/Preset slot…"
+                                 : App.studioSets.currentLabel
+
+                    Connections {
+                        target: App.studioSets
+                        function onCurrentChanged() {
+                            setCombo.currentIndex = App.studioSets.currentRow
+                        }
+                        function onFilterChanged() {
+                            setCombo.currentIndex = App.studioSets.currentRow
+                        }
+                    }
+
+                    onActivated: function (index) {
+                        App.openStudioSet(index)
+                    }
+
+                    delegate: ItemDelegate {
+                        required property int index
+                        required property string label
+                        required property string name
+                        required property bool hasName
+
+                        width: setCombo.width
+                        highlighted: setCombo.highlightedIndex === index
+                        font.pixelSize: LogicTheme.fontSizeSmall
+
+                        contentItem: RowLayout {
+                            spacing: 8
+                            Label {
+                                text: label
+                                color: LogicTheme.textSecondary
+                                font.pixelSize: LogicTheme.fontSizeSmall
+                                Layout.preferredWidth: 72
+                                elide: Text.ElideRight
+                            }
+                            Label {
+                                text: name
+                                color: hasName ? LogicTheme.textPrimary : LogicTheme.textMuted
+                                font.pixelSize: LogicTheme.fontSizeSmall
+                                Layout.fillWidth: true
+                                elide: Text.ElideRight
+                            }
+                        }
+                    }
+                }
+
+                TextField {
+                    Layout.preferredWidth: 110
+                    placeholderText: "Filter…"
+                    font.pixelSize: LogicTheme.fontSizeSmall
+                    onTextChanged: App.studioSets.filterText = text
+                }
+
+                Button {
+                    text: "Open"
+                    enabled: App.studioSets.currentRow >= 0
+                    font.pixelSize: LogicTheme.fontSizeSmall
+                    onClicked: App.openStudioSet(App.studioSets.currentRow)
+                }
+
+                ToolButton {
+                    text: App.studioSets.scanning ? "✕" : "Scan"
+                    font.pixelSize: LogicTheme.fontSizeSmall
+                    ToolTip.visible: hovered
+                    ToolTip.text: App.studioSets.scanning ? "Cancel scan" : "Scan User names from the FA"
+                    onClicked: {
+                        if (App.studioSets.scanning)
+                            App.studioSets.cancelScan()
+                        else
+                            App.studioSets.startScanNames(true)
+                    }
+                }
+            }
+
+            Rectangle {
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                height: 1
+                color: LogicTheme.hairline
+            }
+        }
+
+        ProgressBar {
+            id: compactProgress
+            Layout.fillWidth: true
+            visible: App.studioSets.scanning
+            from: 0
+            to: Math.max(1, App.studioSets.scanTotal)
+            value: App.studioSets.scanProgress
+            Layout.leftMargin: 10
+            Layout.rightMargin: 10
+            Layout.topMargin: 4
+            Layout.bottomMargin: 4
+        }
+    }
+
+    // ── Full browser (standalone / non-compact) ─────────────────────────────
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 12
         spacing: 10
+        visible: !root.compact
 
         Label {
             text: "Studio Sets on the FA"
@@ -22,18 +177,18 @@ Rectangle {
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
             color: LogicTheme.textSecondary
-            font.pixelSize: LogicTheme.fontSize
+            font.pixelSize: LogicTheme.fontSizeSmall
             text: "Pick a User or Preset Studio Set to load it into the FA’s Temporary memory, then change instruments on its parts. Optional: Scan Names reads titles from the keyboard (takes a few minutes for all User slots)."
         }
 
         RowLayout {
             Layout.fillWidth: true
-            spacing: 8
+            spacing: 6
 
             TextField {
                 Layout.fillWidth: true
                 placeholderText: "Filter by slot or name…"
-                font.pixelSize: LogicTheme.fontSize
+                font.pixelSize: LogicTheme.fontSizeSmall
                 onTextChanged: App.studioSets.filterText = text
             }
 
@@ -42,6 +197,7 @@ Rectangle {
                 currentIndex: Math.max(0, model.indexOf(App.studioSets.groupFilter))
                 onActivated: App.studioSets.groupFilter = currentText
                 Layout.preferredWidth: 120
+                font.pixelSize: LogicTheme.fontSizeSmall
             }
 
             Button {
@@ -118,11 +274,12 @@ Rectangle {
                             color: LogicTheme.textSecondary
                             font.pixelSize: LogicTheme.fontSizeSmall
                             Layout.preferredWidth: 90
+                            elide: Text.ElideRight
                         }
                         Label {
                             text: name
                             color: hasName ? LogicTheme.textPrimary : LogicTheme.textMuted
-                            font.pixelSize: LogicTheme.fontSize
+                            font.pixelSize: LogicTheme.fontSizeSmall
                             Layout.fillWidth: true
                             elide: Text.ElideRight
                         }

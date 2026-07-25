@@ -2,11 +2,14 @@
 #include "midi/SysexEngine.h"
 
 #include <RtMidi.h>
+#include <algorithm>
 
 MidiDeviceModel::MidiDeviceModel(SysexEngine *engine, QObject *parent)
     : QAbstractListModel(parent)
     , m_engine(engine)
 {
+    m_connectionPoll.setInterval(1500);
+    connect(&m_connectionPoll, &QTimer::timeout, this, &MidiDeviceModel::pollConnection);
     refresh();
 }
 
@@ -173,9 +176,13 @@ void MidiDeviceModel::refresh()
     endResetModel();
 
     // If we thought we were connected but the engine/ports are gone (FA power-cycled), clear flag.
-    if (m_connected && m_engine && !m_engine->isOpen()) {
+    if (m_connected && (!m_engine || !m_engine->isOpen() || !connectedPortStillPresent())) {
+        stopConnectionPoll();
+        if (m_engine && m_engine->isOpen())
+            m_engine->closePorts();
         m_connected = false;
         m_connectedName.clear();
+        setStatus(QStringLiteral("FA disconnected — cable unplugged or powered off"));
         emit connectedChanged();
     }
 
@@ -228,6 +235,7 @@ bool MidiDeviceModel::connectSelected()
     m_connectedName = inName;
     setStatus(QStringLiteral("Connected: %1").arg(inName));
     emit connectedChanged();
+    startConnectionPoll();
     probeIdentity();
     return true;
 }
@@ -249,12 +257,92 @@ bool MidiDeviceModel::autoConnectFa()
 
 void MidiDeviceModel::disconnectDevice()
 {
+    stopConnectionPoll();
     if (m_engine)
         m_engine->closePorts();
+    const bool wasConnected = m_connected;
     m_connected = false;
     m_connectedName.clear();
     setStatus(QStringLiteral("Disconnected"));
-    emit connectedChanged();
+    if (wasConnected)
+        emit connectedChanged();
+}
+
+bool MidiDeviceModel::connectedPortStillPresent() const
+{
+    if (m_connectedName.isEmpty())
+        return false;
+    for (const auto &p : m_inputs) {
+        if (p.name == m_connectedName)
+            return true;
+    }
+    // CoreMIDI sometimes renames slightly; treat any FA port as still present.
+    for (const auto &p : m_inputs) {
+        if (p.looksLikeFa)
+            return true;
+    }
+    for (const auto &p : m_outputs) {
+        if (p.looksLikeFa)
+            return true;
+    }
+    return false;
+}
+
+void MidiDeviceModel::startConnectionPoll()
+{
+    if (!m_connectionPoll.isActive())
+        m_connectionPoll.start();
+}
+
+void MidiDeviceModel::stopConnectionPoll()
+{
+    m_connectionPoll.stop();
+}
+
+void MidiDeviceModel::pollConnection()
+{
+    if (!m_connected)
+        return;
+
+    // Enumerate ports without resetting the QML list model every tick.
+    QStringList inNames;
+    QStringList outNames;
+    try {
+        RtMidiIn in(RtMidi::MACOSX_CORE);
+        RtMidiOut out(RtMidi::MACOSX_CORE);
+        for (unsigned i = 0; i < in.getPortCount(); ++i)
+            inNames << QString::fromStdString(in.getPortName(i));
+        for (unsigned i = 0; i < out.getPortCount(); ++i)
+            outNames << QString::fromStdString(out.getPortName(i));
+    } catch (const RtMidiError &) {
+        stopConnectionPoll();
+        if (m_engine)
+            m_engine->closePorts();
+        m_connected = false;
+        m_connectedName.clear();
+        setStatus(QStringLiteral("FA disconnected — MIDI error"));
+        emit connectedChanged();
+        refresh();
+        return;
+    }
+
+    const bool namePresent = inNames.contains(m_connectedName)
+                             || std::any_of(inNames.cbegin(), inNames.cend(),
+                                            [](const QString &n) { return nameLooksLikeFa(n); })
+                             || std::any_of(outNames.cbegin(), outNames.cend(),
+                                            [](const QString &n) { return nameLooksLikeFa(n); });
+    const bool healthy = m_engine && m_engine->portsHealthy();
+
+    if (!namePresent || !healthy) {
+        stopConnectionPoll();
+        if (m_engine)
+            m_engine->closePorts();
+        m_connected = false;
+        m_connectedName.clear();
+        setStatus(QStringLiteral("FA disconnected — cable unplugged or powered off"));
+        emit connectedChanged();
+        refresh();
+    }
 }
 
 bool MidiDeviceModel::probeIdentity()

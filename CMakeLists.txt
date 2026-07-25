@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(FAEditor VERSION 0.1.0 LANGUAGES CXX)
+project(FAEditor VERSION 1.0.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -73,6 +73,7 @@ qt_add_qml_module(FAEditor
         qml/views/PartInspector.qml
         qml/views/ZoneKeyboard.qml
         qml/views/EffectsPanel.qml
+        qml/views/EffectsEditView.qml
         qml/views/MidiConnectDialog.qml
         qml/views/ToneBrowser.qml
         qml/views/StudioSetBrowser.qml
@@ -126,11 +127,14 @@ if(APPLE)
         MACOSX_BUNDLE TRUE
         MACOSX_BUNDLE_BUNDLE_NAME "FA Editor"
         MACOSX_BUNDLE_GUI_IDENTIFIER "com.righthere.faeditor"
-        MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
+        MACOSX_BUNDLE_BUNDLE_VERSION 1
         MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION}
         MACOSX_BUNDLE_ICON_FILE "AppIcon"
         MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/cmake/MacOSXBundleInfo.plist.in"
         XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS "${FAEDITOR_ENTITLEMENTS}"
+        XCODE_ATTRIBUTE_CODE_SIGN_STYLE "Automatic"
+        XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "K8DLLLGA28"
+        XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Development"
         XCODE_ATTRIBUTE_ENABLE_HARDENED_RUNTIME YES
         XCODE_ATTRIBUTE_ENABLE_APP_SANDBOX YES
     )
@@ -142,6 +146,37 @@ if(APPLE)
         ${COREAUDIO_LIBRARY}
         ${COREFOUNDATION_LIBRARY}
     )
+
+    # Bundle Qt into the .app on every Release build / Xcode Archive (required for TestFlight).
+    find_program(MACDEPLOYQT_EXECUTABLE macdeployqt
+        HINTS "${Qt6_DIR}/../../../bin" "${CMAKE_PREFIX_PATH}/bin"
+    )
+    if(MACDEPLOYQT_EXECUTABLE)
+        add_custom_command(TARGET FAEditor POST_BUILD
+            COMMAND "${CMAKE_COMMAND}"
+                "-DAPP=$<TARGET_BUNDLE_DIR:FAEditor>"
+                "-DCONFIG=$<CONFIG>"
+                "-DMACDEPLOYQT=${MACDEPLOYQT_EXECUTABLE}"
+                "-DQMLDIR=${CMAKE_CURRENT_SOURCE_DIR}/qml"
+                -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/DeployQt.cmake"
+            COMMENT "macdeployqt (bundle Qt for App Store / TestFlight)"
+            VERBATIM
+        )
+        # Keep a manual target as well.
+        add_custom_target(FAEditor_deploy
+            COMMAND "${CMAKE_COMMAND}"
+                "-DAPP=$<TARGET_BUNDLE_DIR:FAEditor>"
+                "-DCONFIG=Release"
+                "-DMACDEPLOYQT=${MACDEPLOYQT_EXECUTABLE}"
+                "-DQMLDIR=${CMAKE_CURRENT_SOURCE_DIR}/qml"
+                -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/DeployQt.cmake"
+            DEPENDS FAEditor
+            COMMENT "Running macdeployqt"
+            VERBATIM
+        )
+    else()
+        message(WARNING "macdeployqt not found; Release/Archive builds will be incomplete for TestFlight")
+    endif()
 endif()
 
 enable_testing()

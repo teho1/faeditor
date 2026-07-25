@@ -32,9 +32,8 @@ Dialog {
                 text:
                     "1. On the FA: System → USB Driver → Vendor (MIDI+Audio), and install Roland’s USB driver if needed.\n"
                     + "2. In FA Editor: MIDI → Auto-connect FA (or pick ports — skip DAW CTRL).\n"
-                    + "3. Tab 1 Studio Sets: Open a User/Preset slot into Temporary (or scan User names).\n"
-                    + "4. Tab 2 Change Tone: pick a part → Change → double-click a tone (live SysEx to Temporary).\n"
-                    + "5. Use Pull Temp / Push Temp for a full Temporary read/write. To store a User slot permanently, use Write on the FA — SysEx only edits Temporary."
+                    + "3. Tab 1 Sets & Tones: pick a User/Preset slot from the FA Set dropdown (top), select a part, click a tone to assign (instrument icon previews). Local projects live in the Library panel on the same tab.\n"
+                    + "4. Use Pull Temp / Push Temp for a full Temporary read/write. To store a User slot permanently, use Write on the FA — SysEx only edits Temporary."
             }
 
             Label {
@@ -49,8 +48,8 @@ Dialog {
                 color: LogicTheme.textSecondary
                 font.pixelSize: LogicTheme.fontSize
                 text:
-                    "1 Studio Sets · 2 Change Tone · 3 Mixer · 4 Audio FX · 5 Studio FX · 6 Library\n"
-                    + "Keys 1–6 switch tabs (disabled while typing in a text field).\n"
+                    "1 Sets & Tones · 2 Mixer · 3 Effects\n"
+                    + "Keys 1–3 switch tabs (disabled while typing in a text field).\n"
                     + "Ctrl+S save to library · Ctrl+R pull Temporary · Ctrl+P push Temporary."
             }
 
@@ -66,12 +65,12 @@ Dialog {
                 color: LogicTheme.textSecondary
                 font.pixelSize: LogicTheme.fontSize
                 text:
-                    "Save stores the current Temporary Studio Set as a local JSON project and opens the Library tab. "
+                    "Save stores the current Temporary Studio Set as a local JSON project and shows it in the Library panel on Sets & Tones. "
                     + "Star tones in the browser to keep favourites. Library files live in the app’s Application Support folder."
             }
 
             Label {
-                text: "Audio input FX"
+                text: "Effects"
                 font.bold: true
                 color: LogicTheme.textPrimary
                 Layout.topMargin: 6
@@ -82,7 +81,10 @@ Dialog {
                 color: LogicTheme.textSecondary
                 font.pixelSize: LogicTheme.fontSize
                 text:
-                    "TFX Location → INPUT for guitar/line. Some USB Audio routing options are not SysEx-controllable and must be set on the FA "
+                    "Tab 3 shows the FA EFFECTS EDIT signal flow: Part → Chorus/Reverb → Master Comp, plus Audio Input → NS → TFX → MIC Reverb. "
+                    + "Click a block to edit. Pick a part from the Part box dropdown. Input Gain lives on Audio Input; TFX Location on the TFX block. "
+                    + "MFX is shown for routing only (not SysEx yet — edit on the FA). "
+                    + "Some USB Audio routing options are not SysEx-controllable "
                     + "(System → System Effects → USB Audio / USB Driver)."
             }
 

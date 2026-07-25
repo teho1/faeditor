@@ -8,7 +8,6 @@ Rectangle {
     signal connectClicked()
     signal pullClicked()
     signal pushClicked()
-    signal saveClicked()
 
     height: LogicTheme.toolbarHeight
     color: LogicTheme.panelBg
@@ -45,7 +44,7 @@ Rectangle {
 
         FaButton {
             glyph: FaIcons.cable
-            glyphColor: App.midi.connected ? LogicTheme.success : LogicTheme.textMuted
+            glyphColor: App.midi.connected ? LogicTheme.success : LogicTheme.danger
             text: "MIDI"
             onClicked: root.connectClicked()
         }
@@ -58,11 +57,6 @@ Rectangle {
             glyph: FaIcons.upload
             text: "Push"
             onClicked: root.pushClicked()
-        }
-        FaButton {
-            glyph: FaIcons.save
-            text: "Save"
-            onClicked: root.saveClicked()
         }
     }
 }
