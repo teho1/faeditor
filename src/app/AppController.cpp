@@ -1,6 +1,7 @@
 #include "app/AppController.h"
 #include "model/PartModel.h"
 
+#include <QThread>
 #include <QTimer>
 
 AppController::AppController(QObject *parent)
@@ -13,8 +14,18 @@ AppController::AppController(QObject *parent)
     m_studioSets = new StudioSetBrowserModel(m_engine, m_studioSet, this);
     m_tones = new ToneBrowserModel(this);
     m_tones->loadCatalog();
+    m_waveforms = new WaveformCatalog(this);
+    // Bundled Sound List names — load every start so Tone Edit never depends on Waves.
+    m_waveforms->loadCatalog();
     m_audioFx = new AudioFxModel(m_engine, this);
-    m_library = new ProjectStore(m_studioSet, m_audioFx, this);
+    m_tone = new TemporaryToneModel(m_engine, m_studioSet, this);
+    if (m_tone) {
+        if (auto *sn = m_tone->snSynth())
+            sn->setWaveformCatalog(m_waveforms);
+        if (auto *pcm = m_tone->pcmSynth())
+            pcm->setWaveformCatalog(m_waveforms);
+    }
+    m_library = new ProjectStore(m_studioSet, m_audioFx, m_tone, this);
 
     m_studioSet->setToneNameResolver([this](int msb, int lsb, int pc) {
         return m_tones->resolveName(msb, lsb, pc);
@@ -103,14 +114,16 @@ void AppController::startupConnect()
 
 void AppController::setMainTab(int v)
 {
-    v = qBound(0, v, 2);
+    v = qBound(0, v, 3);
     if (m_mainTab == v)
         return;
     m_mainTab = v;
     emit mainTabChanged();
-    // 0 Sets & Tones (+ Library), 1 Mixer, 2 Effects (Audio + Studio)
+    // 0 Sets & Tones (+ Library), 1 Mixer, 2 Effects, 3 Tone
     if (v == 2 && m_midi && m_midi->connected())
         m_audioFx->pullFromDevice();
+    if (v == 3 && m_midi && m_midi->connected() && m_tone)
+        m_tone->pull();
 }
 
 void AppController::setConnectDialogOpen(bool v)
@@ -172,9 +185,18 @@ bool AppController::pull()
 
 bool AppController::push()
 {
-    // Blobs + typed studio overlays, then System Audio FX + Master EQ.
+    // Blobs + typed studio overlays, then tone blobs, then System Audio FX + Master EQ.
     if (!m_studioSet->pushToDevice())
         return false;
+    if (m_tone && m_library) {
+        // Settle after Studio Set rewrite before Temporary Tone DT1.
+        QThread::msleep(250);
+        const auto blobs = m_library->toneBlobs();
+        if (!blobs.isEmpty() && !m_tone->pushToneBlobs(blobs)) {
+            setHint(QStringLiteral("Studio Set pushed, but tone blob push failed."));
+            return false;
+        }
+    }
     if (m_audioFx && !m_audioFx->pushToDevice()) {
         setHint(QStringLiteral("Studio Set pushed, but Audio FX push failed."));
         return false;
@@ -183,7 +205,7 @@ bool AppController::push()
         setHint(QStringLiteral("Studio Set + Audio FX pushed, but Master EQ push failed."));
         return false;
     }
-    setHint(QStringLiteral("Pushed Temporary Studio Set, Audio FX, and Master EQ. Permanent store: Write → User Studio Set on the FA."));
+    setHint(QStringLiteral("Pushed Temporary Studio Set, tones, Audio FX, and Master EQ. Permanent store: Write on the FA."));
     return true;
 }
 
@@ -207,6 +229,21 @@ bool AppController::saveToLibrary()
         return false;
     setMainTab(0); // Sets & Tones (library panel)
     setHint(QStringLiteral("Saved “%1” to library.").arg(m_library->currentName()));
+    return true;
+}
+
+bool AppController::loadLibrary(int row)
+{
+    if (!m_library) {
+        setHint(QStringLiteral("Library is not available."));
+        return false;
+    }
+    if (!m_library->load(row)) {
+        const auto err = m_library->lastError();
+        setHint(err.isEmpty() ? QStringLiteral("Failed to load library file.") : err);
+        return false;
+    }
+    setHint(QStringLiteral("Loaded “%1” from library.").arg(m_library->currentName()));
     return true;
 }
 

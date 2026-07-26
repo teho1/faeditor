@@ -52,8 +52,14 @@ Rectangle {
         _pendingLoadRow = -1
         if (row < 0)
             return
-        if (App.library.load(row))
+        if (App.loadLibrary(row)) {
+            renameError.text = ""
             pushAfterLoadDialog.open()
+        } else {
+            renameError.text = App.library.lastError.length
+                               ? App.library.lastError
+                               : "Could not load library file."
+        }
     }
 
     function cancelPendingLoad() {
@@ -171,6 +177,11 @@ Rectangle {
                         font.pixelSize: LogicTheme.fontSizeSmall
                         Layout.preferredWidth: implicitWidth
                         elide: Text.ElideRight
+                    }
+                    FaButton {
+                        glyph: FaIcons.download
+                        text: root.embedded ? "" : "Load"
+                        onClicked: root.requestLoad(index)
                     }
                     FaButton {
                         glyph: FaIcons.edit
@@ -345,7 +356,7 @@ Rectangle {
             width: parent ? parent.width : 360
             wrapMode: Text.WordWrap
             color: LogicTheme.textSecondary
-            text: "Library project “" + App.library.currentName + "” is loaded in the editor. Push Temporary Studio Set, Audio FX, and Master EQ to the FA now?"
+            text: "Library project “" + App.library.currentName + "” is loaded in the editor. Push Temporary Studio Set, tone blobs, Audio FX, and Master EQ to the FA now?"
         }
 
         onAccepted: App.push()

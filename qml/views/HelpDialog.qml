@@ -86,8 +86,8 @@ Dialog {
                     "New creates a local JSON project (suggested name = current Studio Set). "
                     + "Save and Dup appear only when a library file is open. "
                     + "Click a row to load it (you’ll be warned if there are unsaved edits; delete asks for confirmation). "
-                    + "Save Studio Sets locally (parts, zones, studio FX, IFX, pads, audio FX…) and push back to Temporary. "
-                    + "A library file is a Temporary Studio Set plus System Audio FX / Master EQ snapshot — not a per-tone MFX designer backup; User Write stays on the FA. "
+                    + "Save Studio Sets locally (parts, zones, studio FX, IFX, pads, audio FX, tone MFX / SN-S blobs…) and push back to Temporary. "
+                    + "Library JSON can include toneBlobs (per-part MFX + SN-S when present). User Write for Studio Sets and Tones stays on the FA. "
                     + "In the tone list, use the star next to Search to show favourites only, or star individual tones. "
                     + "Library files live in the app’s Application Support folder."
             }
@@ -123,9 +123,28 @@ Dialog {
                     "Tab 3 is an FA-style EFFECTS EDIT diagram: Part → Chorus/Reverb → Master Comp → Output, "
                     + "plus Audio Input → NS → TFX → MIC Reverb (TFX moves between Input and Main paths from TFX Location). "
                     + "Click a block to edit it. Part picker and Output Main/Sub are on the diagram. "
-                    + "Input Gain is on Audio Input. MFX is routing context only (not SysEx yet — edit on the FA). "
+                    + "Input Gain is on Audio Input. Part MFX opens Tone Edit (tab 4) for presets and parameters. "
                     + "Some USB Audio options are not SysEx-controllable "
                     + "(System → System Effects → USB Audio / USB Driver)."
+            }
+
+            Label {
+                text: "Tone Edit"
+                font.bold: true
+                color: LogicTheme.textPrimary
+                Layout.topMargin: 6
+            }
+            Label {
+                Layout.fillWidth: true
+                wrapMode: Text.WordWrap
+                color: LogicTheme.textSecondary
+                font.pixelSize: LogicTheme.fontSize
+                text:
+                    "Tab 4 edits Temporary Tone for the selected part. Signal flow: OSC → Filter → Amp → LFO → MFX. "
+                    + "SuperNATURAL Synth (SN-S) supports body editing (partials 1–3). All engines share MFX — use ready-made preset chips "
+                    + "(Crunch Amp, Clean Amp, Delay…) to enable MFX Switch, set type, and load starter params. "
+                    + "Init SN-S loads an init Temporary SN-S template. Pull/Push Tone writes Temporary only; "
+                    + "use Write → User Tone on the FA to store a User slot permanently."
             }
 
             Label {
@@ -140,8 +159,9 @@ Dialog {
                 color: LogicTheme.textSecondary
                 font.pixelSize: LogicTheme.fontSize
                 text:
-                    "Temporary Studio Set + System Audio FX / Master EQ via SysEx — not a full tone or MFX designer. "
-                    + "Permanent User store is Write on the FA. Always keep a backup of important User Studio Sets on the instrument or SD card."
+                    "Temporary Studio Set + Temporary Tone (MFX / SN-S MVP) + System Audio FX / Master EQ via SysEx. "
+                    + "PCM / SN-A / drum body editors come later. Permanent User store is Write on the FA. "
+                    + "Always keep a backup of important User data on the instrument or SD card."
             }
         }
     }

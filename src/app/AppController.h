@@ -4,7 +4,9 @@
 #include "model/StudioSetModel.h"
 #include "model/StudioSetBrowserModel.h"
 #include "model/ToneBrowserModel.h"
+#include "model/WaveformCatalog.h"
 #include "model/AudioFxModel.h"
+#include "model/TemporaryToneModel.h"
 #include "project/ProjectStore.h"
 #include "undo/UndoController.h"
 #include "midi/SysexEngine.h"
@@ -19,7 +21,9 @@ class AppController : public QObject
     Q_PROPERTY(StudioSetModel *studioSet READ studioSet CONSTANT)
     Q_PROPERTY(StudioSetBrowserModel *studioSets READ studioSets CONSTANT)
     Q_PROPERTY(ToneBrowserModel *tones READ tones CONSTANT)
+    Q_PROPERTY(WaveformCatalog *waveforms READ waveforms CONSTANT)
     Q_PROPERTY(AudioFxModel *audioFx READ audioFx CONSTANT)
+    Q_PROPERTY(TemporaryToneModel *tone READ tone CONSTANT)
     Q_PROPERTY(ProjectStore *library READ library CONSTANT)
     Q_PROPERTY(UndoController *undo READ undo CONSTANT)
     Q_PROPERTY(int mainTab READ mainTab WRITE setMainTab NOTIFY mainTabChanged)
@@ -34,7 +38,9 @@ public:
     StudioSetModel *studioSet() const { return m_studioSet; }
     StudioSetBrowserModel *studioSets() const { return m_studioSets; }
     ToneBrowserModel *tones() const { return m_tones; }
+    WaveformCatalog *waveforms() const { return m_waveforms; }
     AudioFxModel *audioFx() const { return m_audioFx; }
+    TemporaryToneModel *tone() const { return m_tone; }
     ProjectStore *library() const { return m_library; }
     UndoController *undo() const { return m_undo; }
 
@@ -54,6 +60,8 @@ public:
     Q_INVOKABLE void goChangeToneForPart(int partIndex);
     /** Save current Studio Set to the local library and show Sets & Tones. */
     Q_INVOKABLE bool saveToLibrary();
+    /** Load a library row into the editor; updates workflow hint on success/failure. */
+    Q_INVOKABLE bool loadLibrary(int row);
     /** Open MIDI dialog (refreshes ports; clears stale connection). */
     Q_INVOKABLE void openMidiDialog();
     /** Auto-connect FA and pull Temporary + Audio FX. */
@@ -73,7 +81,9 @@ private:
     StudioSetModel *m_studioSet = nullptr;
     StudioSetBrowserModel *m_studioSets = nullptr;
     ToneBrowserModel *m_tones = nullptr;
+    WaveformCatalog *m_waveforms = nullptr;
     AudioFxModel *m_audioFx = nullptr;
+    TemporaryToneModel *m_tone = nullptr;
     ProjectStore *m_library = nullptr;
     QTimer m_autosaveTimer;
     int m_mainTab = 0;

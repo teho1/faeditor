@@ -1,6 +1,7 @@
 #include "project/ProjectStore.h"
 #include "model/StudioSetModel.h"
 #include "model/AudioFxModel.h"
+#include "model/TemporaryToneModel.h"
 
 #include <QDir>
 #include <QFile>
@@ -14,10 +15,12 @@
 #include <QRegularExpression>
 #include <QLocale>
 
-ProjectStore::ProjectStore(StudioSetModel *studioSet, AudioFxModel *audioFx, QObject *parent)
+ProjectStore::ProjectStore(StudioSetModel *studioSet, AudioFxModel *audioFx,
+                           TemporaryToneModel *tone, QObject *parent)
     : QAbstractListModel(parent)
     , m_studioSet(studioSet)
     , m_audioFx(audioFx)
+    , m_tone(tone)
 {
     QDir().mkpath(libraryDir());
     refresh();
@@ -62,6 +65,13 @@ QJsonObject ProjectStore::buildLibraryRoot(const QString &name, bool refreshFrom
     root.insert(QStringLiteral("audioFx"), m_audioFx ? m_audioFx->toJson() : QJsonObject());
     root.insert(QStringLiteral("sysexBlobs"), m_studioSet ? m_studioSet->sysexBlobsJson() : QJsonObject());
 
+    if (m_tone) {
+        m_toneBlobs = m_tone->toneBlobsJson(refreshFromDevice);
+        root.insert(QStringLiteral("toneBlobs"), m_toneBlobs);
+    } else if (!m_toneBlobs.isEmpty()) {
+        root.insert(QStringLiteral("toneBlobs"), m_toneBlobs);
+    }
+
     QJsonObject systemBlobs;
     if (m_studioSet) {
         systemBlobs.insert(QStringLiteral("masterEq"),
@@ -71,26 +81,54 @@ QJsonObject ProjectStore::buildLibraryRoot(const QString &name, bool refreshFrom
     return root;
 }
 
+void ProjectStore::setError(const QString &e)
+{
+    if (m_lastError == e)
+        return;
+    m_lastError = e;
+    emit lastErrorChanged();
+}
+
 bool ProjectStore::applyLibraryRoot(const QJsonObject &root)
 {
-    if (!m_studioSet || !m_audioFx)
+    if (!m_studioSet || !m_audioFx) {
+        setError(QStringLiteral("Library store is not ready."));
         return false;
+    }
 
+    // studioSet is required. Older library files (and compact saves) may omit
+    // audioFx / sysexBlobs / systemBlobs / toneBlobs — apply those only when present.
     const auto studio = root.value(QStringLiteral("studioSet")).toObject();
+    if (studio.isEmpty()) {
+        setError(QStringLiteral("Library file is missing studioSet data."));
+        return false;
+    }
+
+    if (!m_studioSet->fromJson(studio)) {
+        setError(QStringLiteral("Could not apply Studio Set from library file."));
+        return false;
+    }
+
     const auto audioFx = root.value(QStringLiteral("audioFx")).toObject();
+    if (!audioFx.isEmpty() && !m_audioFx->fromJson(audioFx)) {
+        setError(QStringLiteral("Could not apply Audio FX from library file."));
+        return false;
+    }
+
     const auto sysexBlobs = root.value(QStringLiteral("sysexBlobs")).toObject();
+    if (!sysexBlobs.isEmpty())
+        m_studioSet->setSysexBlobsJson(sysexBlobs);
+
     const auto systemBlobs = root.value(QStringLiteral("systemBlobs")).toObject();
     const auto masterEqB64 = systemBlobs.value(QStringLiteral("masterEq")).toString();
+    if (!masterEqB64.isEmpty())
+        m_studioSet->setSystemMasterEq(QByteArray::fromBase64(masterEqB64.toLatin1()));
 
-    if (studio.isEmpty() || audioFx.isEmpty() || sysexBlobs.isEmpty() || masterEqB64.isEmpty())
-        return false;
+    m_toneBlobs = root.value(QStringLiteral("toneBlobs")).toObject();
+    if (m_tone && !m_toneBlobs.isEmpty())
+        m_tone->setToneBlobsJson(m_toneBlobs);
 
-    if (!m_studioSet->fromJson(studio))
-        return false;
-    if (!m_audioFx->fromJson(audioFx))
-        return false;
-    m_studioSet->setSysexBlobsJson(sysexBlobs);
-    m_studioSet->setSystemMasterEq(QByteArray::fromBase64(masterEqB64.toLatin1()));
+    setError({});
     return true;
 }
 
@@ -182,17 +220,26 @@ bool ProjectStore::saveAs(const QString &name)
 
 bool ProjectStore::load(int row)
 {
-    if (row < 0 || row >= m_entries.size())
+    if (row < 0 || row >= m_entries.size()) {
+        setError(QStringLiteral("Invalid library row."));
         return false;
+    }
     return loadPath(m_entries.at(row).path);
 }
 
 bool ProjectStore::loadPath(const QString &path)
 {
     QFile f(path);
-    if (!f.open(QIODevice::ReadOnly))
+    if (!f.open(QIODevice::ReadOnly)) {
+        setError(QStringLiteral("Could not open library file."));
         return false;
-    const auto doc = QJsonDocument::fromJson(f.readAll());
+    }
+    QJsonParseError parseError;
+    const auto doc = QJsonDocument::fromJson(f.readAll(), &parseError);
+    if (parseError.error != QJsonParseError::NoError || !doc.isObject()) {
+        setError(QStringLiteral("Library file is not valid JSON."));
+        return false;
+    }
     const auto root = doc.object();
     if (!applyLibraryRoot(root))
         return false;
@@ -200,6 +247,7 @@ bool ProjectStore::loadPath(const QString &path)
     m_currentName = root.value(QStringLiteral("name")).toString(QFileInfo(path).completeBaseName());
     emit currentPathChanged();
     m_studioSet->markClean();
+    setError({});
     return true;
 }
 

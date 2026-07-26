@@ -6,6 +6,7 @@
 
 class StudioSetModel;
 class AudioFxModel;
+class TemporaryToneModel;
 
 struct LibraryEntry {
     QString id;
@@ -19,6 +20,7 @@ class ProjectStore : public QAbstractListModel
     Q_OBJECT
     Q_PROPERTY(QString currentPath READ currentPath NOTIFY currentPathChanged)
     Q_PROPERTY(QString currentName READ currentName NOTIFY currentPathChanged)
+    Q_PROPERTY(QString lastError READ lastError NOTIFY lastErrorChanged)
 
 public:
     enum Roles {
@@ -29,7 +31,10 @@ public:
     };
 
     explicit ProjectStore(StudioSetModel *studioSet, AudioFxModel *audioFx,
-                          QObject *parent = nullptr);
+                          TemporaryToneModel *tone = nullptr, QObject *parent = nullptr);
+
+    /** Cached toneBlobs from last save/load (for push after Studio Set). */
+    QJsonObject toneBlobs() const { return m_toneBlobs; }
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
@@ -37,6 +42,7 @@ public:
 
     QString currentPath() const { return m_currentPath; }
     QString currentName() const { return m_currentName; }
+    QString lastError() const { return m_lastError; }
 
     Q_INVOKABLE void refresh();
     Q_INVOKABLE bool save(const QString &name = {});
@@ -56,6 +62,7 @@ public:
 signals:
     void currentPathChanged();
     void libraryChanged();
+    void lastErrorChanged();
 
 private:
     QString libraryDir() const;
@@ -63,10 +70,14 @@ private:
     QString sanitizeName(const QString &name) const;
     QJsonObject buildLibraryRoot(const QString &name, bool refreshFromDevice);
     bool applyLibraryRoot(const QJsonObject &root);
+    void setError(const QString &e);
 
     StudioSetModel *m_studioSet = nullptr;
     AudioFxModel *m_audioFx = nullptr;
+    TemporaryToneModel *m_tone = nullptr;
+    QJsonObject m_toneBlobs;
     QVector<LibraryEntry> m_entries;
     QString m_currentPath;
     QString m_currentName;
+    QString m_lastError;
 };

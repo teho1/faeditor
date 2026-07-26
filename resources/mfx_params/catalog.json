@@ -1,0 +1,3858 @@
+{
+  "source": "Roland FA-06/07/08 Parameter Guide pp.93\u2013116",
+  "types": {
+    "0": {
+      "name": "Thru",
+      "params": []
+    },
+    "1": {
+      "name": "Equalizer",
+      "params": [
+        {
+          "name": "Low Freq",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Low Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Mid1 Freq",
+          "min": 0,
+          "max": 16
+        },
+        {
+          "name": "Mid1 Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Mid1 Q",
+          "min": 0,
+          "max": 4
+        },
+        {
+          "name": "Mid2 Freq",
+          "min": 0,
+          "max": 16
+        },
+        {
+          "name": "Mid2 Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Mid2 Q",
+          "min": 0,
+          "max": 4
+        },
+        {
+          "name": "High Freq",
+          "min": 0,
+          "max": 2
+        },
+        {
+          "name": "High Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "2": {
+      "name": "Spectrum",
+      "params": [
+        {
+          "name": "Band1 (250 Hz)",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Band2 (500 Hz)",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Band3 (1000 Hz)",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Band4 (1250 Hz)",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Band5 (2000 Hz)",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Band6 (3150 Hz)",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Band7 (4000 Hz)",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Band8 (8000 Hz)",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Q",
+          "min": 0,
+          "max": 4
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "3": {
+      "name": "Low Boost",
+      "params": [
+        {
+          "name": "Boost Frequency"
+        },
+        {
+          "name": "Boost Gain",
+          "min": 0,
+          "max": 12
+        },
+        {
+          "name": "Boost Width",
+          "min": 0,
+          "max": 2
+        },
+        {
+          "name": "Low Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "High Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "4": {
+      "name": "Step Filter",
+      "params": [
+        {
+          "name": "Step 01",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Step 02",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Step 03",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Step 04",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Step 05",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Step 06",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Step 07",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Step 08",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Step 09",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Step 10",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Step 11",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Step 12",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Step 13",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Step 14",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Step 15",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Step 16",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Rate"
+        },
+        {
+          "name": "Attack",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Filter Type",
+          "min": 0,
+          "max": 3
+        },
+        {
+          "name": "Filter Slope",
+          "min": 0,
+          "max": 2
+        },
+        {
+          "name": "Filter Resonance",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Filter Gain",
+          "min": 0,
+          "max": 12
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "5": {
+      "name": "Enhancer",
+      "params": [
+        {
+          "name": "Sens",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Mix",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Low Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "High Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "6": {
+      "name": "Auto Wah",
+      "params": [
+        {
+          "name": "Filter Type",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Manual",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Peak",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Sens",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Polarity",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Rate"
+        },
+        {
+          "name": "Depth",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Phase",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Low Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "High Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "7": {
+      "name": "Humanizer",
+      "params": [
+        {
+          "name": "Drive Sw",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Drive",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Vowel1",
+          "min": 0,
+          "max": 4
+        },
+        {
+          "name": "Vowel2",
+          "min": 0,
+          "max": 4
+        },
+        {
+          "name": "Rate"
+        },
+        {
+          "name": "Depth",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Input Sync Sw",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Input Sync Threshold",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Manual",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Low Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "High Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Pan"
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "8": {
+      "name": "Speaker Simulator",
+      "params": [
+        {
+          "name": "Speaker Type",
+          "min": 0,
+          "max": 15
+        },
+        {
+          "name": "Mic Setting",
+          "min": 0,
+          "max": 2
+        },
+        {
+          "name": "Mic Level",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Direct Level",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "9": {
+      "name": "Phaser 1",
+      "params": [
+        {
+          "name": "Mode",
+          "min": 0,
+          "max": 2
+        },
+        {
+          "name": "Manual",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Rate"
+        },
+        {
+          "name": "Depth",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Polarity",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Resonance",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Cross Feedback",
+          "min": -98,
+          "max": 98
+        },
+        {
+          "name": "Mix",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Low Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "High Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "10": {
+      "name": "Phaser 2",
+      "params": [
+        {
+          "name": "Rate",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Color",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Low Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "High Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "11": {
+      "name": "Phaser 3",
+      "params": [
+        {
+          "name": "Speed"
+        },
+        {
+          "name": "Low Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "High Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "12": {
+      "name": "Step Phaser",
+      "params": [
+        {
+          "name": "Mode",
+          "min": 0,
+          "max": 2
+        },
+        {
+          "name": "Manual",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Rate"
+        },
+        {
+          "name": "Depth",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Polarity",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Resonance",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Cross Feedback",
+          "min": -98,
+          "max": 98
+        },
+        {
+          "name": "Step Rate"
+        },
+        {
+          "name": "Mix",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Low Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "High Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "13": {
+      "name": "Multi Stage Phaser",
+      "params": [
+        {
+          "name": "Mode",
+          "min": 0,
+          "max": 5
+        },
+        {
+          "name": "Manual",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Rate"
+        },
+        {
+          "name": "Depth",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Resonance",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Mix",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Pan"
+        },
+        {
+          "name": "Low Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "High Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "14": {
+      "name": "Infinite Phaser",
+      "params": [
+        {
+          "name": "Mode",
+          "min": 0,
+          "max": 3
+        },
+        {
+          "name": "Speed"
+        },
+        {
+          "name": "Resonance",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Mix",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Pan"
+        },
+        {
+          "name": "Low Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "High Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "15": {
+      "name": "Ring Modulator",
+      "params": [
+        {
+          "name": "Frequency",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Sens",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Polarity",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Low Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "High Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "16": {
+      "name": "Tremolo",
+      "params": [
+        {
+          "name": "Mod Wave",
+          "min": 0,
+          "max": 4,
+          "enum": [
+            "TRI",
+            "SQR",
+            "SIN",
+            "SAW1",
+            "SAW2"
+          ]
+        },
+        {
+          "name": "Rate"
+        },
+        {
+          "name": "Depth",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Low Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "High Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "17": {
+      "name": "Auto Pan",
+      "params": [
+        {
+          "name": "Mod Wave",
+          "min": 0,
+          "max": 4,
+          "enum": [
+            "TRI",
+            "SQR",
+            "SIN",
+            "SAW1",
+            "SAW2"
+          ]
+        },
+        {
+          "name": "Rate"
+        },
+        {
+          "name": "Depth",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Low Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "High Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "18": {
+      "name": "Slicer",
+      "params": [
+        {
+          "name": "Step 01",
+          "min": -63,
+          "max": 63
+        },
+        {
+          "name": "Step 02",
+          "min": -63,
+          "max": 63
+        },
+        {
+          "name": "Step 03",
+          "min": -63,
+          "max": 63
+        },
+        {
+          "name": "Step 04",
+          "min": -63,
+          "max": 63
+        },
+        {
+          "name": "Step 05",
+          "min": -63,
+          "max": 63
+        },
+        {
+          "name": "Step 06",
+          "min": -63,
+          "max": 63
+        },
+        {
+          "name": "Step 07",
+          "min": -63,
+          "max": 63
+        },
+        {
+          "name": "Step 08",
+          "min": -63,
+          "max": 63
+        },
+        {
+          "name": "Step 09",
+          "min": -63,
+          "max": 63
+        },
+        {
+          "name": "Step 10",
+          "min": -63,
+          "max": 63
+        },
+        {
+          "name": "Step 11",
+          "min": -63,
+          "max": 63
+        },
+        {
+          "name": "Step 12",
+          "min": -63,
+          "max": 63
+        },
+        {
+          "name": "Step 13",
+          "min": -63,
+          "max": 63
+        },
+        {
+          "name": "Step 14",
+          "min": -63,
+          "max": 63
+        },
+        {
+          "name": "Step 15",
+          "min": -63,
+          "max": 63
+        },
+        {
+          "name": "Step 16",
+          "min": -63,
+          "max": 63
+        },
+        {
+          "name": "Rate"
+        },
+        {
+          "name": "Attack",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Input Sync Sw",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Input Sync Threshold",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Mode",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Shuffle",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "19": {
+      "name": "Rotary 1",
+      "params": [
+        {
+          "name": "Speed",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Woofer Slow Speed"
+        },
+        {
+          "name": "Woofer Fast Speed"
+        },
+        {
+          "name": "Woofer Acceleration",
+          "min": 0,
+          "max": 15
+        },
+        {
+          "name": "Woofer Level",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Tweeter Slow Speed"
+        },
+        {
+          "name": "Tweeter Fast Speed"
+        },
+        {
+          "name": "Tweeter Acceleration",
+          "min": 0,
+          "max": 15
+        },
+        {
+          "name": "Tweeter Level",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Separation",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "20": {
+      "name": "Rotary 2",
+      "params": [
+        {
+          "name": "Speed",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Brake",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Woofer Slow Speed"
+        },
+        {
+          "name": "Woofer Fast Speed"
+        },
+        {
+          "name": "Woofer Trans Up",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Woofer Trans Down",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Woofer Level",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Tweeter Slow Speed"
+        },
+        {
+          "name": "Tweeter Fast Speed"
+        },
+        {
+          "name": "Tweeter Trans Up",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Tweeter Trans Down",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Tweeter Level",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Spread",
+          "min": 0,
+          "max": 10
+        },
+        {
+          "name": "Low Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "High Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "21": {
+      "name": "Rotary 3",
+      "params": [
+        {
+          "name": "Speed",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Brake",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "OD Switch",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "OD Gain",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "OD Drive",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "OD Level",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Woofer Slow Speed"
+        },
+        {
+          "name": "Woofer Fast Speed"
+        },
+        {
+          "name": "Woofer Trans Up",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Woofer Trans Down",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Woofer Level",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Tweeter Slow Speed"
+        },
+        {
+          "name": "Tweeter Fast Speed"
+        },
+        {
+          "name": "Tweeter Trans Up",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Tweeter Trans Down",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Tweeter Level",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Spread",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Low Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "High Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "22": {
+      "name": "Chorus",
+      "params": [
+        {
+          "name": "Filter Type",
+          "min": 0,
+          "max": 2,
+          "enum": [
+            "OFF",
+            "LPF",
+            "HPF"
+          ]
+        },
+        {
+          "name": "Cutoff Freq"
+        },
+        {
+          "name": "Pre Delay"
+        },
+        {
+          "name": "Rate"
+        },
+        {
+          "name": "Depth",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Phase",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Low Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "High Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "23": {
+      "name": "Flanger",
+      "params": [
+        {
+          "name": "Filter Type",
+          "min": 0,
+          "max": 2,
+          "enum": [
+            "OFF",
+            "LPF",
+            "HPF"
+          ]
+        },
+        {
+          "name": "Cutoff Freq"
+        },
+        {
+          "name": "Pre Delay"
+        },
+        {
+          "name": "Rate"
+        },
+        {
+          "name": "Depth",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Phase",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Feedback",
+          "min": -98,
+          "max": 98
+        },
+        {
+          "name": "Low Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "High Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "24": {
+      "name": "Step Flanger",
+      "params": [
+        {
+          "name": "Filter Type",
+          "min": 0,
+          "max": 2
+        },
+        {
+          "name": "Cutoff Freq"
+        },
+        {
+          "name": "Pre Delay"
+        },
+        {
+          "name": "Rate"
+        },
+        {
+          "name": "Depth",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Phase",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Feedback",
+          "min": -98,
+          "max": 98
+        },
+        {
+          "name": "Step Rate"
+        },
+        {
+          "name": "Low Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "High Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "25": {
+      "name": "Hexa-Chorus",
+      "params": [
+        {
+          "name": "Pre Delay"
+        },
+        {
+          "name": "Rate"
+        },
+        {
+          "name": "Depth",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Pre Delay Deviation",
+          "min": 0,
+          "max": 20
+        },
+        {
+          "name": "Depth Deviation",
+          "min": -20,
+          "max": 20
+        },
+        {
+          "name": "Pan Deviation",
+          "min": 0,
+          "max": 20
+        },
+        {
+          "name": "Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "26": {
+      "name": "Tremolo Chorus",
+      "params": [
+        {
+          "name": "Pre Delay"
+        },
+        {
+          "name": "Chorus Rate"
+        },
+        {
+          "name": "Chorus Depth",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Tremolo Rate"
+        },
+        {
+          "name": "Tremolo Separation",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Tremolo Phase",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "27": {
+      "name": "Space-D",
+      "params": [
+        {
+          "name": "Pre Delay"
+        },
+        {
+          "name": "Rate"
+        },
+        {
+          "name": "Depth",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Phase",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Low Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "High Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "28": {
+      "name": "Overdrive",
+      "params": [
+        {
+          "name": "Drive",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Tone",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Amp Sw",
+          "min": 0,
+          "max": 1,
+          "enum": [
+            "OFF",
+            "ON"
+          ]
+        },
+        {
+          "name": "Amp Type",
+          "min": 0,
+          "max": 3,
+          "enum": [
+            "SMALL",
+            "BUILT-IN",
+            "2-STACK",
+            "3-STACK"
+          ]
+        },
+        {
+          "name": "Low Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "High Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Pan"
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "29": {
+      "name": "Distortion",
+      "params": [
+        {
+          "name": "Drive",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Tone",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Amp Sw",
+          "min": 0,
+          "max": 1,
+          "enum": [
+            "OFF",
+            "ON"
+          ]
+        },
+        {
+          "name": "Amp Type",
+          "min": 0,
+          "max": 3,
+          "enum": [
+            "SMALL",
+            "BUILT-IN",
+            "2-STACK",
+            "3-STACK"
+          ]
+        },
+        {
+          "name": "Low Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "High Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Pan"
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "30": {
+      "name": "Guitar Amp Simulator",
+      "params": [
+        {
+          "name": "Amp Sw",
+          "min": 0,
+          "max": 1,
+          "enum": [
+            "OFF",
+            "ON"
+          ]
+        },
+        {
+          "name": "Amp Type",
+          "min": 0,
+          "max": 13,
+          "enum": [
+            "JC-120",
+            "CLEAN TWIN",
+            "MATCH DRIVE",
+            "BG LEAD",
+            "MS1959I",
+            "MS1959II",
+            "MS1959I+II",
+            "SLDN LEAD",
+            "METAL5150",
+            "METAL LEAD",
+            "OD-1",
+            "OD-2",
+            "TURBO",
+            "DISTORTION"
+          ]
+        },
+        {
+          "name": "Amp Volume",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Amp Master",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Amp Gain",
+          "min": 0,
+          "max": 2,
+          "enum": [
+            "Low",
+            "Middle",
+            "High"
+          ]
+        },
+        {
+          "name": "Amp Bass",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Amp Middle",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Amp Treble",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Amp Presence",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Amp Bright",
+          "min": 0,
+          "max": 1,
+          "enum": [
+            "OFF",
+            "ON"
+          ]
+        },
+        {
+          "name": "Speaker Sw",
+          "min": 0,
+          "max": 1,
+          "enum": [
+            "OFF",
+            "ON"
+          ]
+        },
+        {
+          "name": "Speaker Type",
+          "min": 0,
+          "max": 15,
+          "enum": [
+            "SMALL 1",
+            "SMALL 2",
+            "MIDDLE",
+            "JC-120",
+            "BUILT-IN 1",
+            "BUILT-IN 2",
+            "BUILT-IN 3",
+            "BUILT-IN 4",
+            "BUILT-IN 5",
+            "BG STACK 1",
+            "BG STACK 2",
+            "MS STACK 1",
+            "MS STACK 2",
+            "METAL STACK",
+            "2-STACK",
+            "3-STACK"
+          ]
+        },
+        {
+          "name": "Mic Setting",
+          "min": 0,
+          "max": 2,
+          "enum": [
+            "Center",
+            "1 cm",
+            "2 cm"
+          ]
+        },
+        {
+          "name": "Mic Level",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Direct Level",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Pan"
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "31": {
+      "name": "Compressor",
+      "params": [
+        {
+          "name": "Attack",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Threshold",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Post Gain",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Low Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "High Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "32": {
+      "name": "Limiter",
+      "params": [
+        {
+          "name": "Release",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Threshold",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Ratio",
+          "min": 0,
+          "max": 3
+        },
+        {
+          "name": "Post Gain",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Low Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "High Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "33": {
+      "name": "Gate",
+      "params": [
+        {
+          "name": "Threshold",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Mode",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Attack",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Hold",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Release",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "34": {
+      "name": "Delay",
+      "params": [
+        {
+          "name": "Delay Left"
+        },
+        {
+          "name": "Delay Right"
+        },
+        {
+          "name": "Phase Left",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Phase Right",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Feedback Mode",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Feedback",
+          "min": -98,
+          "max": 98
+        },
+        {
+          "name": "HF Damp"
+        },
+        {
+          "name": "Low Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "High Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "35": {
+      "name": "Modulation Delay",
+      "params": [
+        {
+          "name": "Delay Left"
+        },
+        {
+          "name": "Delay Right"
+        },
+        {
+          "name": "Feedback Mode",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Feedback",
+          "min": -98,
+          "max": 98
+        },
+        {
+          "name": "HF Damp"
+        },
+        {
+          "name": "Rate"
+        },
+        {
+          "name": "Depth",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Phase",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Low Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "High Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "36": {
+      "name": "3Tap Pan Delay",
+      "params": [
+        {
+          "name": "Delay Left Time",
+          "min": 0,
+          "max": 2613,
+          "unit": "ms|note",
+          "hint": "0\u20132600 ms; 2601\u20132613 note values"
+        },
+        {
+          "name": "Delay Right Time",
+          "min": 0,
+          "max": 2613,
+          "unit": "ms|note"
+        },
+        {
+          "name": "Delay Center Time",
+          "min": 0,
+          "max": 2613,
+          "unit": "ms|note"
+        },
+        {
+          "name": "Center Feedback",
+          "min": -98,
+          "max": 98,
+          "unit": "%"
+        },
+        {
+          "name": "HF Damp",
+          "min": 200,
+          "max": 8001,
+          "unit": "Hz|bypass",
+          "hint": "200\u20138000 Hz; 8001 = BYPASS"
+        },
+        {
+          "name": "Left Level",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Right Level",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Center Level",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Low Gain",
+          "min": -15,
+          "max": 15,
+          "unit": "dB"
+        },
+        {
+          "name": "High Gain",
+          "min": -15,
+          "max": 15,
+          "unit": "dB"
+        },
+        {
+          "name": "Balance",
+          "min": 0,
+          "max": 100,
+          "unit": "D:W",
+          "hint": "0 = D100:0W \u2026 100 = D0:100W"
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "37": {
+      "name": "4Tap Pan Delay",
+      "params": [
+        {
+          "name": "Delay 1 Time"
+        },
+        {
+          "name": "Delay 2 Time"
+        },
+        {
+          "name": "Delay 3 Time"
+        },
+        {
+          "name": "Delay 4 Time"
+        },
+        {
+          "name": "Delay 1 Feedback",
+          "min": -98,
+          "max": 98
+        },
+        {
+          "name": "HF Damp"
+        },
+        {
+          "name": "Delay 1 Level",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Delay 2 Level",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Delay 3 Level",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Delay 4 Level",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Low Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "High Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "38": {
+      "name": "Multi Tap Delay",
+      "params": [
+        {
+          "name": "Delay 1 Time"
+        },
+        {
+          "name": "Delay 2 Time"
+        },
+        {
+          "name": "Delay 3 Time"
+        },
+        {
+          "name": "Delay 4 Time"
+        },
+        {
+          "name": "Delay 1 Feedback",
+          "min": -98,
+          "max": 98
+        },
+        {
+          "name": "HF Damp"
+        },
+        {
+          "name": "Delay 1 Pan"
+        },
+        {
+          "name": "Delay 2 Pan"
+        },
+        {
+          "name": "Delay 3 Pan"
+        },
+        {
+          "name": "Delay 4 Pan"
+        },
+        {
+          "name": "Delay 1 Level",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Delay 2 Level",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Delay 3 Level",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Delay 4 Level",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Low Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "High Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "39": {
+      "name": "Reverse Delay",
+      "params": [
+        {
+          "name": "Threshold",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Rev Delay Time"
+        },
+        {
+          "name": "Rev Delay Feedback",
+          "min": -98,
+          "max": 98
+        },
+        {
+          "name": "Rev Delay HF Damp"
+        },
+        {
+          "name": "Rev Delay Pan"
+        },
+        {
+          "name": "Rev Delay Level",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Delay 1 Time"
+        },
+        {
+          "name": "Delay 2 Time"
+        },
+        {
+          "name": "Delay 3 Time"
+        },
+        {
+          "name": "Delay 3 Feedback",
+          "min": -98,
+          "max": 98
+        },
+        {
+          "name": "Delay HF Damp"
+        },
+        {
+          "name": "Delay 1 Pan"
+        },
+        {
+          "name": "Delay 2 Pan"
+        },
+        {
+          "name": "Delay 1 Level",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Delay 2 Level",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Low Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "High Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "40": {
+      "name": "Time Ctrl Delay",
+      "params": [
+        {
+          "name": "Delay Time"
+        },
+        {
+          "name": "Acceleration",
+          "min": 0,
+          "max": 15
+        },
+        {
+          "name": "Feedback",
+          "min": -98,
+          "max": 98
+        },
+        {
+          "name": "HF Damp"
+        },
+        {
+          "name": "Low Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "High Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "41": {
+      "name": "LOFI Compress",
+      "params": [
+        {
+          "name": "Pre Filter Type",
+          "min": 0,
+          "max": 5,
+          "enum": [
+            "Comp Off",
+            "Comp On 2",
+            "Comp On 3",
+            "Comp On 4",
+            "Comp On 5",
+            "Comp On 6"
+          ],
+          "hint": "1: Compressor off; 2\u20136: Compressor on (Parameter Guide)"
+        },
+        {
+          "name": "LoFi Type",
+          "min": 0,
+          "max": 8,
+          "enum": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9"
+          ],
+          "hint": "LoFi Type 1\u20139: higher = more degraded. Not named (no Vinyl/Radio labels on FA MFX)."
+        },
+        {
+          "name": "Post Filter Type",
+          "min": 0,
+          "max": 2,
+          "enum": [
+            "OFF",
+            "LPF",
+            "HPF"
+          ],
+          "hint": "OFF / LPF / HPF"
+        },
+        {
+          "name": "Post Filter Cutoff",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Low Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "High Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "42": {
+      "name": "Bit Crusher",
+      "params": [
+        {
+          "name": "Sample Rate",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Bit Down",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Filter",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Low Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "High Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "43": {
+      "name": "Pitch Shifter",
+      "params": [
+        {
+          "name": "Coarse",
+          "min": -24,
+          "max": 12
+        },
+        {
+          "name": "Fine",
+          "min": -100,
+          "max": 100
+        },
+        {
+          "name": "Delay Time"
+        },
+        {
+          "name": "Feedback",
+          "min": -98,
+          "max": 98
+        },
+        {
+          "name": "Low Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "High Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "44": {
+      "name": "2Voice Pitch Shifter",
+      "params": [
+        {
+          "name": "Pitch1 Coarse",
+          "min": -24,
+          "max": 12
+        },
+        {
+          "name": "Pitch1 Fine",
+          "min": -100,
+          "max": 100
+        },
+        {
+          "name": "Pitch1 Delay"
+        },
+        {
+          "name": "Pitch1 Feedback",
+          "min": -98,
+          "max": 98
+        },
+        {
+          "name": "Pitch1 Pan"
+        },
+        {
+          "name": "Pitch1 Level",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Pitch2 Coarse",
+          "min": -24,
+          "max": 12
+        },
+        {
+          "name": "Pitch2 Fine",
+          "min": -100,
+          "max": 100
+        },
+        {
+          "name": "Pitch2 Delay"
+        },
+        {
+          "name": "Pitch2 Feedback",
+          "min": -98,
+          "max": 98
+        },
+        {
+          "name": "Pitch2 Pan"
+        },
+        {
+          "name": "Pitch2 Level",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Low Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "High Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "45": {
+      "name": "Overdrive \u2192 Chorus",
+      "params": [
+        {
+          "name": "Overdrive Drive",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Overdrive Pan"
+        },
+        {
+          "name": "Chorus Pre Delay"
+        },
+        {
+          "name": "Chorus Rate"
+        },
+        {
+          "name": "Chorus Depth",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Chorus Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "46": {
+      "name": "Overdrive \u2192 Flanger",
+      "params": [
+        {
+          "name": "Overdrive Drive",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Overdrive Pan"
+        },
+        {
+          "name": "Flanger Pre Delay"
+        },
+        {
+          "name": "Flanger Rate"
+        },
+        {
+          "name": "Flanger Depth",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Flanger Feedback",
+          "min": -98,
+          "max": 98
+        },
+        {
+          "name": "Flanger Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "47": {
+      "name": "Overdrive \u2192 Delay",
+      "params": [
+        {
+          "name": "Overdrive Drive",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Overdrive Pan"
+        },
+        {
+          "name": "Delay Time"
+        },
+        {
+          "name": "Delay Feedback",
+          "min": -98,
+          "max": 98
+        },
+        {
+          "name": "Delay HF Damp"
+        },
+        {
+          "name": "Delay Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "48": {
+      "name": "Distortion \u2192 Chorus",
+      "params": [
+        {
+          "name": "Distortion Drive",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Distortion Pan"
+        },
+        {
+          "name": "Chorus Pre Delay"
+        },
+        {
+          "name": "Chorus Rate"
+        },
+        {
+          "name": "Chorus Depth",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Chorus Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "49": {
+      "name": "Distortion \u2192 Flanger",
+      "params": [
+        {
+          "name": "Distortion Drive",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Distortion Pan"
+        },
+        {
+          "name": "Flanger Pre Delay"
+        },
+        {
+          "name": "Flanger Rate"
+        },
+        {
+          "name": "Flanger Depth",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Flanger Feedback",
+          "min": -98,
+          "max": 98
+        },
+        {
+          "name": "Flanger Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "50": {
+      "name": "Distortion \u2192 Delay",
+      "params": [
+        {
+          "name": "Distortion Drive",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Distortion Pan"
+        },
+        {
+          "name": "Delay Time"
+        },
+        {
+          "name": "Delay Feedback",
+          "min": -98,
+          "max": 98
+        },
+        {
+          "name": "Delay HF Damp"
+        },
+        {
+          "name": "Delay Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "51": {
+      "name": "OD/DS \u2192 TouchWah",
+      "params": [
+        {
+          "name": "Drive Switch",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Drive Type",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Drive",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Tone",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Amp Sw",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Amp Type",
+          "min": 0,
+          "max": 3
+        },
+        {
+          "name": "Touch Wah Switch",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Touch Wah Filter Type",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Touch Wah Polarity",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Touch Wah Sens",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Touch Wah Manual",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Touch Wah Peak",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Touch Wah Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Low Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "High Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "52": {
+      "name": "OD/DS \u2192 AutoWah",
+      "params": [
+        {
+          "name": "Drive Switch",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Drive Type",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Drive",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Tone",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Amp Sw",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Amp Type",
+          "min": 0,
+          "max": 3
+        },
+        {
+          "name": "Auto Wah Switch",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Auto Wah Filter Type",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Auto Wah Manual",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Auto Wah Peak",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Auto Wah Rate"
+        },
+        {
+          "name": "Auto Wah Depth",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Auto Wah Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Low Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "High Gain",
+          "min": -15,
+          "max": 15
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "53": {
+      "name": "GuitarAmpSim \u2192 Chorus",
+      "params": [
+        {
+          "name": "Pre Amp Sw",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Pre Amp Type",
+          "min": 0,
+          "max": 13
+        },
+        {
+          "name": "Pre Amp Volume",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Pre Amp Master",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Pre Amp Gain",
+          "min": 0,
+          "max": 2
+        },
+        {
+          "name": "Pre Amp Bass",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Pre Amp Middle",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Pre Amp Treble",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Chorus Switch",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Chorus Pre Delay"
+        },
+        {
+          "name": "Chorus Rate"
+        },
+        {
+          "name": "Chorus Depth",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Chorus Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Speaker Sw",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Speaker Type",
+          "min": 0,
+          "max": 15
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "54": {
+      "name": "GuitarAmpSim \u2192 Flanger",
+      "params": [
+        {
+          "name": "Pre Amp Sw",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Pre Amp Type",
+          "min": 0,
+          "max": 13
+        },
+        {
+          "name": "Pre Amp Volume",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Pre Amp Master",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Pre Amp Gain",
+          "min": 0,
+          "max": 2
+        },
+        {
+          "name": "Pre Amp Bass",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Pre Amp Middle",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Pre Amp Treble",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Flanger Switch",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Flanger Pre Delay"
+        },
+        {
+          "name": "Flanger Rate"
+        },
+        {
+          "name": "Flanger Depth",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Flanger Feedback",
+          "min": -98,
+          "max": 98
+        },
+        {
+          "name": "Flanger Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Speaker Sw",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Speaker Type",
+          "min": 0,
+          "max": 15
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "55": {
+      "name": "GuitarAmpSim \u2192 Phaser",
+      "params": [
+        {
+          "name": "Pre Amp Sw",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Pre Amp Type",
+          "min": 0,
+          "max": 13
+        },
+        {
+          "name": "Pre Amp Volume",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Pre Amp Master",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Pre Amp Gain",
+          "min": 0,
+          "max": 2
+        },
+        {
+          "name": "Pre Amp Bass",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Pre Amp Middle",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Pre Amp Treble",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Phaser Switch",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Phaser Manual",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Phaser Resonance",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Phaser Mix",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Phaser Rate"
+        },
+        {
+          "name": "Phaser Depth",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Speaker Sw",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Speaker Type",
+          "min": 0,
+          "max": 15
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "56": {
+      "name": "GuitarAmpSim \u2192 Delay",
+      "params": [
+        {
+          "name": "Pre Amp Sw",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Pre Amp Type",
+          "min": 0,
+          "max": 13
+        },
+        {
+          "name": "Pre Amp Volume",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Pre Amp Master",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Pre Amp Gain",
+          "min": 0,
+          "max": 2
+        },
+        {
+          "name": "Pre Amp Bass",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Pre Amp Middle",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Pre Amp Treble",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Delay Switch",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Delay Time"
+        },
+        {
+          "name": "Delay Feedback",
+          "min": -98,
+          "max": 98
+        },
+        {
+          "name": "Delay HF Damp"
+        },
+        {
+          "name": "Delay Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Speaker Sw",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Speaker Type",
+          "min": 0,
+          "max": 15
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "57": {
+      "name": "EP AmpSim \u2192 Tremolo",
+      "params": [
+        {
+          "name": "Type",
+          "min": 0,
+          "max": 2
+        },
+        {
+          "name": "Bass",
+          "min": -50,
+          "max": 50
+        },
+        {
+          "name": "Treble",
+          "min": -50,
+          "max": 50
+        },
+        {
+          "name": "OD Switch",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "OD Gain",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "OD Drive",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Tremolo Switch",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Tremolo Rate"
+        },
+        {
+          "name": "Tremolo Depth",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Tremolo Duty",
+          "min": -10,
+          "max": 10
+        },
+        {
+          "name": "Speaker Type",
+          "min": 0,
+          "max": 15
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "58": {
+      "name": "EP AmpSim \u2192 Chorus",
+      "params": [
+        {
+          "name": "Type",
+          "min": 0,
+          "max": 2
+        },
+        {
+          "name": "Bass",
+          "min": -50,
+          "max": 50
+        },
+        {
+          "name": "Treble",
+          "min": -50,
+          "max": 50
+        },
+        {
+          "name": "OD Switch",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "OD Gain",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "OD Drive",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Chorus Switch",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Chorus Pre Delay"
+        },
+        {
+          "name": "Chorus Rate"
+        },
+        {
+          "name": "Chorus Depth",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Chorus Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Speaker Type",
+          "min": 0,
+          "max": 15
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "59": {
+      "name": "EP AmpSim \u2192 Flanger",
+      "params": [
+        {
+          "name": "Type",
+          "min": 0,
+          "max": 2
+        },
+        {
+          "name": "Bass",
+          "min": -50,
+          "max": 50
+        },
+        {
+          "name": "Treble",
+          "min": -50,
+          "max": 50
+        },
+        {
+          "name": "OD Switch",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "OD Gain",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "OD Drive",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Flanger Switch",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Flanger Pre Delay"
+        },
+        {
+          "name": "Flanger Rate"
+        },
+        {
+          "name": "Flanger Depth",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Flanger Feedback",
+          "min": -98,
+          "max": 98
+        },
+        {
+          "name": "Flanger Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Speaker Type",
+          "min": 0,
+          "max": 15
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "60": {
+      "name": "EP AmpSim \u2192 Phaser",
+      "params": [
+        {
+          "name": "Type",
+          "min": 0,
+          "max": 2
+        },
+        {
+          "name": "Bass",
+          "min": -50,
+          "max": 50
+        },
+        {
+          "name": "Treble",
+          "min": -50,
+          "max": 50
+        },
+        {
+          "name": "OD Switch",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "OD Gain",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "OD Drive",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Phaser Switch",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Phaser Manual",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Phaser Resonance",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Phaser Mix",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Phaser Rate"
+        },
+        {
+          "name": "Phaser Depth",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Speaker Type",
+          "min": 0,
+          "max": 15
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "61": {
+      "name": "EP AmpSim \u2192 Delay",
+      "params": [
+        {
+          "name": "Type",
+          "min": 0,
+          "max": 2
+        },
+        {
+          "name": "Bass",
+          "min": -50,
+          "max": 50
+        },
+        {
+          "name": "Treble",
+          "min": -50,
+          "max": 50
+        },
+        {
+          "name": "OD Switch",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "OD Gain",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "OD Drive",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Delay Switch",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "name": "Delay Time"
+        },
+        {
+          "name": "Acceleration",
+          "min": 0,
+          "max": 15
+        },
+        {
+          "name": "Delay Feedback",
+          "min": -98,
+          "max": 98
+        },
+        {
+          "name": "Delay HF Damp"
+        },
+        {
+          "name": "Delay Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Speaker Type",
+          "min": 0,
+          "max": 15
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "62": {
+      "name": "Enhancer \u2192 Chorus",
+      "params": [
+        {
+          "name": "Enhancer Sens",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Enhancer Mix",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Chorus Pre Delay"
+        },
+        {
+          "name": "Chorus Rate"
+        },
+        {
+          "name": "Chorus Depth",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Chorus Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "63": {
+      "name": "Enhancer \u2192 Flanger",
+      "params": [
+        {
+          "name": "Enhancer Sens",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Enhancer Mix",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Flanger Pre Delay"
+        },
+        {
+          "name": "Flanger Rate"
+        },
+        {
+          "name": "Flanger Depth",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Flanger Feedback",
+          "min": -98,
+          "max": 98
+        },
+        {
+          "name": "Flanger Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "64": {
+      "name": "Enhancer \u2192 Delay",
+      "params": [
+        {
+          "name": "Enhancer Sens",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Enhancer Mix",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Delay Time"
+        },
+        {
+          "name": "Delay Feedback",
+          "min": -98,
+          "max": 98
+        },
+        {
+          "name": "Delay HF Damp"
+        },
+        {
+          "name": "Delay Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "65": {
+      "name": "Chorus \u2192 Delay",
+      "params": [
+        {
+          "name": "Chorus Pre Delay"
+        },
+        {
+          "name": "Chorus Rate"
+        },
+        {
+          "name": "Chorus Depth",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Chorus Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Delay Time"
+        },
+        {
+          "name": "Delay Feedback",
+          "min": -98,
+          "max": 98
+        },
+        {
+          "name": "Delay HF Damp"
+        },
+        {
+          "name": "Delay Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "66": {
+      "name": "Flanger \u2192 Delay",
+      "params": [
+        {
+          "name": "Flanger Pre Delay"
+        },
+        {
+          "name": "Flanger Rate"
+        },
+        {
+          "name": "Flanger Depth",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Flanger Feedback",
+          "min": -98,
+          "max": 98
+        },
+        {
+          "name": "Flanger Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Delay Time"
+        },
+        {
+          "name": "Delay Feedback",
+          "min": -98,
+          "max": 98
+        },
+        {
+          "name": "Delay HF Damp"
+        },
+        {
+          "name": "Delay Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "67": {
+      "name": "Chorus \u2192 Flanger",
+      "params": [
+        {
+          "name": "Chorus Pre Delay"
+        },
+        {
+          "name": "Chorus Rate"
+        },
+        {
+          "name": "Chorus Depth",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Chorus Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Flanger Pre Delay"
+        },
+        {
+          "name": "Flanger Rate"
+        },
+        {
+          "name": "Flanger Depth",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Flanger Feedback",
+          "min": -98,
+          "max": 98
+        },
+        {
+          "name": "Flanger Balance",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    },
+    "68": {
+      "name": "Vocoder",
+      "params": [
+        {
+          "name": "Mic Sens",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Synth Level",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Mic Mix",
+          "min": 0,
+          "max": 127
+        },
+        {
+          "name": "Level",
+          "min": 0,
+          "max": 127
+        }
+      ]
+    }
+  }
+}

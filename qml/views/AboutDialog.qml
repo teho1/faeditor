@@ -110,7 +110,7 @@ Dialog {
                     "• RtMidi — © Gary P. Scavone (MIT-style license).\n\n"
                     + "• Font Awesome Free — icons/fonts under the Font Awesome Free License (CC BY 4.0 for icons, SIL OFL 1.1 for fonts, MIT for code).\n\n"
                     + "• Material Icons — © Google LLC (Apache License 2.0).\n\n"
-                    + "• Tone names/catalog derived from Roland’s publicly documented Sound List (reference data for FA-06/07/08). Parameter editing uses Roland’s published MIDI / SysEx documentation.\n\n"
+                    + "• Tone and waveform name catalogs derived from Roland’s publicly documented Sound List (reference data for FA-06/07/08). Parameter editing uses Roland’s published MIDI / SysEx documentation.\n\n"
                     + "See `LICENSE` and `THIRD_PARTY_NOTICES.md` in the GitHub repository for full texts."
             }
 

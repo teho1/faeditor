@@ -314,7 +314,17 @@ Rectangle {
                             }
                         }
 
-                        Item { Layout.fillHeight: true }
+                        Button {
+                            text: "MFX → Tone"
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 26
+                            font.pixelSize: LogicTheme.fontSizeSmall
+                            onClicked: {
+                                root.selectBlock("mfx")
+                                App.tone.openMfxStage()
+                                App.mainTab = 3
+                            }
+                        }
                     }
 
                     // Clicking empty chrome opens the part list (same idea as Output).
@@ -627,14 +637,26 @@ Rectangle {
                         font.bold: true
                     }
 
-                    // —— Unimplemented stubs ——
-                    Label {
+                    // —— MFX deep-link to Tone Edit ——
+                    ColumnLayout {
                         visible: root.selectedBlock === "mfx"
+                        spacing: 10
                         Layout.fillWidth: true
-                        wrapMode: Text.WordWrap
-                        color: LogicTheme.warning
-                        font.pixelSize: LogicTheme.fontSize
-                        text: "Part MFX is shown for routing context. Type and parameters are not modeled in SysEx yet — edit MFX on the FA (EFFECTS EDIT → MFX)."
+
+                        Label {
+                            Layout.fillWidth: true
+                            wrapMode: Text.WordWrap
+                            color: LogicTheme.textSecondary
+                            font.pixelSize: LogicTheme.fontSize
+                            text: "Part MFX (amp models, delays, chorus…) lives in Temporary Tone. Open Tone Edit for presets and parameters."
+                        }
+                        Button {
+                            text: "Open in Tone Edit"
+                            onClicked: {
+                                App.tone.openMfxStage()
+                                App.mainTab = 3
+                            }
+                        }
                     }
 
                     // —— Audio Input (gain) ——

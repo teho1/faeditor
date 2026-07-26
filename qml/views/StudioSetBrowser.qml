@@ -133,6 +133,17 @@ Rectangle {
                             scanConfirm.openFor(true)
                     }
                 }
+
+                FaButton {
+                    glyph: ""
+                    text: App.waveforms.busy ? "…" : "Waves"
+                    ToolTip.visible: hovered
+                    ToolTip.text: App.waveforms.loaded
+                                  ? "Reload bundled waveform names (already loaded at startup)"
+                                  : "Load bundled waveform names"
+                    enabled: !App.waveforms.busy
+                    onClicked: App.waveforms.fetchWaveformNames()
+                }
             }
 
             Rectangle {
@@ -214,6 +225,14 @@ Rectangle {
                 enabled: !App.studioSets.scanning
                 onClicked: scanConfirm.openFor(false)
             }
+
+            Button {
+                text: App.waveforms.busy ? "Loading Waves…" : "Reload Waveform Names"
+                ToolTip.visible: hovered
+                ToolTip.text: "Optional — names load automatically from the bundled Sound List at startup"
+                enabled: !App.waveforms.busy
+                onClicked: App.waveforms.fetchWaveformNames()
+            }
         }
 
         ProgressBar {
@@ -225,10 +244,13 @@ Rectangle {
         }
 
         Label {
-            text: App.studioSets.statusText
+            text: App.studioSets.statusText.length > 0
+                  ? App.studioSets.statusText
+                  : App.waveforms.statusText
             color: LogicTheme.accent
             font.pixelSize: LogicTheme.fontSizeSmall
             visible: App.studioSets.statusText.length > 0
+                     || App.waveforms.statusText.length > 0
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
         }

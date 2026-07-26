@@ -100,6 +100,7 @@ ApplicationWindow {
             TabButton { text: "1. Sets & Tones"; width: implicitWidth }
             TabButton { text: "2. Mixer"; width: implicitWidth }
             TabButton { text: "3. Effects"; width: implicitWidth }
+            TabButton { text: "4. Tone"; width: implicitWidth }
             currentIndex: App.mainTab
             onCurrentIndexChanged: {
                 App.mainTab = currentIndex
@@ -107,10 +108,11 @@ ApplicationWindow {
             }
         }
 
-        // Digits 1–3 switch tabs (skipped while a text field has focus)
+        // Digits 1–4 switch tabs (skipped while a text field has focus)
         Shortcut { sequence: "1"; enabled: !root._editingText; onActivated: { App.mainTab = 0; root.clearTextFocus() } }
         Shortcut { sequence: "2"; enabled: !root._editingText; onActivated: { App.mainTab = 1; root.clearTextFocus() } }
         Shortcut { sequence: "3"; enabled: !root._editingText; onActivated: { App.mainTab = 2; root.clearTextFocus() } }
+        Shortcut { sequence: "4"; enabled: !root._editingText; onActivated: { App.mainTab = 3; root.clearTextFocus() } }
 
         RowLayout {
             Layout.fillWidth: true
@@ -125,6 +127,7 @@ ApplicationWindow {
                 ChangeToneView {}
                 MixerView {}
                 EffectsEditView {}
+                ToneEditView {}
             }
 
             Rectangle {

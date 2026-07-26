@@ -1,0 +1,50 @@
+{
+  "source": "FA Parameter Guide MFX → UI family routing (MfxUiHelpers::familyForType)",
+  "families": {
+    "generic": {
+      "component": "MfxGenericParameterEditor",
+      "types": [0, 43, 44, 68]
+    },
+    "eq": {
+      "component": "MfxEQEditor",
+      "types": [1, 2, 3]
+    },
+    "filter": {
+      "component": "MfxFilterEditor",
+      "types": [4, 5, 6]
+    },
+    "modulation": {
+      "component": "MfxModulationEditor",
+      "types": [7, 9, 10, 11, 12, 13, 14, 16, 17, 22, 23, 24, 25, 26, 27]
+    },
+    "pipeline": {
+      "component": "MfxPipelineEditor",
+      "types": [15, 41, 42, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67]
+    },
+    "slicer": {
+      "component": "MfxSlicerEditor",
+      "types": [18]
+    },
+    "rotary": {
+      "component": "MfxRotaryEditor",
+      "types": [19, 20, 21]
+    },
+    "amp": {
+      "component": "MfxAmpEditor",
+      "types": [8, 28, 29, 30]
+    },
+    "compressor": {
+      "component": "MfxCompressorEditor",
+      "types": [31, 32, 33]
+    },
+    "delay": {
+      "component": "MfxDelayEditor",
+      "types": [34, 35, 37, 38, 39, 40],
+      "note": "Type 36 uses multiTapDelay (rich timeline); DelayEditor hosts both."
+    },
+    "multiTapDelay": {
+      "component": "MfxTapDelayEditor",
+      "types": [36]
+    }
+  }
+}

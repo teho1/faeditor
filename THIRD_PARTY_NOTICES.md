@@ -77,7 +77,8 @@ https://github.com/google/material-design-icons
 
 ## Roland documentation / sound list data
 
-Tone names and SysEx behaviour are derived from Roland’s publicly published
-FA-06/07/08 manuals, MIDI implementation, and sound list materials for
-interoperability. Those documents remain Roland’s property; this project does
-not claim ownership of Roland’s trademarks, sounds, or firmware.
+Tone names, waveform names (SN-S PCM and PCM Synth INT-A/B tables), and SysEx
+behaviour are derived from Roland’s publicly published FA-06/07/08 manuals,
+MIDI implementation, and sound list materials for interoperability. Those
+documents remain Roland’s property; this project does not claim ownership of
+Roland’s trademarks, sounds, or firmware.

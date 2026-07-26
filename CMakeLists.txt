@@ -46,9 +46,21 @@ qt_add_executable(FAEditor
     src/model/PartModel.cpp
     src/model/EffectsModel.cpp
     src/model/ToneBrowserModel.cpp
+    src/model/WaveformCatalog.cpp
     src/model/StudioSetBrowserModel.cpp
     src/model/AudioFxModel.cpp
     src/model/TemporarySysexStore.cpp
+    src/model/MfxModel.cpp
+    src/model/MfxParamCatalog.cpp
+    src/model/MfxUiHelpers.cpp
+    src/model/MfxTapDelayModel.cpp
+    src/model/MfxParamListModel.cpp
+    src/model/SnSynthToneModel.cpp
+    src/model/PcmSynthToneModel.cpp
+    src/model/SnAcousticInstCatalog.cpp
+    src/model/SnAcousticToneModel.cpp
+    src/model/TemporaryToneModel.cpp
+    src/model/MfxPresetStore.cpp
     src/project/ProjectStore.cpp
     src/undo/UndoController.cpp
 )
@@ -70,13 +82,34 @@ qt_add_qml_module(FAEditor
         qml/components/StatusBar.qml
         qml/components/FaIcon.qml
         qml/components/FaButton.qml
+        qml/components/AdsrEnvelopeGraph.qml
+        qml/components/FilterResponseGraph.qml
+        qml/components/LfoWaveformGraph.qml
+        qml/components/CompressorTransferGraph.qml
+        qml/components/MfxEqGraph.qml
+        qml/components/MatrixControlCards.qml
+        qml/components/MfxParamFader.qml
+        qml/components/MfxParamGrid.qml
+        qml/components/MfxTapDelayEditor.qml
+        qml/components/MfxGenericParameterEditor.qml
+        qml/components/MfxDelayEditor.qml
+        qml/components/MfxEQEditor.qml
+        qml/components/MfxFilterEditor.qml
+        qml/components/MfxModulationEditor.qml
+        qml/components/MfxCompressorEditor.qml
+        qml/components/MfxAmpEditor.qml
+        qml/components/MfxRotaryEditor.qml
+        qml/components/MfxPipelineEditor.qml
+        qml/components/MfxSlicerEditor.qml
         qml/views/MixerView.qml
         qml/views/PartInspector.qml
         qml/views/ZoneKeyboard.qml
         qml/views/EffectsPanel.qml
         qml/views/EffectsEditView.qml
+        qml/views/ToneEditView.qml
         qml/views/MidiConnectDialog.qml
         qml/views/ToneBrowser.qml
+        qml/views/WaveformBrowser.qml
         qml/views/StudioSetBrowser.qml
         qml/views/ChangeToneView.qml
         qml/views/AudioFxPanel.qml
@@ -85,6 +118,10 @@ qt_add_qml_module(FAEditor
         qml/views/HelpDialog.qml
     RESOURCES
         resources/tones/soundlist.json
+        resources/waves/waveforms.json
+        resources/mfx_presets/presets.json
+        resources/mfx_params/catalog.json
+        resources/mfx_params/families.json
         resources/fonts/fa-solid-900.ttf
         resources/fonts/MaterialIcons-Regular.ttf
         resources/icons/mute.svg
@@ -189,3 +226,26 @@ qt_add_executable(FAEditorTests
 target_include_directories(FAEditorTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(FAEditorTests PRIVATE Qt6::Core Qt6::Test)
 add_test(NAME FAEditorTests COMMAND FAEditorTests)
+
+qt_add_executable(FAEditorMfxTests
+    tests/test_mfx_tap.cpp
+    src/model/MfxModel.cpp
+    src/model/MfxParamCatalog.cpp
+    src/model/MfxUiHelpers.cpp
+    src/model/MfxTapDelayModel.cpp
+    src/model/MfxParamListModel.cpp
+    src/midi/AddressMap.cpp
+    src/midi/RolandChecksum.cpp
+    src/midi/SysexEngine.cpp
+    src/midi/MidiDeviceModel.cpp
+)
+target_include_directories(FAEditorMfxTests PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${rtmidi_SOURCE_DIR}
+)
+target_link_libraries(FAEditorMfxTests PRIVATE Qt6::Core Qt6::Test rtmidi)
+if(APPLE)
+    target_link_libraries(FAEditorMfxTests PRIVATE
+        ${COREMIDI_LIBRARY} ${COREAUDIO_LIBRARY} ${COREFOUNDATION_LIBRARY})
+endif()
+add_test(NAME FAEditorMfxTests COMMAND FAEditorMfxTests)

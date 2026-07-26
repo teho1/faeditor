@@ -13,9 +13,15 @@
 #include "model/ToneBrowserModel.h"
 #include "model/StudioSetBrowserModel.h"
 #include "model/AudioFxModel.h"
+#include "model/MfxModel.h"
+#include "model/MfxTapDelayModel.h"
+#include "model/MfxParamListModel.h"
+#include "model/MfxUiHelpers.h"
 #include "midi/MidiDeviceModel.h"
 #include "project/ProjectStore.h"
 #include "undo/UndoController.h"
+
+#include <qqml.h>
 
 int main(int argc, char *argv[])
 {
@@ -67,6 +73,13 @@ int main(int argc, char *argv[])
                                                QStringLiteral("Obtained from AppController"));
     qmlRegisterUncreatableType<AppController>("FAEditor", 1, 0, "AppController",
                                               QStringLiteral("Use App context property"));
+    qmlRegisterUncreatableType<MfxModel>("FAEditor", 1, 0, "MfxModel",
+                                         QStringLiteral("Obtained from TemporaryToneModel"));
+    qmlRegisterUncreatableType<MfxTapDelayModel>("FAEditor", 1, 0, "MfxTapDelayModel",
+                                                 QStringLiteral("Obtained from MfxModel.tapDelay"));
+    qmlRegisterUncreatableType<MfxParamListModel>("FAEditor", 1, 0, "MfxParamListModel",
+                                                  QStringLiteral("Obtained from MfxModel.paramList"));
+    qmlRegisterSingletonInstance("FAEditor", 1, 0, "MfxUiFamily", MfxUiHelpers::instance());
 
     AppController controller;
 
