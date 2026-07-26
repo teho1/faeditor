@@ -14,7 +14,7 @@ AppController::AppController(QObject *parent)
     m_tones = new ToneBrowserModel(this);
     m_tones->loadCatalog();
     m_audioFx = new AudioFxModel(m_engine, this);
-    m_library = new ProjectStore(m_studioSet, this);
+    m_library = new ProjectStore(m_studioSet, m_audioFx, this);
 
     m_studioSet->setToneNameResolver([this](int msb, int lsb, int pc) {
         return m_tones->resolveName(msb, lsb, pc);
@@ -172,10 +172,19 @@ bool AppController::pull()
 
 bool AppController::push()
 {
-    const bool ok = m_studioSet->pushToDevice();
-    if (ok)
-        setHint(QStringLiteral("Pushed to Temporary (live edit buffer). Permanent store: on the FA use Write → User Studio Set."));
-    return ok;
+    // Blobs + typed studio overlays, then System Audio FX + Master EQ.
+    if (!m_studioSet->pushToDevice())
+        return false;
+    if (m_audioFx && !m_audioFx->pushToDevice()) {
+        setHint(QStringLiteral("Studio Set pushed, but Audio FX push failed."));
+        return false;
+    }
+    if (!m_studioSet->pushSystemMasterEq()) {
+        setHint(QStringLiteral("Studio Set + Audio FX pushed, but Master EQ push failed."));
+        return false;
+    }
+    setHint(QStringLiteral("Pushed Temporary Studio Set, Audio FX, and Master EQ. Permanent store: Write → User Studio Set on the FA."));
+    return true;
 }
 
 bool AppController::openStudioSet(int row)

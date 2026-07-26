@@ -26,7 +26,10 @@ inline constexpr Address kTemporaryStudioSet{{0x18, 0x00, 0x00, 0x00}};
 inline constexpr Address kStudioSetCommon{{0x18, 0x00, 0x00, 0x00}};
 inline constexpr Address kStudioSetChorus{{0x18, 0x00, 0x01, 0x00}};
 inline constexpr Address kStudioSetReverb{{0x18, 0x00, 0x02, 0x00}};
+inline constexpr Address kStudioSetIfx{{0x18, 0x00, 0x03, 0x00}};
 inline constexpr Address kStudioSetMasterComp{{0x18, 0x00, 0x05, 0x00}};
+inline constexpr Address kStudioSetController{{0x18, 0x00, 0x50, 0x00}};
+inline constexpr Address kStudioSetPadCommon{{0x18, 0x00, 0x51, 0x00}};
 
 inline Address part(int index)
 {
@@ -38,6 +41,27 @@ inline Address zone(int index)
 {
     Q_ASSERT(index >= 0 && index < 16);
     return Address{{0x18, 0x00, static_cast<quint8>(0x40 + index), 0x00}};
+}
+
+inline Address partEq(int index)
+{
+    Q_ASSERT(index >= 0 && index < 16);
+    return Address{{0x18, 0x00, static_cast<quint8>(0x30 + index), 0x00}};
+}
+
+inline Address midiChannel(int index)
+{
+    Q_ASSERT(index >= 0 && index < 16);
+    return Address{{0x18, 0x00, static_cast<quint8>(0x06 + index), 0x00}};
+}
+
+/** Pads use packed 7-bit addressing: pad0=00 52 00, pad1=00 52 40, pad2=00 53 00, … */
+inline Address pad(int index)
+{
+    Q_ASSERT(index >= 0 && index < 16);
+    return Address{{0x18, 0x00,
+                    static_cast<quint8>(0x52 + index / 2),
+                    static_cast<quint8>((index % 2) * 0x40)}};
 }
 
 inline Address partParam(int partIndex, quint8 offset)
@@ -75,6 +99,7 @@ inline Address masterCompParam(quint8 offset)
 }
 
 inline constexpr Address kSystemCommon{{0x02, 0x00, 0x00, 0x00}};
+inline constexpr Address kSystemMasterEq{{0x02, 0x00, 0x01, 0x00}};
 inline constexpr Address kSystemInputEfx{{0x02, 0x00, 0x02, 0x00}};
 inline constexpr Address kSystemTfx{{0x02, 0x00, 0x03, 0x00}};
 inline constexpr Address kSystemController{{0x02, 0x00, 0x05, 0x00}};
@@ -106,7 +131,22 @@ inline constexpr quint8 TfxLocation = 0x28;
 inline constexpr quint8 TfxInputGain = 0x29;
 inline constexpr int InputEfxSize = 0x0B;
 inline constexpr int TfxSize = 0x26;
+inline constexpr int MasterEqSize = 0x0F;
 } // namespace sysOff
+
+/** Temporary Studio Set block sizes (MIDI Implementation). */
+namespace ssOff {
+inline constexpr int CommonSize = 0x5D;
+inline constexpr int ChorusSize = 0x55;
+inline constexpr int ReverbSize = 0x64;
+inline constexpr int IfxSize = 0x112;
+inline constexpr int MasterCompSize = 0x12;
+inline constexpr int MidiChSize = 0x01;
+inline constexpr int PartEqSize = 0x08;
+inline constexpr int ControllerSize = 0x3E;
+inline constexpr int PadCommonSize = 0x01;
+inline constexpr int PadSize = 0x10;
+} // namespace ssOff
 
 namespace ctrlOff {
 inline constexpr quint8 SwitchS1Assign = 0x14;

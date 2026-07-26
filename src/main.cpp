@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
     app.setOrganizationName(QStringLiteral("FAEditor"));
     app.setOrganizationDomain(QStringLiteral("faeditor.local"));
     app.setApplicationName(QStringLiteral("FA Editor"));
-    app.setApplicationVersion(QStringLiteral("0.1.4"));
+    app.setApplicationVersion(QStringLiteral("1.0.0"));
 
     // Prefer bundle .icns (Dock/Finder), fall back to embedded PNG.
     QIcon appIcon;

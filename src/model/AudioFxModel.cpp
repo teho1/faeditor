@@ -1,6 +1,7 @@
 #include "model/AudioFxModel.h"
 #include "midi/SysexEngine.h"
 
+#include <QJsonObject>
 #include <algorithm>
 
 AudioFxModel::AudioFxModel(SysexEngine *engine, QObject *parent)
@@ -244,6 +245,52 @@ bool AudioFxModel::pushToDevice()
 
     setBusy(false);
     setControllerStatus(QStringLiteral("Pushed Input FX + TFX to FA"));
+    return true;
+}
+
+QJsonObject AudioFxModel::toJson() const
+{
+    QJsonObject o;
+    o.insert(QStringLiteral("inputReverbSwitch"), m_inputReverbSwitch);
+    o.insert(QStringLiteral("inputReverbType"), m_inputReverbType);
+    o.insert(QStringLiteral("inputReverbTime"), m_inputReverbTime);
+    o.insert(QStringLiteral("inputReverbLevel"), m_inputReverbLevel);
+    o.insert(QStringLiteral("nsSwitch"), m_nsSwitch);
+    o.insert(QStringLiteral("nsThreshold"), m_nsThreshold);
+    o.insert(QStringLiteral("nsRelease"), m_nsRelease);
+    o.insert(QStringLiteral("tfxSwitch"), m_tfxSwitch);
+    o.insert(QStringLiteral("tfxType"), m_tfxType);
+    o.insert(QStringLiteral("tfxParamA"), m_tfxParamA);
+    o.insert(QStringLiteral("tfxParamB"), m_tfxParamB);
+    o.insert(QStringLiteral("tfxParamC"), m_tfxParamC);
+    o.insert(QStringLiteral("tfxParamD"), m_tfxParamD);
+    o.insert(QStringLiteral("tfxLocation"), m_tfxLocation);
+    o.insert(QStringLiteral("tfxInputGain"), m_tfxInputGain);
+    return o;
+}
+
+bool AudioFxModel::fromJson(const QJsonObject &obj)
+{
+    if (obj.isEmpty())
+        return true;
+    m_fromDevice = true;
+    m_inputReverbSwitch = obj.value(QStringLiteral("inputReverbSwitch")).toBool(m_inputReverbSwitch);
+    m_inputReverbType = obj.value(QStringLiteral("inputReverbType")).toInt(m_inputReverbType);
+    m_inputReverbTime = obj.value(QStringLiteral("inputReverbTime")).toInt(m_inputReverbTime);
+    m_inputReverbLevel = obj.value(QStringLiteral("inputReverbLevel")).toInt(m_inputReverbLevel);
+    m_nsSwitch = obj.value(QStringLiteral("nsSwitch")).toBool(m_nsSwitch);
+    m_nsThreshold = obj.value(QStringLiteral("nsThreshold")).toInt(m_nsThreshold);
+    m_nsRelease = obj.value(QStringLiteral("nsRelease")).toInt(m_nsRelease);
+    m_tfxSwitch = obj.value(QStringLiteral("tfxSwitch")).toBool(m_tfxSwitch);
+    m_tfxType = std::clamp(obj.value(QStringLiteral("tfxType")).toInt(m_tfxType), 0, 28);
+    m_tfxParamA = obj.value(QStringLiteral("tfxParamA")).toInt(m_tfxParamA);
+    m_tfxParamB = obj.value(QStringLiteral("tfxParamB")).toInt(m_tfxParamB);
+    m_tfxParamC = obj.value(QStringLiteral("tfxParamC")).toInt(m_tfxParamC);
+    m_tfxParamD = obj.value(QStringLiteral("tfxParamD")).toInt(m_tfxParamD);
+    m_tfxLocation = obj.value(QStringLiteral("tfxLocation")).toInt(m_tfxLocation) & 0x01;
+    m_tfxInputGain = std::clamp(obj.value(QStringLiteral("tfxInputGain")).toInt(m_tfxInputGain), 0, 6);
+    m_fromDevice = false;
+    emit audioFxChanged();
     return true;
 }
 

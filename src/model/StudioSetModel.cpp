@@ -247,6 +247,120 @@ void StudioSetModel::refreshToneNames()
     }
 }
 
+void StudioSetModel::seedRawFromSysexBlobs()
+{
+    for (int i = 0; i < 16; ++i) {
+        const auto partBlob = m_sysexBlobs.blob(TemporarySysexStore::partKey(i));
+        if (!partBlob.isEmpty())
+            m_parts[i]->setRawPartBytes(partBlob);
+        const auto zoneBlob = m_sysexBlobs.blob(TemporarySysexStore::zoneKey(i));
+        if (!zoneBlob.isEmpty())
+            m_parts[i]->setRawZoneBytes(zoneBlob);
+    }
+    const auto chorus = m_sysexBlobs.blob(QStringLiteral("chorus"));
+    if (!chorus.isEmpty())
+        m_effects->setRawChorus(chorus);
+    const auto reverb = m_sysexBlobs.blob(QStringLiteral("reverb"));
+    if (!reverb.isEmpty())
+        m_effects->setRawReverb(reverb);
+    const auto mcomp = m_sysexBlobs.blob(QStringLiteral("masterComp"));
+    if (!mcomp.isEmpty())
+        m_effects->setRawMasterComp(mcomp);
+}
+
+bool StudioSetModel::pullSystemMasterEq(QString *error)
+{
+    if (!m_engine || !m_engine->isOpen()) {
+        if (error)
+            *error = QStringLiteral("Not connected");
+        return false;
+    }
+    QByteArray data;
+    if (!m_engine->read(roland::addr::kSystemMasterEq, roland::sysOff::MasterEqSize, &data, error))
+        return false;
+    m_systemMasterEq = data;
+    return true;
+}
+
+bool StudioSetModel::refreshLibraryBlobs()
+{
+    if (!m_engine || !m_engine->isOpen())
+        return false;
+    QString err;
+    if (!m_sysexBlobs.pullFromDevice(m_engine, &err)) {
+        setError(err);
+        return false;
+    }
+    seedRawFromSysexBlobs();
+    if (!pullSystemMasterEq(&err)) {
+        setError(err);
+        return false;
+    }
+    return true;
+}
+
+bool StudioSetModel::pushSystemMasterEq()
+{
+    if (m_systemMasterEq.isEmpty())
+        return true;
+    if (!m_engine || !m_engine->isOpen()) {
+        setError(QStringLiteral("Not connected"));
+        return false;
+    }
+    QString err;
+    if (!m_engine->write(roland::addr::kSystemMasterEq, m_systemMasterEq, &err)) {
+        setError(err);
+        return false;
+    }
+    return true;
+}
+
+QJsonObject StudioSetModel::sysexBlobsJson() const
+{
+    return m_sysexBlobs.toJson();
+}
+
+void StudioSetModel::setSysexBlobsJson(const QJsonObject &obj)
+{
+    m_sysexBlobs.fromJson(obj);
+    seedRawFromSysexBlobs();
+}
+
+void StudioSetModel::setSystemMasterEq(const QByteArray &data)
+{
+    m_systemMasterEq = data;
+}
+
+bool StudioSetModel::pushTypedOverlays(QString *error)
+{
+    QByteArray nameData(16, ' ');
+    const auto latin = m_name.toLatin1();
+    for (int i = 0; i < latin.size() && i < 16; ++i)
+        nameData[i] = latin[i];
+    if (!m_engine->write(roland::addr::kStudioSetCommon, nameData, error))
+        return false;
+
+    {
+        QByteArray d(1, static_cast<char>(m_soloPart));
+        if (!m_engine->writeParam(roland::addr::commonParam(roland::commonOff::SoloPart), d, error))
+            return false;
+    }
+
+    for (int i = 0; i < 16; ++i) {
+        if (!m_engine->write(roland::addr::part(i), m_parts[i]->toPartBytes(), error))
+            return false;
+        if (!m_engine->write(roland::addr::zone(i), m_parts[i]->toZoneBytes(), error))
+            return false;
+    }
+
+    if (!m_engine->write(roland::addr::kStudioSetChorus, m_effects->chorusBytes(), error)
+        || !m_engine->write(roland::addr::kStudioSetReverb, m_effects->reverbBytes(), error)
+        || !m_engine->write(roland::addr::kStudioSetMasterComp, m_effects->masterCompBytes(), error)) {
+        return false;
+    }
+    return true;
+}
+
 bool StudioSetModel::pullFromDevice()
 {
     if (!m_engine || !m_engine->isOpen()) {
@@ -258,13 +372,14 @@ bool StudioSetModel::pullFromDevice()
     m_suppressUndo = true;
 
     QString err;
-    QByteArray common;
-    if (!m_engine->read(roland::addr::kStudioSetCommon, 0x40, &common, &err)) {
+    if (!m_sysexBlobs.pullFromDevice(m_engine, &err)) {
         setError(err);
         setBusy(false);
         m_suppressUndo = false;
         return false;
     }
+
+    const QByteArray common = m_sysexBlobs.blob(QStringLiteral("common"));
     if (common.size() >= 16) {
         m_name = QString::fromLatin1(common.constData(), 16).trimmed();
         emit nameChanged();
@@ -273,27 +388,31 @@ bool StudioSetModel::pullFromDevice()
         setSoloPart(static_cast<quint8>(common[roland::commonOff::SoloPart]));
 
     for (int i = 0; i < 16; ++i) {
-        QByteArray partData;
-        if (!m_engine->read(roland::addr::part(i), roland::partOff::PartSize, &partData, &err)) {
-            setError(QStringLiteral("Part %1: %2").arg(i + 1).arg(err));
+        const auto partData = m_sysexBlobs.blob(TemporarySysexStore::partKey(i));
+        if (partData.isEmpty()) {
+            setError(QStringLiteral("Part %1: missing sysex data").arg(i + 1));
             setBusy(false);
             m_suppressUndo = false;
             return false;
         }
         m_parts[i]->loadFromPartBytes(partData);
 
-        QByteArray zoneData;
-        if (m_engine->read(roland::addr::zone(i), roland::zoneOff::ZoneSize, &zoneData, &err))
+        const auto zoneData = m_sysexBlobs.blob(TemporarySysexStore::zoneKey(i));
+        if (!zoneData.isEmpty())
             m_parts[i]->loadFromZoneBytes(zoneData);
     }
 
-    QByteArray chorus, reverb, mcomp;
-    if (m_engine->read(roland::addr::kStudioSetChorus, 0x20, &chorus, &err))
+    const auto chorus = m_sysexBlobs.blob(QStringLiteral("chorus"));
+    if (!chorus.isEmpty())
         m_effects->loadChorus(chorus);
-    if (m_engine->read(roland::addr::kStudioSetReverb, 0x20, &reverb, &err))
+    const auto reverb = m_sysexBlobs.blob(QStringLiteral("reverb"));
+    if (!reverb.isEmpty())
         m_effects->loadReverb(reverb);
-    if (m_engine->read(roland::addr::kStudioSetMasterComp, 0x20, &mcomp, &err))
+    const auto mcomp = m_sysexBlobs.blob(QStringLiteral("masterComp"));
+    if (!mcomp.isEmpty())
         m_effects->loadMasterComp(mcomp);
+
+    pullSystemMasterEq(&err); // optional for Temporary pull; keep going if Master EQ fails
 
     refreshToneNames();
     beginResetModel();
@@ -316,32 +435,20 @@ bool StudioSetModel::pushToDevice()
     setBusy(true);
     QString err;
 
-    QByteArray nameData(16, ' ');
-    const auto latin = m_name.toLatin1();
-    for (int i = 0; i < latin.size() && i < 16; ++i)
-        nameData[i] = latin[i];
-    if (!m_engine->write(roland::addr::kStudioSetCommon, nameData, &err)) {
+    if (!m_sysexBlobs.isEmpty()) {
+        seedRawFromSysexBlobs();
+        if (!m_sysexBlobs.pushToDevice(m_engine, &err)) {
+            setError(err);
+            setBusy(false);
+            return false;
+        }
+    }
+
+    if (!pushTypedOverlays(&err)) {
         setError(err);
         setBusy(false);
         return false;
     }
-
-    for (int i = 0; i < 16; ++i) {
-        if (!m_engine->write(roland::addr::part(i), m_parts[i]->toPartBytes(), &err)) {
-            setError(err);
-            setBusy(false);
-            return false;
-        }
-        if (!m_engine->write(roland::addr::zone(i), m_parts[i]->toZoneBytes(), &err)) {
-            setError(err);
-            setBusy(false);
-            return false;
-        }
-    }
-
-    m_engine->write(roland::addr::kStudioSetChorus, m_effects->chorusBytes(), &err);
-    m_engine->write(roland::addr::kStudioSetReverb, m_effects->reverbBytes(), &err);
-    m_engine->write(roland::addr::kStudioSetMasterComp, m_effects->masterCompBytes(), &err);
 
     setBusy(false);
     setDirty(false);

@@ -1,9 +1,11 @@
 #pragma once
 
 #include <QAbstractListModel>
+#include <QJsonObject>
 #include <QStringList>
 
 class StudioSetModel;
+class AudioFxModel;
 
 struct LibraryEntry {
     QString id;
@@ -26,7 +28,8 @@ public:
         IdRole
     };
 
-    explicit ProjectStore(StudioSetModel *studioSet, QObject *parent = nullptr);
+    explicit ProjectStore(StudioSetModel *studioSet, AudioFxModel *audioFx,
+                          QObject *parent = nullptr);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
@@ -58,8 +61,11 @@ private:
     QString libraryDir() const;
     QString autosavePath() const;
     QString sanitizeName(const QString &name) const;
+    QJsonObject buildLibraryRoot(const QString &name, bool refreshFromDevice);
+    bool applyLibraryRoot(const QJsonObject &root);
 
     StudioSetModel *m_studioSet = nullptr;
+    AudioFxModel *m_audioFx = nullptr;
     QVector<LibraryEntry> m_entries;
     QString m_currentPath;
     QString m_currentName;

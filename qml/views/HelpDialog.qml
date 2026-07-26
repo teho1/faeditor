@@ -86,7 +86,8 @@ Dialog {
                     "New creates a local JSON project (suggested name = current Studio Set). "
                     + "Save and Dup appear only when a library file is open. "
                     + "Click a row to load it (you’ll be warned if there are unsaved edits; delete asks for confirmation). "
-                    + "After load you can push the project to the FA Temporary. "
+                    + "Save Studio Sets locally (parts, zones, studio FX, IFX, pads, audio FX…) and push back to Temporary. "
+                    + "A library file is a Temporary Studio Set plus System Audio FX / Master EQ snapshot — not a per-tone MFX designer backup; User Write stays on the FA. "
                     + "In the tone list, use the star next to Search to show favourites only, or star individual tones. "
                     + "Library files live in the app’s Application Support folder."
             }
@@ -139,8 +140,8 @@ Dialog {
                 color: LogicTheme.textSecondary
                 font.pixelSize: LogicTheme.fontSize
                 text:
-                    "Studio Set / Temporary editing only — not a full tone designer. Relies on documented Roland SysEx. "
-                    + "Always keep a backup of important User Studio Sets on the instrument or SD card."
+                    "Temporary Studio Set + System Audio FX / Master EQ via SysEx — not a full tone or MFX designer. "
+                    + "Permanent User store is Write on the FA. Always keep a backup of important User Studio Sets on the instrument or SD card."
             }
         }
     }

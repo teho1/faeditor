@@ -345,7 +345,7 @@ Rectangle {
             width: parent ? parent.width : 360
             wrapMode: Text.WordWrap
             color: LogicTheme.textSecondary
-            text: "Library project “" + App.library.currentName + "” is loaded in the editor. Push it to the FA Temporary Studio Set now?"
+            text: "Library project “" + App.library.currentName + "” is loaded in the editor. Push Temporary Studio Set, Audio FX, and Master EQ to the FA now?"
         }
 
         onAccepted: App.push()

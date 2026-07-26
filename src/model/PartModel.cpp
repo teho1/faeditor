@@ -292,6 +292,20 @@ void PartModel::loadFromZoneBytes(const QByteArray &data)
     emit partChanged();
 }
 
+void PartModel::setRawPartBytes(const QByteArray &data)
+{
+    m_rawPart = data;
+    if (m_rawPart.size() < roland::partOff::PartSize)
+        m_rawPart.resize(roland::partOff::PartSize);
+}
+
+void PartModel::setRawZoneBytes(const QByteArray &data)
+{
+    m_rawZone = data;
+    if (m_rawZone.size() < roland::zoneOff::ZoneSize)
+        m_rawZone.resize(roland::zoneOff::ZoneSize);
+}
+
 QByteArray PartModel::toPartBytes() const
 {
     QByteArray data = m_rawPart.size() >= roland::partOff::PartSize

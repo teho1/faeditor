@@ -2,8 +2,10 @@
 
 #include "model/PartModel.h"
 #include "model/EffectsModel.h"
+#include "model/TemporarySysexStore.h"
 
 #include <QAbstractListModel>
+#include <QByteArray>
 #include <QVector>
 #include <QJsonObject>
 #include <functional>
@@ -73,8 +75,18 @@ public:
     Q_INVOKABLE bool pushToDevice();
     Q_INVOKABLE void markClean();
 
+    /** Re-pull Temporary sysex blobs + System Master EQ when MIDI is connected (library save). */
+    bool refreshLibraryBlobs();
+    bool pushSystemMasterEq();
+
     QJsonObject toJson() const;
     bool fromJson(const QJsonObject &obj);
+
+    QJsonObject sysexBlobsJson() const;
+    void setSysexBlobsJson(const QJsonObject &obj);
+    QByteArray systemMasterEq() const { return m_systemMasterEq; }
+    void setSystemMasterEq(const QByteArray &data);
+    bool hasSysexBlobs() const { return !m_sysexBlobs.isEmpty(); }
 
     void setToneNameResolver(const std::function<QString(int, int, int)> &fn);
 
@@ -100,11 +112,16 @@ private:
     void writeEffectParam(const QString &section, const QString &param, int value);
     void refreshToneNames();
     void notifyPartRow(int row);
+    void seedRawFromSysexBlobs();
+    bool pullSystemMasterEq(QString *error);
+    bool pushTypedOverlays(QString *error);
 
     SysexEngine *m_engine = nullptr;
     UndoController *m_undo = nullptr;
     QVector<PartModel *> m_parts;
     EffectsModel *m_effects = nullptr;
+    TemporarySysexStore m_sysexBlobs;
+    QByteArray m_systemMasterEq;
     QString m_name = QStringLiteral("INIT STUDIOSET");
     int m_selectedPart = 0;
     int m_soloPart = 0; // 0 = off, 1-16

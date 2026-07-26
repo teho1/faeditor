@@ -1,4 +1,5 @@
 #include "model/EffectsModel.h"
+#include "midi/AddressMap.h"
 
 #include <algorithm>
 
@@ -178,9 +179,26 @@ void EffectsModel::loadMasterComp(const QByteArray &data)
     emit effectsChanged();
 }
 
+void EffectsModel::setRawChorus(const QByteArray &data)
+{
+    m_rawChorus = data;
+}
+
+void EffectsModel::setRawReverb(const QByteArray &data)
+{
+    m_rawReverb = data;
+}
+
+void EffectsModel::setRawMasterComp(const QByteArray &data)
+{
+    m_rawMasterComp = data;
+}
+
 QByteArray EffectsModel::chorusBytes() const
 {
-    QByteArray d = m_rawChorus.isEmpty() ? QByteArray(0x20, char(0)) : m_rawChorus;
+    QByteArray d = m_rawChorus.isEmpty()
+                       ? QByteArray(roland::ssOff::ChorusSize, char(0))
+                       : m_rawChorus;
     if (d.size() < 3)
         d.resize(3);
     // Preserve Switch at [0]; Type/Level match Reverb offsets.
@@ -191,7 +209,9 @@ QByteArray EffectsModel::chorusBytes() const
 
 QByteArray EffectsModel::reverbBytes() const
 {
-    QByteArray d = m_rawReverb.isEmpty() ? QByteArray(0x20, char(0)) : m_rawReverb;
+    QByteArray d = m_rawReverb.isEmpty()
+                       ? QByteArray(roland::ssOff::ReverbSize, char(0))
+                       : m_rawReverb;
     if (d.size() < 3)
         d.resize(3);
     d[1] = static_cast<char>(m_reverbType);
@@ -201,7 +221,9 @@ QByteArray EffectsModel::reverbBytes() const
 
 QByteArray EffectsModel::masterCompBytes() const
 {
-    QByteArray d = m_rawMasterComp.isEmpty() ? QByteArray(0x20, char(0)) : m_rawMasterComp;
+    QByteArray d = m_rawMasterComp.isEmpty()
+                       ? QByteArray(roland::ssOff::MasterCompSize, char(0))
+                       : m_rawMasterComp;
     if (d.size() < 6)
         d.resize(6);
     d[0] = static_cast<char>(m_masterCompSwitch ? 1 : 0);

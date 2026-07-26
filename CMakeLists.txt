@@ -48,6 +48,7 @@ qt_add_executable(FAEditor
     src/model/ToneBrowserModel.cpp
     src/model/StudioSetBrowserModel.cpp
     src/model/AudioFxModel.cpp
+    src/model/TemporarySysexStore.cpp
     src/project/ProjectStore.cpp
     src/undo/UndoController.cpp
 )
@@ -127,7 +128,7 @@ if(APPLE)
         MACOSX_BUNDLE TRUE
         MACOSX_BUNDLE_BUNDLE_NAME "FA Editor"
         MACOSX_BUNDLE_GUI_IDENTIFIER "com.righthere.faeditor"
-        MACOSX_BUNDLE_BUNDLE_VERSION 1
+        MACOSX_BUNDLE_BUNDLE_VERSION 2
         MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION}
         MACOSX_BUNDLE_ICON_FILE "AppIcon"
         MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/cmake/MacOSXBundleInfo.plist.in"

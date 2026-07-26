@@ -79,6 +79,9 @@ public:
 
     void loadFromPartBytes(const QByteArray &data);
     void loadFromZoneBytes(const QByteArray &data);
+    /** Keep deep SysEx bytes from library blobs without overwriting typed UI fields. */
+    void setRawPartBytes(const QByteArray &data);
+    void setRawZoneBytes(const QByteArray &data);
     /** Overlay modeled fields onto last pulled raw block (never zero-wipe Receive Src etc.). */
     QByteArray toPartBytes() const;
     QByteArray toZoneBytes() const;

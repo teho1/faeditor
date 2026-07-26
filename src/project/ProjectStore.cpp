@@ -1,5 +1,6 @@
 #include "project/ProjectStore.h"
 #include "model/StudioSetModel.h"
+#include "model/AudioFxModel.h"
 
 #include <QDir>
 #include <QFile>
@@ -13,9 +14,10 @@
 #include <QRegularExpression>
 #include <QLocale>
 
-ProjectStore::ProjectStore(StudioSetModel *studioSet, QObject *parent)
+ProjectStore::ProjectStore(StudioSetModel *studioSet, AudioFxModel *audioFx, QObject *parent)
     : QAbstractListModel(parent)
     , m_studioSet(studioSet)
+    , m_audioFx(audioFx)
 {
     QDir().mkpath(libraryDir());
     refresh();
@@ -42,6 +44,54 @@ QString ProjectStore::sanitizeName(const QString &name) const
         n = QStringLiteral("Untitled");
     n.replace(QRegularExpression(QStringLiteral("[^A-Za-z0-9_\\- ]")), QStringLiteral("_"));
     return n.left(64);
+}
+
+QJsonObject ProjectStore::buildLibraryRoot(const QString &name, bool refreshFromDevice)
+{
+    if (refreshFromDevice && m_studioSet) {
+        m_studioSet->refreshLibraryBlobs();
+        if (m_audioFx)
+            m_audioFx->pullFromDevice();
+    }
+
+    QJsonObject root;
+    root.insert(QStringLiteral("name"), name);
+    root.insert(QStringLiteral("created"), QDateTime::currentDateTimeUtc().toString(Qt::ISODate));
+    root.insert(QStringLiteral("modified"), QDateTime::currentDateTimeUtc().toString(Qt::ISODate));
+    root.insert(QStringLiteral("studioSet"), m_studioSet ? m_studioSet->toJson() : QJsonObject());
+    root.insert(QStringLiteral("audioFx"), m_audioFx ? m_audioFx->toJson() : QJsonObject());
+    root.insert(QStringLiteral("sysexBlobs"), m_studioSet ? m_studioSet->sysexBlobsJson() : QJsonObject());
+
+    QJsonObject systemBlobs;
+    if (m_studioSet) {
+        systemBlobs.insert(QStringLiteral("masterEq"),
+                           QString::fromLatin1(m_studioSet->systemMasterEq().toBase64()));
+    }
+    root.insert(QStringLiteral("systemBlobs"), systemBlobs);
+    return root;
+}
+
+bool ProjectStore::applyLibraryRoot(const QJsonObject &root)
+{
+    if (!m_studioSet || !m_audioFx)
+        return false;
+
+    const auto studio = root.value(QStringLiteral("studioSet")).toObject();
+    const auto audioFx = root.value(QStringLiteral("audioFx")).toObject();
+    const auto sysexBlobs = root.value(QStringLiteral("sysexBlobs")).toObject();
+    const auto systemBlobs = root.value(QStringLiteral("systemBlobs")).toObject();
+    const auto masterEqB64 = systemBlobs.value(QStringLiteral("masterEq")).toString();
+
+    if (studio.isEmpty() || audioFx.isEmpty() || sysexBlobs.isEmpty() || masterEqB64.isEmpty())
+        return false;
+
+    if (!m_studioSet->fromJson(studio))
+        return false;
+    if (!m_audioFx->fromJson(audioFx))
+        return false;
+    m_studioSet->setSysexBlobsJson(sysexBlobs);
+    m_studioSet->setSystemMasterEq(QByteArray::fromBase64(masterEqB64.toLatin1()));
+    return true;
 }
 
 int ProjectStore::rowCount(const QModelIndex &parent) const
@@ -107,11 +157,8 @@ void ProjectStore::refresh()
 bool ProjectStore::save(const QString &name)
 {
     if (!m_currentPath.isEmpty()) {
-        QJsonObject root;
-        root.insert(QStringLiteral("name"), name.isEmpty() ? m_currentName : name);
-        root.insert(QStringLiteral("created"), QDateTime::currentDateTimeUtc().toString(Qt::ISODate));
-        root.insert(QStringLiteral("modified"), QDateTime::currentDateTimeUtc().toString(Qt::ISODate));
-        root.insert(QStringLiteral("studioSet"), m_studioSet->toJson());
+        const QString displayName = name.isEmpty() ? m_currentName : name;
+        const auto root = buildLibraryRoot(displayName, true);
         QFile f(m_currentPath);
         if (!f.open(QIODevice::WriteOnly | QIODevice::Truncate))
             return false;
@@ -147,8 +194,7 @@ bool ProjectStore::loadPath(const QString &path)
         return false;
     const auto doc = QJsonDocument::fromJson(f.readAll());
     const auto root = doc.object();
-    const auto studio = root.value(QStringLiteral("studioSet")).toObject();
-    if (!m_studioSet->fromJson(studio.isEmpty() ? root : studio))
+    if (!applyLibraryRoot(root))
         return false;
     m_currentPath = path;
     m_currentName = root.value(QStringLiteral("name")).toString(QFileInfo(path).completeBaseName());
@@ -305,11 +351,8 @@ void ProjectStore::autosave()
 {
     if (!m_studioSet)
         return;
-    QJsonObject root;
-    root.insert(QStringLiteral("name"), m_studioSet->name());
-    root.insert(QStringLiteral("modified"), QDateTime::currentDateTimeUtc().toString(Qt::ISODate));
+    auto root = buildLibraryRoot(m_studioSet->name(), false);
     root.insert(QStringLiteral("crashRecovery"), true);
-    root.insert(QStringLiteral("studioSet"), m_studioSet->toJson());
     QFile f(autosavePath());
     if (f.open(QIODevice::WriteOnly | QIODevice::Truncate))
         f.write(QJsonDocument(root).toJson(QJsonDocument::Compact));
@@ -326,5 +369,5 @@ bool ProjectStore::recoverAutosaveIfNeeded()
     const auto root = doc.object();
     if (!root.value(QStringLiteral("crashRecovery")).toBool())
         return false;
-    return m_studioSet->fromJson(root.value(QStringLiteral("studioSet")).toObject());
+    return applyLibraryRoot(root);
 }

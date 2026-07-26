@@ -2,6 +2,7 @@
 
 #include "midi/AddressMap.h"
 
+#include <QJsonObject>
 #include <QObject>
 #include <QStringList>
 
@@ -78,6 +79,9 @@ public:
     Q_INVOKABLE bool pullFromDevice();
     Q_INVOKABLE bool pushToDevice();
     Q_INVOKABLE bool assignDeviceControlsToTfx();
+
+    QJsonObject toJson() const;
+    bool fromJson(const QJsonObject &obj);
 
 signals:
     void audioFxChanged();

@@ -50,6 +50,10 @@ public:
     void loadChorus(const QByteArray &data);
     void loadReverb(const QByteArray &data);
     void loadMasterComp(const QByteArray &data);
+    /** Keep deep SysEx bytes from library blobs without overwriting typed UI fields. */
+    void setRawChorus(const QByteArray &data);
+    void setRawReverb(const QByteArray &data);
+    void setRawMasterComp(const QByteArray &data);
     QByteArray chorusBytes() const;
     QByteArray reverbBytes() const;
     QByteArray masterCompBytes() const;
