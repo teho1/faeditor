@@ -125,7 +125,9 @@ void MidiDeviceModel::refresh()
     m_inputs.clear();
     m_outputs.clear();
     QString error;
-    if (!m_platform || !m_platform->discoverMidiPorts(&m_inputs,&m_outputs,&error)) setStatus(error);
+    if (!m_platform || !m_platform->supportsWorkspace(InstrumentPlatform::Workspace::MidiConnection))
+        setStatus(QStringLiteral("MIDI connection is not supported by this instrument"));
+    else if (!m_platform->discoverMidiPorts(&m_inputs,&m_outputs,&error)) setStatus(error);
     endResetModel();
 
     // If we thought we were connected but the engine/ports are gone (FA power-cycled), clear flag.
@@ -160,8 +162,10 @@ QStringList MidiDeviceModel::outputNames() const
 
 bool MidiDeviceModel::connectSelected()
 {
-    if (!m_platform)
+    if (!m_platform || !m_platform->supportsWorkspace(InstrumentPlatform::Workspace::MidiConnection, true)) {
+        setStatus(QStringLiteral("MIDI connection is not supported by this instrument"));
         return false;
+    }
 
     refresh();
     if (!selectionValid()) {
@@ -193,6 +197,10 @@ bool MidiDeviceModel::connectSelected()
 
 bool MidiDeviceModel::autoConnectFa()
 {
+    if (!m_platform || !m_platform->supportsWorkspace(InstrumentPlatform::Workspace::MidiConnection, true)) {
+        setStatus(QStringLiteral("MIDI connection is not supported by this instrument"));
+        return false;
+    }
     refresh();
     preferFaSelection(true);
     if (!selectionValid()
@@ -283,6 +291,10 @@ void MidiDeviceModel::pollConnection()
 
 bool MidiDeviceModel::probeIdentity()
 {
+    if (!m_platform || !m_platform->supportsWorkspace(InstrumentPlatform::Workspace::DeviceIdentity)) {
+        setStatus(QStringLiteral("Device identity is not supported by this instrument"));
+        return false;
+    }
     if (!m_platform || !m_platform->isConnected())
         return false;
     QString err;

@@ -8,6 +8,7 @@ class RolandFAPlatform final : public InstrumentPlatform
 {
 public:
     explicit RolandFAPlatform(SysexEngine *engine) : m_engine(engine) {}
+    DeviceProfile profile() const override;
     bool isConnected() const override;
     bool discoverMidiPorts(QVector<MidiPort> *, QVector<MidiPort> *, QString *) override;
     bool openMidiConnection(int, int, QString *) override;

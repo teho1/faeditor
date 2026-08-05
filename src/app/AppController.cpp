@@ -155,7 +155,8 @@ void AppController::applyToneToSelectedPart(int toneRow)
 void AppController::previewTone(int toneRow)
 {
     applyToneToSelectedPart(toneRow);
-    if (!m_platform || !m_platform->isConnected())
+    if (!m_platform || !m_platform->supportsWorkspace(InstrumentPlatform::Workspace::NotePreview, true)
+        || !m_platform->isConnected())
         return;
     auto *p = m_studioSet->selectedPartModel();
     if (!p)

@@ -1,6 +1,8 @@
 #include <QtTest>
 #include "FakeInstrumentPlatform.h"
 #include "model/TemporarySysexStore.h"
+#include "platform/RolandFantomPlatform.h"
+#include "platform/YamahaPlatform.h"
 
 class TestPlatform : public QObject
 {
@@ -55,6 +57,25 @@ private slots:
         FakeInstrumentPlatform fake; fake.failure=QStringLiteral("studio failure");
         TemporarySysexStore store; QString error;
         QVERIFY(!store.pullFromDevice(&fake,&error)); QCOMPARE(error,QStringLiteral("studio failure"));
+    }
+    void capabilityNegotiation()
+    {
+        FakeInstrumentPlatform fake;
+        fake.deviceProfile.workspaces={{InstrumentPlatform::Workspace::Library,InstrumentPlatform::FeatureAccess::ReadOnly}};
+        QVERIFY(fake.supportsWorkspace(InstrumentPlatform::Workspace::Library));
+        QVERIFY(!fake.supportsWorkspace(InstrumentPlatform::Workspace::Library,true));
+        QCOMPARE(fake.workspaceAccess(InstrumentPlatform::Workspace::AudioFx),InstrumentPlatform::FeatureAccess::Unavailable);
+    }
+    void skeletonAdaptersFailSafely()
+    {
+        RolandFantomPlatform fantom; YamahaPlatform yamaha; QString error;
+        QCOMPARE(fantom.profile().manufacturer,QStringLiteral("Roland"));
+        QCOMPARE(yamaha.profile().manufacturer,QStringLiteral("Yamaha"));
+        QVERIFY(!fantom.supportsWorkspace(InstrumentPlatform::Workspace::ToneEditing));
+        QVERIFY(yamaha.supportsWorkspace(InstrumentPlatform::Workspace::Library));
+        QVERIFY(!yamaha.supportsWorkspace(InstrumentPlatform::Workspace::Library,true));
+        QVERIFY(!fantom.openMidiConnection(0,0,&error));
+        QCOMPARE(error,QStringLiteral("Not implemented for this instrument profile"));
     }
 };
 QTEST_APPLESS_MAIN(TestPlatform)

@@ -12,6 +12,7 @@ private slots:
     void liveSetterWritesParameter();
     void controllerAssignmentTargetsSystemController();
     void injectedFailureIsReported();
+    void unavailableCapabilityPreventsIo();
 };
 
 void AudioFxTests::pullUsesAudioBlocks()
@@ -80,6 +81,15 @@ void AudioFxTests::injectedFailureIsReported()
     QVERIFY(!model.pullFromDevice());
     QCOMPARE(model.lastError(),QStringLiteral("simulated audio timeout"));
     QVERIFY(!model.busy());
+}
+
+void AudioFxTests::unavailableCapabilityPreventsIo()
+{
+    FakeInstrumentPlatform fake; fake.deviceProfile.workspaces.clear();
+    AudioFxModel model(&fake);
+    QVERIFY(!model.pullFromDevice());
+    QVERIFY(fake.audioRequests.isEmpty());
+    QVERIFY(model.lastError().contains(QStringLiteral("not supported")));
 }
 
 QTEST_GUILESS_MAIN(AudioFxTests)

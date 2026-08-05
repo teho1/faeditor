@@ -164,6 +164,10 @@ void AudioFxModel::setTfxType(int v)
 
 bool AudioFxModel::pullFromDevice()
 {
+    if (!m_platform || !m_platform->supportsWorkspace(InstrumentPlatform::Workspace::AudioFx)) {
+        setError(QStringLiteral("Audio FX is not supported by this instrument"));
+        return false;
+    }
     if (!m_platform || !m_platform->isConnected()) {
         setError(QStringLiteral("Not connected"));
         return false;
@@ -224,6 +228,10 @@ bool AudioFxModel::pullFromDevice()
 
 bool AudioFxModel::pushToDevice()
 {
+    if (!m_platform || !m_platform->supportsWorkspace(InstrumentPlatform::Workspace::AudioFx, true)) {
+        setError(QStringLiteral("Audio FX is not writable for this instrument"));
+        return false;
+    }
     if (!m_platform || !m_platform->isConnected()) {
         setError(QStringLiteral("Not connected"));
         return false;
@@ -309,6 +317,10 @@ bool AudioFxModel::fromJson(const QJsonObject &obj)
 
 bool AudioFxModel::assignDeviceControlsToTfx()
 {
+    if (!m_platform || !m_platform->supportsWorkspace(InstrumentPlatform::Workspace::AudioFx, true)) {
+        setError(QStringLiteral("Audio FX is not writable for this instrument"));
+        return false;
+    }
     if (!m_platform || !m_platform->isConnected()) {
         setError(QStringLiteral("Not connected"));
         return false;

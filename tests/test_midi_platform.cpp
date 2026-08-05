@@ -13,6 +13,7 @@ private slots:
     void unhealthyPortDisconnects();
     void disconnectClosesPlatform();
     void previewMessageUsesPlatform();
+    void unavailableCapabilityPreventsDiscovery();
 };
 
 void MidiPlatformTests::connectionSucceeds()
@@ -69,6 +70,16 @@ void MidiPlatformTests::previewMessageUsesPlatform()
     QCOMPARE(fake.previews[0].channel,3); QCOMPARE(fake.previews[0].note,60);
     QCOMPARE(fake.previews[0].velocity,100); QVERIFY(fake.previews[0].noteOn);
     QCOMPARE(fake.previews[1].velocity,0); QVERIFY(!fake.previews[1].noteOn);
+}
+
+void MidiPlatformTests::unavailableCapabilityPreventsDiscovery()
+{
+    FakeInstrumentPlatform fake; fake.deviceProfile.workspaces.clear();
+    MidiDeviceModel model(&fake);
+    QCOMPARE(fake.discoveryCalls,0);
+    QVERIFY(!model.autoConnectFa());
+    QCOMPARE(fake.discoveryCalls,0);
+    QVERIFY(model.statusText().contains(QStringLiteral("not supported")));
 }
 
 QTEST_GUILESS_MAIN(MidiPlatformTests)

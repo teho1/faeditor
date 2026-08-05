@@ -7,6 +7,15 @@ using namespace roland;
 
 bool RolandFAPlatform::isConnected() const { return m_engine && m_engine->isOpen(); }
 
+InstrumentPlatform::DeviceProfile RolandFAPlatform::profile() const
+{
+    using A=FeatureAccess; using W=Workspace; using T=ToneEngineCapability;
+    return {QStringLiteral("Roland"),QStringLiteral("FA-06/07/08"),
+            {T::SuperNaturalSynth,T::PcmSynth,T::SuperNaturalAcoustic,T::PcmDrum,T::SuperNaturalDrum},16,
+            {{W::MidiConnection,A::ReadWrite},{W::DeviceIdentity,A::ReadOnly},{W::StudioSets,A::ReadWrite},
+             {W::ToneEditing,A::ReadWrite},{W::AudioFx,A::ReadWrite},{W::NotePreview,A::ReadWrite},{W::Library,A::ReadWrite}}};
+}
+
 bool RolandFAPlatform::nameIsDawControl(const QString &name)
 {
     const auto n=name.toLower();

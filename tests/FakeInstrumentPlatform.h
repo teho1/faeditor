@@ -19,6 +19,13 @@ public:
     QVector<MidiPort> outputPorts{{0,QStringLiteral("FA-08"),false,true}};
     struct Preview { int channel; int note; int velocity; bool noteOn; };
     QVector<Preview> previews;
+    int discoveryCalls = 0;
+    DeviceProfile deviceProfile{
+        QStringLiteral("Fake"),QStringLiteral("Test Instrument"),{},16,
+        {{Workspace::MidiConnection,FeatureAccess::ReadWrite},{Workspace::DeviceIdentity,FeatureAccess::ReadOnly},
+         {Workspace::StudioSets,FeatureAccess::ReadWrite},{Workspace::ToneEditing,FeatureAccess::ReadWrite},
+         {Workspace::AudioFx,FeatureAccess::ReadWrite},{Workspace::NotePreview,FeatureAccess::ReadWrite},
+         {Workspace::Library,FeatureAccess::ReadWrite}}};
     QString failure;
     QVector<Request> requests;
     QVector<AudioRequest> audioRequests;
@@ -34,7 +41,8 @@ public:
     void seedStudio(StudioBlock b,int i,const QByteArray&d){studio.insert(QStringLiteral("%1:%2").arg(int(b)).arg(i),d);}
     QByteArray storedStudio(StudioBlock b,int i)const{return studio.value(QStringLiteral("%1:%2").arg(int(b)).arg(i));}
     bool isConnected() const override { return connected; }
-    bool discoverMidiPorts(QVector<MidiPort>*in,QVector<MidiPort>*out,QString*e) override { if(!failure.isEmpty()){if(e)*e=failure;return false;} if(in)*in=inputPorts;if(out)*out=outputPorts;return true; }
+    DeviceProfile profile() const override { return deviceProfile; }
+    bool discoverMidiPorts(QVector<MidiPort>*in,QVector<MidiPort>*out,QString*e) override { ++discoveryCalls; if(!failure.isEmpty()){if(e)*e=failure;return false;} if(in)*in=inputPorts;if(out)*out=outputPorts;return true; }
     bool openMidiConnection(int in,int out,QString*e) override { Q_UNUSED(in);Q_UNUSED(out); if(!openSucceeds||!failure.isEmpty()){if(e)*e=failure.isEmpty()?QStringLiteral("Open failed"):failure;connected=false;return false;} connected=true;return true; }
     void closeMidiConnection() override { connected=false; }
     bool midiConnectionHealthy() const override { return connected&&healthy; }

@@ -9,6 +9,17 @@
 class InstrumentPlatform
 {
 public:
+    enum class FeatureAccess { Unavailable, ReadOnly, ReadWrite };
+    enum class Workspace { MidiConnection, DeviceIdentity, StudioSets, ToneEditing, AudioFx, NotePreview, Library };
+    enum class ToneEngineCapability { SuperNaturalSynth, PcmSynth, SuperNaturalAcoustic, PcmDrum, SuperNaturalDrum };
+    struct WorkspaceCapability { Workspace workspace; FeatureAccess access = FeatureAccess::Unavailable; };
+    struct DeviceProfile {
+        QString manufacturer;
+        QString model;
+        QVector<ToneEngineCapability> toneEngines;
+        int partCount = 0;
+        QVector<WorkspaceCapability> workspaces;
+    };
     struct MidiPort { int index = -1; QString name; bool isDawControl = false; bool looksLikeFa = false; };
     enum class ToneSection { Mfx, MfxSwitch, SnCommon, SnMisc, SnPartial,
                              PcmCommon, PcmPmt, PcmCommon2, PcmPartial,
@@ -18,6 +29,18 @@ public:
     enum class AudioBlock { SystemCommon, InputEfx, Tfx, SystemController };
 
     virtual ~InstrumentPlatform() = default;
+    virtual DeviceProfile profile() const = 0;
+    FeatureAccess workspaceAccess(Workspace workspace) const
+    {
+        for (const auto &capability : profile().workspaces)
+            if (capability.workspace == workspace) return capability.access;
+        return FeatureAccess::Unavailable;
+    }
+    bool supportsWorkspace(Workspace workspace, bool write = false) const
+    {
+        const auto access = workspaceAccess(workspace);
+        return access == FeatureAccess::ReadWrite || (!write && access == FeatureAccess::ReadOnly);
+    }
     virtual bool isConnected() const = 0;
     virtual bool discoverMidiPorts(QVector<MidiPort> *inputs, QVector<MidiPort> *outputs,
                                    QString *error = nullptr) = 0;
