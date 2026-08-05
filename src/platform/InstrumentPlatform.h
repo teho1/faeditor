@@ -14,6 +14,9 @@ public:
 
     virtual ~InstrumentPlatform() = default;
     virtual bool isConnected() const = 0;
+    virtual bool recallStudioSet(int bankMsb, int bankLsb, int program,
+                                 QString *error = nullptr) = 0;
+    virtual bool readTemporaryStudioSetName(QString *name, QString *error = nullptr) = 0;
     virtual bool readToneSection(int part, roland::ToneEngine engine, ToneSection section,
                                  int sectionIndex, int size, QByteArray *data,
                                  QString *error = nullptr) = 0;

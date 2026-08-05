@@ -12,6 +12,8 @@ public:
     bool connected = true;
     QString failure;
     QVector<Request> requests;
+    int recalledMsb = -1, recalledLsb = -1, recalledProgram = -1;
+    QString studioSetName = QStringLiteral("Fake Set");
 
     QString key(int part, roland::ToneEngine engine, ToneSection section, int index) const
     { return QStringLiteral("%1:%2:%3:%4").arg(part).arg(int(engine)).arg(int(section)).arg(index); }
@@ -20,6 +22,10 @@ public:
     QByteArray stored(int part, roland::ToneEngine engine, ToneSection section, int index) const
     { return memory.value(key(part, engine, section, index)); }
     bool isConnected() const override { return connected; }
+    bool recallStudioSet(int msb, int lsb, int program, QString *error) override
+    { if (!check(error)) return false; recalledMsb=msb; recalledLsb=lsb; recalledProgram=program; return true; }
+    bool readTemporaryStudioSetName(QString *name, QString *error) override
+    { if (!check(error)) return false; if (name) *name=studioSetName; return true; }
     bool readToneSection(int part, roland::ToneEngine engine, ToneSection section, int index,
                          int size, QByteArray *data, QString *error) override
     {

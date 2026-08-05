@@ -1,5 +1,5 @@
 #include "model/StudioSetBrowserModel.h"
-#include "midi/SysexEngine.h"
+#include "platform/InstrumentPlatform.h"
 #include "midi/AddressMap.h"
 #include "model/StudioSetModel.h"
 
@@ -52,10 +52,10 @@ QString slotKey(const StudioSetSlot &s)
 
 } // namespace
 
-StudioSetBrowserModel::StudioSetBrowserModel(SysexEngine *engine, StudioSetModel *studioSet,
+StudioSetBrowserModel::StudioSetBrowserModel(InstrumentPlatform *platform, StudioSetModel *studioSet,
                                              QObject *parent)
     : QAbstractListModel(parent)
-    , m_engine(engine)
+    , m_platform(platform)
     , m_studioSet(studioSet)
 {
     buildSlots();
@@ -229,31 +229,18 @@ QVariantMap StudioSetBrowserModel::slotAt(int row) const
 
 bool StudioSetBrowserModel::writeSetupSelect(const StudioSetSlot &slot, QString *error)
 {
-    if (!m_engine || !m_engine->isOpen()) {
+    if (!m_platform || !m_platform->isConnected()) {
         if (error)
             *error = QStringLiteral("Not connected");
         return false;
     }
 
-    QByteArray mode(1, char(1)); // Sound Mode = STUDIO
-    if (!m_engine->writeParam(roland::Address{{0x01, 0x00, 0x00, 0x00}}, mode, error))
-        return false;
-
-    QByteArray select;
-    select.append(char(slot.bankMsb & 0x7F));
-    select.append(char(slot.bankLsb & 0x7F));
-    select.append(char(slot.program & 0x7F));
-    return m_engine->write(roland::Address{{0x01, 0x00, 0x00, 0x04}}, select, error);
+    return m_platform->recallStudioSet(slot.bankMsb, slot.bankLsb, slot.program, error);
 }
 
 bool StudioSetBrowserModel::readTemporaryName(QString *outName, QString *error)
 {
-    QByteArray data;
-    if (!m_engine->read(roland::addr::kStudioSetCommon, 16, &data, error, 2500))
-        return false;
-    if (outName)
-        *outName = QString::fromLatin1(data.constData(), qMin(16, data.size())).trimmed();
-    return true;
+    return m_platform && m_platform->readTemporaryStudioSetName(outName, error);
 }
 
 bool StudioSetBrowserModel::recallRow(int row, bool pullAfter)
@@ -311,7 +298,7 @@ void StudioSetBrowserModel::startScanNames(bool userOnly)
 {
     if (m_scanning)
         return;
-    if (!m_engine || !m_engine->isOpen()) {
+    if (!m_platform || !m_platform->isConnected()) {
         setStatus(QStringLiteral("Connect to the FA first"));
         return;
     }
@@ -391,7 +378,7 @@ bool StudioSetBrowserModel::syncCurrentNameFromDevice()
 {
     if (m_scanning)
         return false;
-    if (!m_engine || !m_engine->isOpen())
+    if (!m_platform || !m_platform->isConnected())
         return false;
     const int abs = absoluteIndexFromFiltered(m_currentRow);
     if (abs < 0)

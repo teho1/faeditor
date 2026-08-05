@@ -5,6 +5,23 @@ using namespace roland;
 
 bool RolandFAPlatform::isConnected() const { return m_engine && m_engine->isOpen(); }
 
+bool RolandFAPlatform::recallStudioSet(int msb, int lsb, int program, QString *error)
+{
+    if (!isConnected()) { if (error) *error = QStringLiteral("Not connected"); return false; }
+    if (!m_engine->writeParam(Address{{0x01, 0x00, 0x00, 0x00}}, QByteArray(1, char(1)), error))
+        return false;
+    QByteArray select; select.append(char(msb & 0x7f)); select.append(char(lsb & 0x7f)); select.append(char(program & 0x7f));
+    return m_engine->write(Address{{0x01, 0x00, 0x00, 0x04}}, select, error);
+}
+
+bool RolandFAPlatform::readTemporaryStudioSetName(QString *name, QString *error)
+{
+    QByteArray data;
+    if (!m_engine || !m_engine->read(addr::kStudioSetCommon, 16, &data, error, 2500)) return false;
+    if (name) *name = QString::fromLatin1(data.constData(), qMin(16, data.size())).trimmed();
+    return true;
+}
+
 Address RolandFAPlatform::address(int part, ToneEngine engine, ToneSection section, int index) const
 {
     switch (section) {

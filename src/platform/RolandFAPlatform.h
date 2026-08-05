@@ -9,6 +9,8 @@ class RolandFAPlatform final : public InstrumentPlatform
 public:
     explicit RolandFAPlatform(SysexEngine *engine) : m_engine(engine) {}
     bool isConnected() const override;
+    bool recallStudioSet(int bankMsb, int bankLsb, int program, QString *error) override;
+    bool readTemporaryStudioSetName(QString *name, QString *error) override;
     bool readToneSection(int part, roland::ToneEngine engine, ToneSection section,
                          int sectionIndex, int size, QByteArray *data, QString *error) override;
     bool writeToneSection(int part, roland::ToneEngine engine, ToneSection section,

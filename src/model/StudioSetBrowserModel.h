@@ -4,7 +4,7 @@
 #include <QVector>
 #include <QTimer>
 
-class SysexEngine;
+class InstrumentPlatform;
 class StudioSetModel;
 
 struct StudioSetSlot {
@@ -39,7 +39,7 @@ public:
         HasNameRole
     };
 
-    explicit StudioSetBrowserModel(SysexEngine *engine, StudioSetModel *studioSet,
+    explicit StudioSetBrowserModel(InstrumentPlatform *platform, StudioSetModel *studioSet,
                                    QObject *parent = nullptr);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -90,7 +90,7 @@ private:
     void loadCachedNames();
     void saveCachedNames() const;
 
-    SysexEngine *m_engine = nullptr;
+    InstrumentPlatform *m_platform = nullptr;
     StudioSetModel *m_studioSet = nullptr;
     QVector<StudioSetSlot> m_all;
     QVector<int> m_filtered;
