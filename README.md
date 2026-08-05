@@ -27,12 +27,28 @@ A signed binary is available as **[Editor for Roland FA](https://apps.apple.com/
 
 ## Build
 
+The `FAEDITOR_PRODUCT` CMake cache option selects `FA` or `FANTOM` and defaults to `FA`.
+The default command and target remain unchanged:
+
 ```bash
 cmake -S . -B build -DCMAKE_PREFIX_PATH=/Volumes/Datastore/Qt/6.11.1/macos
 cmake --build build -j
 ctest --test-dir build --output-on-failure
 open build/FAEditor.app
 ```
+
+Build the separate Fantom shell with:
+
+```bash
+cmake -S . -B build-fantom -DFAEDITOR_PRODUCT=FANTOM -DCMAKE_PREFIX_PATH=/Volumes/Datastore/Qt/6.11.1/macos
+cmake --build build-fantom -j
+ctest --test-dir build-fantom --output-on-failure
+open build-fantom/FantomEditor.app
+```
+
+The Fantom product currently provides its own workflow shell and selects the safe
+Fantom capability profile. Device-specific editing is not implemented and it sends
+no guessed MIDI or SysEx.
 
 ## Usage
 
@@ -43,9 +59,11 @@ open build/FAEditor.app
 
 ## Layout
 
-- `src/` — C++ MIDI, models, project store, undo
-- `src/platform/` — application-level instrument boundary and Roland FA production adapter
-- `qml/` — Logic-inspired dark UI
+- `src/app/` — product controllers (`AppController` for FA, safe `FantomAppController` shell)
+- `src/platform/` — shared capability boundary and verified/skeleton device adapters
+- `src/model/`, `src/project/`, `src/undo/` — reusable model, local-backup/library, and undo primitives
+- `qml/components/`, `qml/theme/` — shared Logic-inspired controls and theme
+- `qml/Main.qml`, `qml/FantomMain.qml` — separate product workflows selected by CMake
 - `resources/tones/soundlist.json` — FA-06/07/08 preset tone catalog from Roland Sound List (`scripts/import_soundlist.py`)
 - `resources/waves/waveforms.json` — waveform name catalog (`scripts/import_waveforms.py`)
 - `roland_specs/` — official PDFs (reference only)
