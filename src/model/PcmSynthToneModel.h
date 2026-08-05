@@ -7,7 +7,7 @@
 #include <QStringList>
 #include <array>
 
-class SysexEngine;
+class InstrumentPlatform;
 class WaveformCatalog;
 
 /** PCM Synth Temporary Tone — Common + PMT + 4 partials (MVP fields). */
@@ -79,7 +79,7 @@ class PcmSynthToneModel : public QObject
     Q_PROPERTY(QString lastError READ lastError NOTIFY lastErrorChanged)
 
 public:
-    explicit PcmSynthToneModel(SysexEngine *engine, QObject *parent = nullptr);
+    explicit PcmSynthToneModel(InstrumentPlatform *platform, QObject *parent = nullptr);
 
     void setWaveformCatalog(WaveformCatalog *catalog);
 
@@ -234,7 +234,7 @@ private:
     void syncCommonFromRaw();
     void setError(const QString &e);
 
-    SysexEngine *m_engine = nullptr;
+    InstrumentPlatform *m_platform = nullptr;
     WaveformCatalog *m_waves = nullptr;
     bool m_fromDevice = false;
     int m_partIndex = 0;

@@ -1,6 +1,6 @@
 #include "model/PcmSynthToneModel.h"
 #include "model/WaveformCatalog.h"
-#include "midi/SysexEngine.h"
+#include "platform/InstrumentPlatform.h"
 
 #include <QJsonArray>
 #include <algorithm>
@@ -32,9 +32,9 @@ int decodeNibbles(const QByteArray &raw, int offset, int nibbleCount)
 
 } // namespace
 
-PcmSynthToneModel::PcmSynthToneModel(SysexEngine *engine, QObject *parent)
+PcmSynthToneModel::PcmSynthToneModel(InstrumentPlatform *platform, QObject *parent)
     : QObject(parent)
-    , m_engine(engine)
+    , m_platform(platform)
 {
     m_common = QByteArray(pcmSynthOff::CommonSize, '\0');
     m_pmt = QByteArray(pcmSynthOff::PmtSize, '\0');
@@ -208,30 +208,29 @@ int PcmSynthToneModel::partialByte(int offset) const
 
 void PcmSynthToneModel::writeCommonBytes(quint8 offset, const QByteArray &data)
 {
-    if (m_fromDevice || !m_engine || !m_engine->isOpen() || data.isEmpty())
+    if (m_fromDevice || !m_platform || !m_platform->isConnected() || data.isEmpty())
         return;
     QString err;
-    if (!m_engine->writeParam(addOffset(addr::pcmSynthCommon(m_partIndex), offset), data, &err))
+    if (!m_platform->writeToneParameter(m_partIndex, ToneEngine::PcmSynth, InstrumentPlatform::ToneSection::PcmCommon, 0, offset, data, &err))
         setError(err);
 }
 
 void PcmSynthToneModel::writePmtBytes(quint8 offset, const QByteArray &data)
 {
-    if (m_fromDevice || !m_engine || !m_engine->isOpen() || data.isEmpty())
+    if (m_fromDevice || !m_platform || !m_platform->isConnected() || data.isEmpty())
         return;
     QString err;
-    if (!m_engine->writeParam(addOffset(addr::pcmSynthPmt(m_partIndex), offset), data, &err))
+    if (!m_platform->writeToneParameter(m_partIndex, ToneEngine::PcmSynth, InstrumentPlatform::ToneSection::PcmPmt, 0, offset, data, &err))
         setError(err);
 }
 
 void PcmSynthToneModel::writePartialBytes(int partial, int offset, const QByteArray &data)
 {
-    if (m_fromDevice || !m_engine || !m_engine->isOpen() || data.isEmpty())
+    if (m_fromDevice || !m_platform || !m_platform->isConnected() || data.isEmpty())
         return;
     QString err;
-    if (!m_engine->writeParam(addOffset(addr::pcmSynthPartial(m_partIndex, partial),
-                                        static_cast<quint32>(offset)),
-                              data, &err))
+    if (!m_platform->writeToneParameter(m_partIndex, ToneEngine::PcmSynth, InstrumentPlatform::ToneSection::PcmPartial,
+                                        partial, offset, data, &err))
         setError(err);
 }
 
@@ -521,22 +520,22 @@ void PcmSynthToneModel::setMatrix4Sens(int v) { setMatrixSens(3, v); }
 
 bool PcmSynthToneModel::pullFromDevice()
 {
-    if (!m_engine || !m_engine->isOpen()) {
+    if (!m_platform || !m_platform->isConnected()) {
         setError(QStringLiteral("Not connected"));
         return false;
     }
     QString err;
     QByteArray common, pmt, common2;
     std::array<QByteArray, 4> partials;
-    if (!m_engine->read(addr::pcmSynthCommon(m_partIndex), pcmSynthOff::CommonSize, &common, &err)
-        || !m_engine->read(addr::pcmSynthPmt(m_partIndex), pcmSynthOff::PmtSize, &pmt, &err)
-        || !m_engine->read(addr::pcmSynthCommon2(m_partIndex), pcmSynthOff::Common2Size, &common2, &err)) {
+    if (!m_platform->readToneSection(m_partIndex, ToneEngine::PcmSynth, InstrumentPlatform::ToneSection::PcmCommon, 0, pcmSynthOff::CommonSize, &common, &err)
+        || !m_platform->readToneSection(m_partIndex, ToneEngine::PcmSynth, InstrumentPlatform::ToneSection::PcmPmt, 0, pcmSynthOff::PmtSize, &pmt, &err)
+        || !m_platform->readToneSection(m_partIndex, ToneEngine::PcmSynth, InstrumentPlatform::ToneSection::PcmCommon2, 0, pcmSynthOff::Common2Size, &common2, &err)) {
         setError(err);
         return false;
     }
     for (int i = 0; i < 4; ++i) {
-        if (!m_engine->read(addr::pcmSynthPartial(m_partIndex, i), pcmSynthOff::PartialSize,
-                            &partials[static_cast<size_t>(i)], &err)) {
+        if (!m_platform->readToneSection(m_partIndex, ToneEngine::PcmSynth, InstrumentPlatform::ToneSection::PcmPartial,
+                                         i, pcmSynthOff::PartialSize, &partials[static_cast<size_t>(i)], &err)) {
             setError(err);
             return false;
         }
@@ -556,20 +555,20 @@ bool PcmSynthToneModel::pullFromDevice()
 
 bool PcmSynthToneModel::pushToDevice()
 {
-    if (!m_engine || !m_engine->isOpen()) {
+    if (!m_platform || !m_platform->isConnected()) {
         setError(QStringLiteral("Not connected"));
         return false;
     }
     QString err;
-    if (!m_engine->write(addr::pcmSynthCommon(m_partIndex), m_common, &err)
-        || !m_engine->write(addr::pcmSynthPmt(m_partIndex), m_pmt, &err)
-        || !m_engine->write(addr::pcmSynthCommon2(m_partIndex), m_common2, &err)) {
+    if (!m_platform->writeToneSection(m_partIndex, ToneEngine::PcmSynth, InstrumentPlatform::ToneSection::PcmCommon, 0, m_common, &err)
+        || !m_platform->writeToneSection(m_partIndex, ToneEngine::PcmSynth, InstrumentPlatform::ToneSection::PcmPmt, 0, m_pmt, &err)
+        || !m_platform->writeToneSection(m_partIndex, ToneEngine::PcmSynth, InstrumentPlatform::ToneSection::PcmCommon2, 0, m_common2, &err)) {
         setError(err);
         return false;
     }
     for (int i = 0; i < 4; ++i) {
-        if (!m_engine->write(addr::pcmSynthPartial(m_partIndex, i),
-                             m_partials[static_cast<size_t>(i)].raw, &err)) {
+        if (!m_platform->writeToneSection(m_partIndex, ToneEngine::PcmSynth, InstrumentPlatform::ToneSection::PcmPartial,
+                                          i, m_partials[static_cast<size_t>(i)].raw, &err)) {
             setError(err);
             return false;
         }
