@@ -9,7 +9,7 @@ AppController::AppController(QObject *parent)
 {
     m_engine = new SysexEngine(this);
     m_platform = new RolandFAPlatform(m_engine);
-    m_midi = new MidiDeviceModel(m_engine, this);
+    m_midi = new MidiDeviceModel(m_platform, this);
     m_undo = new UndoController(this);
     m_studioSet = new StudioSetModel(m_platform, m_undo, this);
     m_studioSets = new StudioSetBrowserModel(m_platform, m_studioSet, this);
@@ -75,7 +75,7 @@ void AppController::openMidiDialog()
     if (m_midi) {
         m_midi->refresh();
         // Stale "connected" after FA power-cycle / CoreMIDI renumber
-        if (m_midi->connected() && m_engine && !m_engine->isOpen())
+        if (m_midi->connected() && m_platform && !m_platform->isConnected())
             m_midi->disconnectDevice();
     }
     // Force a rising edge so the Popup always opens, even if already flagged open.
@@ -155,23 +155,16 @@ void AppController::applyToneToSelectedPart(int toneRow)
 void AppController::previewTone(int toneRow)
 {
     applyToneToSelectedPart(toneRow);
-    if (!m_engine || !m_engine->isOpen())
+    if (!m_platform || !m_platform->isConnected())
         return;
     auto *p = m_studioSet->selectedPartModel();
     if (!p)
         return;
     const quint8 ch = static_cast<quint8>(p->receiveChannel() & 0x0F);
-    QByteArray noteOn;
-    noteOn.append(static_cast<char>(0x90 | ch));
-    noteOn.append(char(60));
-    noteOn.append(char(100));
-    m_engine->sendMessage(noteOn);
+    m_platform->sendPreviewNote(ch, 60, 100, true, nullptr);
     QTimer::singleShot(300, this, [this, ch]() {
-        QByteArray noteOff;
-        noteOff.append(static_cast<char>(0x80 | ch));
-        noteOff.append(char(60));
-        noteOff.append(char(0));
-        m_engine->sendMessage(noteOff);
+        if (m_platform)
+            m_platform->sendPreviewNote(ch, 60, 0, false, nullptr);
     });
 }
 

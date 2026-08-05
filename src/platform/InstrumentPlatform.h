@@ -4,10 +4,12 @@
 
 #include <QByteArray>
 #include <QString>
+#include <QVector>
 
 class InstrumentPlatform
 {
 public:
+    struct MidiPort { int index = -1; QString name; bool isDawControl = false; bool looksLikeFa = false; };
     enum class ToneSection { Mfx, MfxSwitch, SnCommon, SnMisc, SnPartial,
                              PcmCommon, PcmPmt, PcmCommon2, PcmPartial,
                              SnAcousticCommon };
@@ -17,6 +19,16 @@ public:
 
     virtual ~InstrumentPlatform() = default;
     virtual bool isConnected() const = 0;
+    virtual bool discoverMidiPorts(QVector<MidiPort> *inputs, QVector<MidiPort> *outputs,
+                                   QString *error = nullptr) = 0;
+    virtual bool openMidiConnection(int inputIndex, int outputIndex,
+                                    QString *error = nullptr) = 0;
+    virtual void closeMidiConnection() = 0;
+    virtual bool midiConnectionHealthy() const = 0;
+    virtual bool detectRolandFA(quint8 *deviceId, int timeoutMs = 1500,
+                                QString *error = nullptr) = 0;
+    virtual bool sendPreviewNote(int channel, int note, int velocity, bool noteOn,
+                                 QString *error = nullptr) = 0;
     virtual bool recallStudioSet(int bankMsb, int bankLsb, int program,
                                  QString *error = nullptr) = 0;
     virtual bool readTemporaryStudioSetName(QString *name, QString *error = nullptr) = 0;

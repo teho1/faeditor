@@ -1,18 +1,13 @@
 #pragma once
 
+#include "platform/InstrumentPlatform.h"
+
 #include <QAbstractListModel>
 #include <QStringList>
 #include <QTimer>
 #include <memory>
 
-class SysexEngine;
-
-struct MidiPortInfo {
-    int index = -1;
-    QString name;
-    bool isDawControl = false;
-    bool looksLikeFa = false;
-};
+using MidiPortInfo = InstrumentPlatform::MidiPort;
 
 class MidiDeviceModel : public QAbstractListModel
 {
@@ -35,7 +30,7 @@ public:
         LooksLikeFaRole
     };
 
-    explicit MidiDeviceModel(SysexEngine *engine, QObject *parent = nullptr);
+    explicit MidiDeviceModel(InstrumentPlatform *platform, QObject *parent = nullptr);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
@@ -61,8 +56,6 @@ public:
     /** True if current selection still refers to valid ports. */
     Q_INVOKABLE bool selectionValid() const;
 
-    SysexEngine *engine() const { return m_engine; }
-
 signals:
     void connectedChanged();
     void portsChanged();
@@ -70,17 +63,14 @@ signals:
     void selectionChanged();
 
 private:
-    static bool nameIsDawControl(const QString &name);
-    static bool nameLooksLikeFa(const QString &name);
     void setStatus(const QString &text);
     void preferFaSelection(bool force = false);
     bool indexInRange(int idx, int count) const;
-    void pollConnection();
     void startConnectionPoll();
     void stopConnectionPoll();
     bool connectedPortStillPresent() const;
 
-    SysexEngine *m_engine = nullptr;
+    InstrumentPlatform *m_platform = nullptr;
     QVector<MidiPortInfo> m_inputs;
     QVector<MidiPortInfo> m_outputs;
     bool m_connected = false;
@@ -89,4 +79,7 @@ private:
     int m_selectedInput = -1;
     int m_selectedOutput = -1;
     QTimer m_connectionPoll;
+
+private slots:
+    void pollConnection();
 };

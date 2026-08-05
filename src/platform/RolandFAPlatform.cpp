@@ -1,9 +1,56 @@
 #include "platform/RolandFAPlatform.h"
 #include "midi/SysexEngine.h"
 
+#include <RtMidi.h>
+
 using namespace roland;
 
 bool RolandFAPlatform::isConnected() const { return m_engine && m_engine->isOpen(); }
+
+bool RolandFAPlatform::nameIsDawControl(const QString &name)
+{
+    const auto n=name.toLower();
+    return n.contains(QStringLiteral("daw")) || n.contains(QStringLiteral("mackie"))
+           || (n.contains(QStringLiteral("ctrl")) && !n.contains(QStringLiteral("controller")));
+}
+
+bool RolandFAPlatform::nameLooksLikeFa(const QString &name)
+{
+    if (nameIsDawControl(name)) return false;
+    const auto n=name.toUpper();
+    if (n.contains(QStringLiteral("FA-06")) || n.contains(QStringLiteral("FA-07")) || n.contains(QStringLiteral("FA-08"))
+        || n.contains(QStringLiteral("FA 06")) || n.contains(QStringLiteral("FA 07")) || n.contains(QStringLiteral("FA 08"))
+        || n.contains(QStringLiteral("FA06")) || n.contains(QStringLiteral("FA07")) || n.contains(QStringLiteral("FA08"))) return true;
+    return n.contains(QLatin1String("ROLAND")) && n.contains(QLatin1String("FA"));
+}
+
+bool RolandFAPlatform::discoverMidiPorts(QVector<MidiPort> *inputs,QVector<MidiPort> *outputs,QString *error)
+{
+    if (inputs) inputs->clear(); if (outputs) outputs->clear();
+    try {
+        RtMidiIn in(RtMidi::MACOSX_CORE); RtMidiOut out(RtMidi::MACOSX_CORE);
+        if (inputs) for (unsigned i=0;i<in.getPortCount();++i) { const auto n=QString::fromStdString(in.getPortName(i)); inputs->push_back({int(i),n,nameIsDawControl(n),nameLooksLikeFa(n)}); }
+        if (outputs) for (unsigned i=0;i<out.getPortCount();++i) { const auto n=QString::fromStdString(out.getPortName(i)); outputs->push_back({int(i),n,nameIsDawControl(n),nameLooksLikeFa(n)}); }
+        return true;
+    } catch (const RtMidiError &e) { if (error) *error=QString::fromStdString(e.getMessage()); return false; }
+}
+
+bool RolandFAPlatform::openMidiConnection(int in,int out,QString *error){return m_engine&&m_engine->openPorts(in,out,error);}
+void RolandFAPlatform::closeMidiConnection(){if(m_engine)m_engine->closePorts();}
+bool RolandFAPlatform::midiConnectionHealthy()const{return m_engine&&m_engine->portsHealthy();}
+bool RolandFAPlatform::detectRolandFA(quint8 *deviceId,int timeoutMs,QString *error)
+{
+    if (error) error->clear();
+    if (!m_engine || !m_engine->sendIdentityRequest(error)) return false;
+    quint8 id=0x10;
+    if (!m_engine->waitIdentityReply(&id,timeoutMs)) { m_engine->setDeviceId(0x10); if(deviceId)*deviceId=0x10; return false; }
+    m_engine->setDeviceId(id); if(deviceId)*deviceId=id; return true;
+}
+bool RolandFAPlatform::sendPreviewNote(int channel,int note,int velocity,bool on,QString *error)
+{
+    QByteArray message; message.append(char((on?0x90:0x80)|(channel&0x0f))); message.append(char(note&0x7f)); message.append(char(velocity&0x7f));
+    return m_engine&&m_engine->sendMessage(message,error);
+}
 
 bool RolandFAPlatform::recallStudioSet(int msb, int lsb, int program, QString *error)
 {

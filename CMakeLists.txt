@@ -267,6 +267,14 @@ target_include_directories(FAEditorAudioFxTests PRIVATE ${CMAKE_CURRENT_SOURCE_D
 target_link_libraries(FAEditorAudioFxTests PRIVATE Qt6::Core Qt6::Test)
 add_test(NAME FAEditorAudioFxTests COMMAND FAEditorAudioFxTests)
 
+qt_add_executable(FAEditorMidiPlatformTests
+    tests/test_midi_platform.cpp
+    src/midi/MidiDeviceModel.cpp
+)
+target_include_directories(FAEditorMidiPlatformTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+target_link_libraries(FAEditorMidiPlatformTests PRIVATE Qt6::Core Qt6::Test)
+add_test(NAME FAEditorMidiPlatformTests COMMAND FAEditorMidiPlatformTests)
+
 qt_add_executable(FAEditorToneWorkflowTests
     tests/test_tone_workflow.cpp
     src/model/StudioSetModel.cpp src/model/PartModel.cpp src/model/EffectsModel.cpp

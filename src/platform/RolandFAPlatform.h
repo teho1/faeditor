@@ -9,6 +9,12 @@ class RolandFAPlatform final : public InstrumentPlatform
 public:
     explicit RolandFAPlatform(SysexEngine *engine) : m_engine(engine) {}
     bool isConnected() const override;
+    bool discoverMidiPorts(QVector<MidiPort> *, QVector<MidiPort> *, QString *) override;
+    bool openMidiConnection(int, int, QString *) override;
+    void closeMidiConnection() override;
+    bool midiConnectionHealthy() const override;
+    bool detectRolandFA(quint8 *, int, QString *) override;
+    bool sendPreviewNote(int, int, int, bool, QString *) override;
     bool recallStudioSet(int bankMsb, int bankLsb, int program, QString *error) override;
     bool readTemporaryStudioSetName(QString *name, QString *error) override;
     bool readStudioBlock(StudioBlock, int, int, QByteArray *, QString *) override;
@@ -31,5 +37,7 @@ private:
                             int sectionIndex) const;
     roland::Address studioAddress(StudioBlock block, int index) const;
     roland::Address audioAddress(AudioBlock block) const;
+    static bool nameIsDawControl(const QString &name);
+    static bool nameLooksLikeFa(const QString &name);
     SysexEngine *m_engine = nullptr;
 };

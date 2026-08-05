@@ -1,12 +1,9 @@
 #include "midi/MidiDeviceModel.h"
-#include "midi/SysexEngine.h"
-
-#include <RtMidi.h>
 #include <algorithm>
 
-MidiDeviceModel::MidiDeviceModel(SysexEngine *engine, QObject *parent)
+MidiDeviceModel::MidiDeviceModel(InstrumentPlatform *platform, QObject *parent)
     : QAbstractListModel(parent)
-    , m_engine(engine)
+    , m_platform(platform)
 {
     m_connectionPoll.setInterval(1500);
     connect(&m_connectionPoll, &QTimer::timeout, this, &MidiDeviceModel::pollConnection);
@@ -64,30 +61,6 @@ void MidiDeviceModel::setSelectedOutput(int v)
         return;
     m_selectedOutput = v;
     emit selectionChanged();
-}
-
-bool MidiDeviceModel::nameIsDawControl(const QString &name)
-{
-    const auto n = name.toLower();
-    return n.contains(QStringLiteral("daw"))
-           || n.contains(QStringLiteral("mackie"))
-           || (n.contains(QStringLiteral("ctrl")) && !n.contains(QStringLiteral("controller")));
-}
-
-bool MidiDeviceModel::nameLooksLikeFa(const QString &name)
-{
-    if (nameIsDawControl(name))
-        return false;
-    const auto n = name.toUpper();
-    // Common CoreMIDI labels: "FA-08", "Roland FA-07", "FA08", "FA 06"
-    if (n.contains(QStringLiteral("FA-06")) || n.contains(QStringLiteral("FA-07"))
-        || n.contains(QStringLiteral("FA-08")) || n.contains(QStringLiteral("FA 06"))
-        || n.contains(QStringLiteral("FA 07")) || n.contains(QStringLiteral("FA 08"))
-        || n.contains(QStringLiteral("FA06")) || n.contains(QStringLiteral("FA07"))
-        || n.contains(QStringLiteral("FA08")))
-        return true;
-    // Broader: "FA" + model digit, but avoid random "FA" substrings in other devices
-    return n.contains(QLatin1String("ROLAND")) && n.contains(QLatin1String("FA"));
 }
 
 void MidiDeviceModel::setStatus(const QString &text)
@@ -151,35 +124,14 @@ void MidiDeviceModel::refresh()
     beginResetModel();
     m_inputs.clear();
     m_outputs.clear();
-    try {
-        RtMidiIn in(RtMidi::MACOSX_CORE);
-        RtMidiOut out(RtMidi::MACOSX_CORE);
-        for (unsigned i = 0; i < in.getPortCount(); ++i) {
-            MidiPortInfo info;
-            info.index = static_cast<int>(i);
-            info.name = QString::fromStdString(in.getPortName(i));
-            info.isDawControl = nameIsDawControl(info.name);
-            info.looksLikeFa = nameLooksLikeFa(info.name);
-            m_inputs.push_back(info);
-        }
-        for (unsigned i = 0; i < out.getPortCount(); ++i) {
-            MidiPortInfo info;
-            info.index = static_cast<int>(i);
-            info.name = QString::fromStdString(out.getPortName(i));
-            info.isDawControl = nameIsDawControl(info.name);
-            info.looksLikeFa = nameLooksLikeFa(info.name);
-            m_outputs.push_back(info);
-        }
-    } catch (const RtMidiError &e) {
-        setStatus(QString::fromStdString(e.getMessage()));
-    }
+    QString error;
+    if (!m_platform || !m_platform->discoverMidiPorts(&m_inputs,&m_outputs,&error)) setStatus(error);
     endResetModel();
 
     // If we thought we were connected but the engine/ports are gone (FA power-cycled), clear flag.
-    if (m_connected && (!m_engine || !m_engine->isOpen() || !connectedPortStillPresent())) {
+    if (m_connected && (!m_platform || !m_platform->isConnected() || !connectedPortStillPresent())) {
         stopConnectionPoll();
-        if (m_engine && m_engine->isOpen())
-            m_engine->closePorts();
+        if (m_platform && m_platform->isConnected()) m_platform->closeMidiConnection();
         m_connected = false;
         m_connectedName.clear();
         setStatus(QStringLiteral("FA disconnected — cable unplugged or powered off"));
@@ -208,7 +160,7 @@ QStringList MidiDeviceModel::outputNames() const
 
 bool MidiDeviceModel::connectSelected()
 {
-    if (!m_engine)
+    if (!m_platform)
         return false;
 
     refresh();
@@ -218,11 +170,10 @@ bool MidiDeviceModel::connectSelected()
     }
 
     // Re-open cleanly (important after FA reboot / CoreMIDI renumber)
-    if (m_engine->isOpen())
-        m_engine->closePorts();
+    if (m_platform->isConnected()) m_platform->closeMidiConnection();
 
     QString err;
-    if (!m_engine->openPorts(m_selectedInput, m_selectedOutput, &err)) {
+    if (!m_platform->openMidiConnection(m_selectedInput, m_selectedOutput, &err)) {
         setStatus(err);
         m_connected = false;
         m_connectedName.clear();
@@ -258,8 +209,7 @@ bool MidiDeviceModel::autoConnectFa()
 void MidiDeviceModel::disconnectDevice()
 {
     stopConnectionPoll();
-    if (m_engine)
-        m_engine->closePorts();
+    if (m_platform) m_platform->closeMidiConnection();
     const bool wasConnected = m_connected;
     m_connected = false;
     m_connectedName.clear();
@@ -304,20 +254,10 @@ void MidiDeviceModel::pollConnection()
     if (!m_connected)
         return;
 
-    // Enumerate ports without resetting the QML list model every tick.
-    QStringList inNames;
-    QStringList outNames;
-    try {
-        RtMidiIn in(RtMidi::MACOSX_CORE);
-        RtMidiOut out(RtMidi::MACOSX_CORE);
-        for (unsigned i = 0; i < in.getPortCount(); ++i)
-            inNames << QString::fromStdString(in.getPortName(i));
-        for (unsigned i = 0; i < out.getPortCount(); ++i)
-            outNames << QString::fromStdString(out.getPortName(i));
-    } catch (const RtMidiError &) {
+    QVector<MidiPortInfo> inputs,outputs; QString discoveryError;
+    if (!m_platform || !m_platform->discoverMidiPorts(&inputs,&outputs,&discoveryError)) {
         stopConnectionPoll();
-        if (m_engine)
-            m_engine->closePorts();
+        if (m_platform) m_platform->closeMidiConnection();
         m_connected = false;
         m_connectedName.clear();
         setStatus(QStringLiteral("FA disconnected — MIDI error"));
@@ -326,17 +266,13 @@ void MidiDeviceModel::pollConnection()
         return;
     }
 
-    const bool namePresent = inNames.contains(m_connectedName)
-                             || std::any_of(inNames.cbegin(), inNames.cend(),
-                                            [](const QString &n) { return nameLooksLikeFa(n); })
-                             || std::any_of(outNames.cbegin(), outNames.cend(),
-                                            [](const QString &n) { return nameLooksLikeFa(n); });
-    const bool healthy = m_engine && m_engine->portsHealthy();
+    const bool namePresent = std::any_of(inputs.cbegin(),inputs.cend(),[this](const auto&p){return p.name==m_connectedName||p.looksLikeFa;})
+                             || std::any_of(outputs.cbegin(),outputs.cend(),[](const auto&p){return p.looksLikeFa;});
+    const bool healthy = m_platform && m_platform->midiConnectionHealthy();
 
     if (!namePresent || !healthy) {
         stopConnectionPoll();
-        if (m_engine)
-            m_engine->closePorts();
+        if (m_platform) m_platform->closeMidiConnection();
         m_connected = false;
         m_connectedName.clear();
         setStatus(QStringLiteral("FA disconnected — cable unplugged or powered off"));
@@ -347,20 +283,18 @@ void MidiDeviceModel::pollConnection()
 
 bool MidiDeviceModel::probeIdentity()
 {
-    if (!m_engine || !m_engine->isOpen())
+    if (!m_platform || !m_platform->isConnected())
         return false;
     QString err;
-    if (!m_engine->sendIdentityRequest(&err)) {
-        setStatus(err);
-        return false;
-    }
     quint8 dev = 0x10;
-    if (m_engine->waitIdentityReply(&dev, 1500)) {
-        m_engine->setDeviceId(dev);
+    if (m_platform->detectRolandFA(&dev,1500,&err)) {
         setStatus(QStringLiteral("FA Identity OK (device %1)").arg(dev, 2, 16, QChar('0')));
         return true;
     }
+    if (!err.isEmpty()) {
+        setStatus(err);
+        return false;
+    }
     setStatus(QStringLiteral("Connected (no Identity Reply — using device 0x10)"));
-    m_engine->setDeviceId(0x10);
     return false;
 }
