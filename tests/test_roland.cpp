@@ -1,6 +1,7 @@
 #include <QtTest>
 #include "midi/RolandChecksum.h"
 #include "midi/AddressMap.h"
+#include <QFile>
 
 class TestRoland : public QObject
 {
@@ -38,6 +39,24 @@ private slots:
     {
         const auto a = roland::addr::partParam(0, 0x09);
         QCOMPARE(a[3], quint8(0x09));
+    }
+
+    void mixerControlsRetainPointerGrab()
+    {
+        for (const auto &name : {QStringLiteral("Fader.qml"),QStringLiteral("PanKnob.qml")}) {
+            QFile file(QStringLiteral(FAEDITOR_SOURCE_DIR "/qml/components/") + name);
+            QVERIFY2(file.open(QIODevice::ReadOnly),qPrintable(file.errorString()));
+            QVERIFY2(file.readAll().contains("preventStealing: true"),qPrintable(name));
+        }
+    }
+
+    void channelStripHasNoFakeLevelMeter()
+    {
+        QFile file(QStringLiteral(FAEDITOR_SOURCE_DIR "/qml/components/ChannelStrip.qml"));
+        QVERIFY(file.open(QIODevice::ReadOnly));
+        const auto source=file.readAll();
+        QVERIFY(!source.contains("Meter placeholder"));
+        QVERIFY(!source.contains("opacity: 0.5"));
     }
 };
 

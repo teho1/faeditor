@@ -225,6 +225,7 @@ qt_add_executable(FAEditorTests
     src/midi/AddressMap.cpp
 )
 target_include_directories(FAEditorTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_compile_definitions(FAEditorTests PRIVATE FAEDITOR_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_libraries(FAEditorTests PRIVATE Qt6::Core Qt6::Test)
 add_test(NAME FAEditorTests COMMAND FAEditorTests)
 

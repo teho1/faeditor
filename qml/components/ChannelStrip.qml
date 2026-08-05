@@ -35,24 +35,6 @@ Rectangle {
             horizontalAlignment: Text.AlignHCenter
         }
 
-        // Meter placeholder
-        Rectangle {
-            Layout.alignment: Qt.AlignHCenter
-            width: 10
-            height: 40
-            color: LogicTheme.faderTrack
-            radius: 2
-            Rectangle {
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
-                height: parent.height * ((part ? part.level : 0) / 127)
-                color: LogicTheme.accent
-                opacity: 0.5
-                radius: 2
-            }
-        }
-
         PanKnob {
             Layout.alignment: Qt.AlignHCenter
             value: part ? part.pan : 64

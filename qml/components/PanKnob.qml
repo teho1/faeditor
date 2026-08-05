@@ -28,6 +28,9 @@ Item {
 
     MouseArea {
         anchors.fill: parent
+        // Horizontal drags otherwise get stolen by the mixer ScrollView after
+        // the platform drag threshold (about 10 px).
+        preventStealing: true
         property real startX
         property real startVal
         onPressed: (mouse) => { startX = mouse.x; startVal = root.value }

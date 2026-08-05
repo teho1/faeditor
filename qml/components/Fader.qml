@@ -54,6 +54,9 @@ Item {
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.SizeVerCursor
+        // The mixer lives in a ScrollView. Keep the pointer grab after Qt's
+        // drag threshold instead of letting the parent Flickable cancel us.
+        preventStealing: true
         onPositionChanged: (mouse) => {
             if (!pressed) return
             const t = 1 - Math.min(1, Math.max(0, mouse.y / height))
