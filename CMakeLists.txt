@@ -1,6 +1,21 @@
 cmake_minimum_required(VERSION 3.21)
 project(FAEditor VERSION 1.1.0 LANGUAGES CXX)
 
+set(FAEDITOR_PRODUCT "FA" CACHE STRING "Product to build (FA or FANTOM)")
+set_property(CACHE FAEDITOR_PRODUCT PROPERTY STRINGS FA FANTOM)
+string(TOUPPER "${FAEDITOR_PRODUCT}" FAEDITOR_PRODUCT)
+include(cmake/Products.cmake)
+faeditor_product_metadata(
+    "${FAEDITOR_PRODUCT}"
+    APP_TARGET APP_DISPLAY_NAME APP_BUNDLE_ID APP_VERSION APP_BUNDLE_VERSION APP_QML_URI APP_QML_MAIN
+)
+message(STATUS "FAEditor product: ${FAEDITOR_PRODUCT} (${APP_DISPLAY_NAME}, ${APP_BUNDLE_ID})")
+if(FAEDITOR_PRODUCT STREQUAL "FA")
+    set(APP_ORGANIZATION_DOMAIN "faeditor.local")
+else()
+    set(APP_ORGANIZATION_DOMAIN "fantomeditor.local")
+endif()
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
@@ -35,8 +50,9 @@ set(RTMIDI_BUILD_TESTING OFF CACHE BOOL "" FORCE)
 set(RTMIDI_API_CORE ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(rtmidi)
 
-qt_add_executable(FAEditor
-    src/main.cpp
+set(COMMON_APP_SOURCES src/main.cpp)
+if(FAEDITOR_PRODUCT STREQUAL "FA")
+    list(APPEND COMMON_APP_SOURCES
     src/app/AppController.cpp
     src/midi/MidiDeviceModel.cpp
     src/midi/SysexEngine.cpp
@@ -64,15 +80,21 @@ qt_add_executable(FAEditor
     src/model/MfxPresetStore.cpp
     src/project/ProjectStore.cpp
     src/undo/UndoController.cpp
-)
+    )
+else()
+    list(APPEND COMMON_APP_SOURCES src/app/FantomAppController.h)
+endif()
+
+qt_add_executable(${APP_TARGET} ${COMMON_APP_SOURCES})
 
 set_source_files_properties(qml/theme/LogicTheme.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 set_source_files_properties(qml/theme/FaIcons.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
-qt_add_qml_module(FAEditor
-    URI FAEditor
-    VERSION 1.0
-    QML_FILES
+if(FAEDITOR_PRODUCT STREQUAL "FA")
+    qt_add_qml_module(${APP_TARGET}
+        URI FAEditor
+        VERSION 1.0
+        QML_FILES
         qml/Main.qml
         qml/theme/LogicTheme.qml
         qml/theme/FaIcons.qml
@@ -117,7 +139,7 @@ qt_add_qml_module(FAEditor
         qml/views/LibraryView.qml
         qml/views/AboutDialog.qml
         qml/views/HelpDialog.qml
-    RESOURCES
+        RESOURCES
         resources/tones/soundlist.json
         resources/waves/waveforms.json
         resources/mfx_presets/presets.json
@@ -131,15 +153,24 @@ qt_add_qml_module(FAEditor
         resources/icons/pull.svg
         resources/icons/push.svg
         resources/icons/save.svg
-        resources/icons/appicon.png
-)
+            resources/icons/appicon.png
+    )
+else()
+    qt_add_qml_module(${APP_TARGET}
+        URI FantomEditor
+        VERSION 1.0
+        QML_FILES
+            qml/FantomMain.qml
+            qml/theme/LogicTheme.qml
+    )
+endif()
 
-target_include_directories(FAEditor PRIVATE
+target_include_directories(${APP_TARGET} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
     ${rtmidi_SOURCE_DIR}
 )
 
-target_link_libraries(FAEditor PRIVATE
+target_link_libraries(${APP_TARGET} PRIVATE
     Qt6::Core
     Qt6::Gui
     Qt6::Widgets
@@ -150,6 +181,19 @@ target_link_libraries(FAEditor PRIVATE
     rtmidi
 )
 
+target_compile_definitions(${APP_TARGET} PRIVATE
+    FAEDITOR_PRODUCT_KEY="${FAEDITOR_PRODUCT}"
+    FAEDITOR_ORGANIZATION_NAME="${APP_TARGET}"
+    FAEDITOR_ORGANIZATION_DOMAIN="${APP_ORGANIZATION_DOMAIN}"
+    FAEDITOR_APPLICATION_NAME="${APP_DISPLAY_NAME}"
+    FAEDITOR_APPLICATION_VERSION="${APP_VERSION}"
+    FAEDITOR_QML_URI="${APP_QML_URI}"
+    FAEDITOR_QML_MAIN="${APP_QML_MAIN}"
+)
+if(FAEDITOR_PRODUCT STREQUAL "FANTOM")
+    target_compile_definitions(${APP_TARGET} PRIVATE FAEDITOR_PRODUCT_FANTOM=1)
+endif()
+
 if(APPLE)
     if(NOT CMAKE_OSX_DEPLOYMENT_TARGET)
         set(CMAKE_OSX_DEPLOYMENT_TARGET "12.0" CACHE STRING "Minimum macOS version" FORCE)
@@ -159,16 +203,15 @@ if(APPLE)
     set_source_files_properties(${FAEDITOR_ICNS} PROPERTIES
         MACOSX_PACKAGE_LOCATION Resources
     )
-    target_sources(FAEditor PRIVATE ${FAEDITOR_ICNS})
+    if(FAEDITOR_PRODUCT STREQUAL "FA")
+        target_sources(${APP_TARGET} PRIVATE ${FAEDITOR_ICNS})
+    endif()
 
     set(FAEDITOR_ENTITLEMENTS "${CMAKE_CURRENT_SOURCE_DIR}/cmake/FAEditor.entitlements")
-    set_target_properties(FAEditor PROPERTIES
+    set_target_properties(${APP_TARGET} PROPERTIES
         MACOSX_BUNDLE TRUE
-        MACOSX_BUNDLE_BUNDLE_NAME "FA Editor"
-        MACOSX_BUNDLE_GUI_IDENTIFIER "com.righthere.faeditor"
-        MACOSX_BUNDLE_BUNDLE_VERSION 4
-        MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
-        MACOSX_BUNDLE_ICON_FILE "AppIcon"
+        MACOSX_BUNDLE_BUNDLE_NAME "${APP_DISPLAY_NAME}"
+        MACOSX_BUNDLE_GUI_IDENTIFIER "${APP_BUNDLE_ID}"
         MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/cmake/MacOSXBundleInfo.plist.in"
         XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS "${FAEDITOR_ENTITLEMENTS}"
         XCODE_ATTRIBUTE_CODE_SIGN_STYLE "Automatic"
@@ -180,7 +223,20 @@ if(APPLE)
     find_library(COREMIDI_LIBRARY CoreMIDI)
     find_library(COREAUDIO_LIBRARY CoreAudio)
     find_library(COREFOUNDATION_LIBRARY CoreFoundation)
-    target_link_libraries(FAEditor PRIVATE
+    if(FAEDITOR_PRODUCT STREQUAL "FA")
+        # Keep the released FA bundle metadata literal and unchanged.
+        set_target_properties(${APP_TARGET} PROPERTIES
+            MACOSX_BUNDLE_BUNDLE_VERSION 4
+            MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+            MACOSX_BUNDLE_ICON_FILE "AppIcon"
+        )
+    else()
+        set_target_properties(${APP_TARGET} PROPERTIES
+            MACOSX_BUNDLE_BUNDLE_VERSION "${APP_BUNDLE_VERSION}"
+            MACOSX_BUNDLE_SHORT_VERSION_STRING "${APP_VERSION}"
+        )
+    endif()
+    target_link_libraries(${APP_TARGET} PRIVATE
         ${COREMIDI_LIBRARY}
         ${COREAUDIO_LIBRARY}
         ${COREFOUNDATION_LIBRARY}
@@ -191,9 +247,9 @@ if(APPLE)
         HINTS "${Qt6_DIR}/../../../bin" "${CMAKE_PREFIX_PATH}/bin"
     )
     if(MACDEPLOYQT_EXECUTABLE)
-        add_custom_command(TARGET FAEditor POST_BUILD
+        add_custom_command(TARGET ${APP_TARGET} POST_BUILD
             COMMAND "${CMAKE_COMMAND}"
-                "-DAPP=$<TARGET_BUNDLE_DIR:FAEditor>"
+                "-DAPP=$<TARGET_BUNDLE_DIR:${APP_TARGET}>"
                 "-DCONFIG=$<CONFIG>"
                 "-DMACDEPLOYQT=${MACDEPLOYQT_EXECUTABLE}"
                 "-DQMLDIR=${CMAKE_CURRENT_SOURCE_DIR}/qml"
@@ -202,14 +258,14 @@ if(APPLE)
             VERBATIM
         )
         # Keep a manual target as well.
-        add_custom_target(FAEditor_deploy
+        add_custom_target(${APP_TARGET}_deploy
             COMMAND "${CMAKE_COMMAND}"
-                "-DAPP=$<TARGET_BUNDLE_DIR:FAEditor>"
+                "-DAPP=$<TARGET_BUNDLE_DIR:${APP_TARGET}>"
                 "-DCONFIG=Release"
                 "-DMACDEPLOYQT=${MACDEPLOYQT_EXECUTABLE}"
                 "-DQMLDIR=${CMAKE_CURRENT_SOURCE_DIR}/qml"
                 -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/DeployQt.cmake"
-            DEPENDS FAEditor
+            DEPENDS ${APP_TARGET}
             COMMENT "Running macdeployqt"
             VERBATIM
         )
@@ -219,6 +275,9 @@ if(APPLE)
 endif()
 
 enable_testing()
+add_test(NAME ProductConfigurationTests
+    COMMAND ${CMAKE_COMMAND} -DSOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_product_options.cmake)
 qt_add_executable(FAEditorTests
     tests/test_roland.cpp
     src/midi/RolandChecksum.cpp

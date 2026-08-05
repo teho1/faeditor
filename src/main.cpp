@@ -6,6 +6,9 @@
 #include <QFile>
 #include <QCoreApplication>
 
+#if defined(FAEDITOR_PRODUCT_FANTOM)
+#include "app/FantomAppController.h"
+#else
 #include "app/AppController.h"
 #include "model/PartModel.h"
 #include "model/EffectsModel.h"
@@ -20,16 +23,22 @@
 #include "midi/MidiDeviceModel.h"
 #include "project/ProjectStore.h"
 #include "undo/UndoController.h"
+#endif
 
 #include <qqml.h>
 
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
-    app.setOrganizationName(QStringLiteral("FAEditor"));
-    app.setOrganizationDomain(QStringLiteral("faeditor.local"));
-    app.setApplicationName(QStringLiteral("FA Editor"));
+    app.setOrganizationName(QStringLiteral(FAEDITOR_ORGANIZATION_NAME));
+    app.setOrganizationDomain(QStringLiteral(FAEDITOR_ORGANIZATION_DOMAIN));
+    app.setApplicationName(QStringLiteral(FAEDITOR_APPLICATION_NAME));
+#if defined(FAEDITOR_PRODUCT_FANTOM)
+    app.setApplicationVersion(QStringLiteral(FAEDITOR_APPLICATION_VERSION));
+#else
+    // Keep the released FA application version literal and unchanged.
     app.setApplicationVersion(QStringLiteral("1.1"));
+#endif
 
     // Prefer bundle .icns (Dock/Finder), fall back to embedded PNG.
     QIcon appIcon;
@@ -41,7 +50,7 @@ int main(int argc, char *argv[])
             appIcon.addFile(icns);
     }
 #endif
-    if (appIcon.isNull())
+    if (appIcon.isNull() && QStringLiteral(FAEDITOR_PRODUCT_KEY) == QStringLiteral("FA"))
         appIcon.addFile(QStringLiteral(":/qt/qml/FAEditor/resources/icons/appicon.png"));
     if (!appIcon.isNull())
         app.setWindowIcon(appIcon);
@@ -53,6 +62,11 @@ int main(int argc, char *argv[])
     QQuickStyle::setStyle(QStringLiteral("Fusion"));
 #endif
 
+#if defined(FAEDITOR_PRODUCT_FANTOM)
+    qmlRegisterUncreatableType<FantomAppController>("FantomEditor", 1, 0, "FantomAppController",
+                                                    QStringLiteral("Use App context property"));
+    FantomAppController controller;
+#else
     qmlRegisterUncreatableType<PartModel>("FAEditor", 1, 0, "PartModel",
                                           QStringLiteral("Obtained from StudioSetModel"));
     qmlRegisterUncreatableType<EffectsModel>("FAEditor", 1, 0, "EffectsModel",
@@ -82,6 +96,7 @@ int main(int argc, char *argv[])
     qmlRegisterSingletonInstance("FAEditor", 1, 0, "MfxUiFamily", MfxUiHelpers::instance());
 
     AppController controller;
+#endif
 
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty(QStringLiteral("App"), &controller);
@@ -89,7 +104,7 @@ int main(int argc, char *argv[])
     QObject::connect(
         &engine, &QQmlApplicationEngine::objectCreationFailed, &app,
         []() { QCoreApplication::exit(-1); }, Qt::QueuedConnection);
-    engine.loadFromModule(QStringLiteral("FAEditor"), QStringLiteral("Main"));
+    engine.loadFromModule(QStringLiteral(FAEDITOR_QML_URI), QStringLiteral(FAEDITOR_QML_MAIN));
 
     if (engine.rootObjects().isEmpty())
         return -1;
