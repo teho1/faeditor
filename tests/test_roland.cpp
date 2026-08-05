@@ -58,6 +58,20 @@ private slots:
         QVERIFY(!source.contains("Meter placeholder"));
         QVERIFY(!source.contains("opacity: 0.5"));
     }
+
+    void knobsUseLogicStyleVerticalDrag()
+    {
+        QFile file(QStringLiteral(FAEDITOR_SOURCE_DIR "/qml/components/PanKnob.qml"));
+        QVERIFY(file.open(QIODevice::ReadOnly));
+        const auto source=file.readAll();
+        QVERIFY(source.contains("lastY - mouse.y"));
+        QVERIFY(source.contains("Qt.ShiftModifier"));
+        QVERIFY(source.contains("fineScale"));
+        QVERIFY(source.contains("onDoubleClicked"));
+        QVERIFY(source.contains("defaultValue: 64"));
+        QVERIFY(source.contains("preventStealing: true"));
+        QVERIFY(!source.contains("mouse.x - startX"));
+    }
 };
 
 QTEST_APPLESS_MAIN(TestRoland)
