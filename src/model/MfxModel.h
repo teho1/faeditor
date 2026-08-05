@@ -9,7 +9,7 @@
 #include <QStringList>
 #include <QVariantList>
 
-class SysexEngine;
+class InstrumentPlatform;
 
 /** Shared Temporary Tone MFX block (145 B) + Switch. */
 class MfxModel : public QObject
@@ -33,7 +33,7 @@ class MfxModel : public QObject
     Q_PROPERTY(QString lastError READ lastError NOTIFY lastErrorChanged)
 
 public:
-    explicit MfxModel(SysexEngine *engine, QObject *parent = nullptr);
+    explicit MfxModel(InstrumentPlatform *platform, QObject *parent = nullptr);
 
     bool mfxSwitch() const { return m_switch; }
     int type() const { return m_type; }
@@ -94,7 +94,7 @@ private:
     static QByteArray encodeParam(int logicalValue);
     static int decodeParam(const QByteArray &four);
 
-    SysexEngine *m_engine = nullptr;
+    InstrumentPlatform *m_platform = nullptr;
     bool m_fromDevice = false;
     int m_partIndex = 0;
     roland::ToneEngine m_engineType = roland::ToneEngine::Unknown;

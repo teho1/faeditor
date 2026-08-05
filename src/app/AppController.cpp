@@ -8,6 +8,7 @@ AppController::AppController(QObject *parent)
     : QObject(parent)
 {
     m_engine = new SysexEngine(this);
+    m_platform = new RolandFAPlatform(m_engine);
     m_midi = new MidiDeviceModel(m_engine, this);
     m_undo = new UndoController(this);
     m_studioSet = new StudioSetModel(m_engine, m_undo, this);
@@ -18,7 +19,7 @@ AppController::AppController(QObject *parent)
     // Bundled Sound List names — load every start so Tone Edit never depends on Waves.
     m_waveforms->loadCatalog();
     m_audioFx = new AudioFxModel(m_engine, this);
-    m_tone = new TemporaryToneModel(m_engine, m_studioSet, this);
+    m_tone = new TemporaryToneModel(m_engine, m_platform, m_studioSet, this);
     if (m_tone) {
         if (auto *sn = m_tone->snSynth())
             sn->setWaveformCatalog(m_waveforms);

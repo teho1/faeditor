@@ -12,6 +12,7 @@
 #include <QTimer>
 
 class SysexEngine;
+class InstrumentPlatform;
 class StudioSetModel;
 
 /** Selected part's Temporary Tone — MFX (all engines) + SN-S / PCM / SN-A body. */
@@ -37,7 +38,7 @@ class TemporaryToneModel : public QObject
     Q_PROPERTY(MfxPresetStore *presets READ presets CONSTANT)
 
 public:
-    explicit TemporaryToneModel(SysexEngine *engine, StudioSetModel *studioSet,
+    explicit TemporaryToneModel(SysexEngine *engine, InstrumentPlatform *platform, StudioSetModel *studioSet,
                                 QObject *parent = nullptr);
 
     int partIndex() const { return m_partIndex; }
@@ -87,6 +88,7 @@ private:
     QJsonObject capturePartBlob(int partIndex, bool fromDevice);
 
     SysexEngine *m_sysex = nullptr;
+    InstrumentPlatform *m_platform = nullptr;
     StudioSetModel *m_studioSet = nullptr;
     MfxModel *m_mfx = nullptr;
     SnSynthToneModel *m_sn = nullptr;

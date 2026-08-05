@@ -21,7 +21,7 @@ public:
 
     bool openPorts(int inIndex, int outIndex, QString *error = nullptr);
     void closePorts();
-    bool isOpen() const;
+    virtual bool isOpen() const;
     /** True if ports are open and RtMidi still reports them open (unplug / power-off). */
     bool portsHealthy() const;
 
@@ -29,14 +29,14 @@ public:
     quint8 deviceId() const { return m_deviceId; }
 
     /** Blocking RQ1 with timeout; returns DT1 payload (data only) on success. */
-    bool read(const roland::Address &address, int size, QByteArray *outData, QString *error = nullptr,
-              int timeoutMs = 3000);
+    virtual bool read(const roland::Address &address, int size, QByteArray *outData, QString *error = nullptr,
+                      int timeoutMs = 3000);
 
     /** Write DT1, splitting into <=256 byte packets with inter-packet delay. */
-    bool write(const roland::Address &address, const QByteArray &data, QString *error = nullptr);
+    virtual bool write(const roland::Address &address, const QByteArray &data, QString *error = nullptr);
 
     /** Single-byte (or short) parameter write. */
-    bool writeParam(const roland::Address &address, const QByteArray &data, QString *error = nullptr);
+    virtual bool writeParam(const roland::Address &address, const QByteArray &data, QString *error = nullptr);
 
     bool sendIdentityRequest(QString *error = nullptr);
     /** Wait for Identity Reply; returns true if Roland FA signature seen. */

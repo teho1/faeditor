@@ -7,7 +7,7 @@
 #include <QStringList>
 #include <array>
 
-class SysexEngine;
+class InstrumentPlatform;
 class WaveformCatalog;
 
 /** SuperNATURAL Synth Temporary Tone — Common + 3 partials (MVP fields). */
@@ -58,7 +58,7 @@ class SnSynthToneModel : public QObject
     Q_PROPERTY(QString lastError READ lastError NOTIFY lastErrorChanged)
 
 public:
-    explicit SnSynthToneModel(SysexEngine *engine, QObject *parent = nullptr);
+    explicit SnSynthToneModel(InstrumentPlatform *platform, QObject *parent = nullptr);
 
     void setWaveformCatalog(WaveformCatalog *catalog);
 
@@ -163,7 +163,7 @@ private:
     void syncCommonFromRaw();
     void setError(const QString &e);
 
-    SysexEngine *m_engine = nullptr;
+    InstrumentPlatform *m_platform = nullptr;
     WaveformCatalog *m_waves = nullptr;
     bool m_fromDevice = false;
     int m_partIndex = 0;

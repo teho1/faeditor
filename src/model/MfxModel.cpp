@@ -1,7 +1,7 @@
 #include "model/MfxModel.h"
 #include "model/MfxParamCatalog.h"
 #include "model/MfxUiHelpers.h"
-#include "midi/SysexEngine.h"
+#include "platform/InstrumentPlatform.h"
 
 #include <QJsonArray>
 #include <QVariantMap>
@@ -9,9 +9,9 @@
 
 using namespace roland;
 
-MfxModel::MfxModel(SysexEngine *engine, QObject *parent)
+MfxModel::MfxModel(InstrumentPlatform *platform, QObject *parent)
     : QObject(parent)
-    , m_engine(engine)
+    , m_platform(platform)
 {
     m_raw = QByteArray(mfxOff::MfxSize, '\0');
     MfxParamCatalog::ensureLoaded();
@@ -256,38 +256,37 @@ int MfxModel::decodeParam(const QByteArray &four)
 
 void MfxModel::writeSwitch(bool on)
 {
-    if (m_fromDevice || !m_engine || !m_engine->isOpen()
+    if (m_fromDevice || !m_platform || !m_platform->isConnected()
         || m_engineType == ToneEngine::Unknown)
         return;
     QByteArray d(1, static_cast<char>(on ? 1 : 0));
     QString err;
-    if (!m_engine->writeParam(addr::mfxSwitch(m_partIndex, m_engineType), d, &err))
+    if (!m_platform->writeToneSection(m_partIndex, m_engineType, InstrumentPlatform::ToneSection::MfxSwitch, 0, d, &err))
         setError(err);
 }
 
 void MfxModel::writeByte(quint8 offset, int value)
 {
-    if (m_fromDevice || !m_engine || !m_engine->isOpen()
+    if (m_fromDevice || !m_platform || !m_platform->isConnected()
         || m_engineType == ToneEngine::Unknown)
         return;
     QByteArray d(1, static_cast<char>(value & 0x7F));
     QString err;
-    if (!m_engine->writeParam(addOffset(addr::mfx(m_partIndex, m_engineType), offset), d, &err))
+    if (!m_platform->writeToneParameter(m_partIndex, m_engineType, InstrumentPlatform::ToneSection::Mfx, 0, offset, d, &err))
         setError(err);
 }
 
 void MfxModel::writeParam(int index, int logicalValue)
 {
-    if (m_fromDevice || !m_engine || !m_engine->isOpen()
+    if (m_fromDevice || !m_platform || !m_platform->isConnected()
         || m_engineType == ToneEngine::Unknown)
         return;
     if (index < 0 || index >= mfxOff::ParamCount)
         return;
     const auto data = encodeParam(logicalValue);
-    const auto address = addOffset(addr::mfx(m_partIndex, m_engineType),
-                                   mfxOff::Param1 + index * mfxOff::ParamBytes);
     QString err;
-    if (!m_engine->writeParam(address, data, &err))
+    if (!m_platform->writeToneParameter(m_partIndex, m_engineType, InstrumentPlatform::ToneSection::Mfx, 0,
+                                        mfxOff::Param1 + index * mfxOff::ParamBytes, data, &err))
         setError(err);
 }
 
@@ -378,10 +377,10 @@ bool MfxModel::applyPreset(const QJsonObject &preset)
     setFromDevice(false);
 
     // Live-write switch + full MFX block when connected.
-    if (m_engine && m_engine->isOpen() && m_engineType != ToneEngine::Unknown) {
+    if (m_platform && m_platform->isConnected() && m_engineType != ToneEngine::Unknown) {
         writeSwitch(m_switch);
         QString err;
-        if (!m_engine->write(addr::mfx(m_partIndex, m_engineType), m_raw, &err)) {
+        if (!m_platform->writeToneSection(m_partIndex, m_engineType, InstrumentPlatform::ToneSection::Mfx, 0, m_raw, &err)) {
             setError(err);
             return false;
         }
@@ -412,18 +411,18 @@ QByteArray MfxModel::mfxBytes() const
 
 bool MfxModel::pullFromDevice()
 {
-    if (!m_engine || !m_engine->isOpen() || m_engineType == ToneEngine::Unknown) {
+    if (!m_platform || !m_platform->isConnected() || m_engineType == ToneEngine::Unknown) {
         setError(QStringLiteral("Not connected or unknown tone engine"));
         return false;
     }
     QByteArray mfxData;
     QByteArray sw;
     QString err;
-    if (!m_engine->read(addr::mfx(m_partIndex, m_engineType), mfxOff::MfxSize, &mfxData, &err)) {
+    if (!m_platform->readToneSection(m_partIndex, m_engineType, InstrumentPlatform::ToneSection::Mfx, 0, mfxOff::MfxSize, &mfxData, &err)) {
         setError(err);
         return false;
     }
-    if (!m_engine->read(addr::mfxSwitch(m_partIndex, m_engineType), 1, &sw, &err)) {
+    if (!m_platform->readToneSection(m_partIndex, m_engineType, InstrumentPlatform::ToneSection::MfxSwitch, 0, 1, &sw, &err)) {
         setError(err);
         return false;
     }
@@ -434,13 +433,13 @@ bool MfxModel::pullFromDevice()
 
 bool MfxModel::pushToDevice()
 {
-    if (!m_engine || !m_engine->isOpen() || m_engineType == ToneEngine::Unknown) {
+    if (!m_platform || !m_platform->isConnected() || m_engineType == ToneEngine::Unknown) {
         setError(QStringLiteral("Not connected or unknown tone engine"));
         return false;
     }
     QString err;
     writeSwitch(m_switch);
-    if (!m_engine->write(addr::mfx(m_partIndex, m_engineType), mfxBytes(), &err)) {
+    if (!m_platform->writeToneSection(m_partIndex, m_engineType, InstrumentPlatform::ToneSection::Mfx, 0, mfxBytes(), &err)) {
         setError(err);
         return false;
     }

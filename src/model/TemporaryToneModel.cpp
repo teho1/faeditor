@@ -8,14 +8,15 @@
 
 using namespace roland;
 
-TemporaryToneModel::TemporaryToneModel(SysexEngine *engine, StudioSetModel *studioSet,
+TemporaryToneModel::TemporaryToneModel(SysexEngine *engine, InstrumentPlatform *platform, StudioSetModel *studioSet,
                                        QObject *parent)
     : QObject(parent)
     , m_sysex(engine)
+    , m_platform(platform)
     , m_studioSet(studioSet)
 {
-    m_mfx = new MfxModel(engine, this);
-    m_sn = new SnSynthToneModel(engine, this);
+    m_mfx = new MfxModel(platform, this);
+    m_sn = new SnSynthToneModel(platform, this);
     m_pcm = new PcmSynthToneModel(engine, this);
     m_sna = new SnAcousticToneModel(engine, this);
     m_presets = new MfxPresetStore(this);
@@ -221,6 +222,10 @@ bool TemporaryToneModel::push()
 bool TemporaryToneModel::initSnSynth()
 {
     syncFromStudioSet();
+    // The body and MFX are written to the SN-S Temporary area. Keep the part's
+    // tone mode in sync too; otherwise the next sync/push selects the old engine.
+    if (auto *part = m_studioSet ? m_studioSet->selectedPartModel() : nullptr)
+        part->setBankMsb(95);
     m_sn->loadInitTemplate();
     m_mfx->loadBytes(QByteArray(mfxOff::MfxSize, '\0'), false);
     m_mfx->setContext(m_partIndex, ToneEngine::SnSynth);
@@ -277,14 +282,14 @@ QJsonObject TemporaryToneModel::capturePartBlob(int partIndex, bool fromDevice)
         return blob;
 
     if (fromDevice && m_sysex && m_sysex->isOpen()) {
-        MfxModel tmp(m_sysex);
+        MfxModel tmp(m_platform);
         tmp.setContext(partIndex, engine);
         if (tmp.pullFromDevice())
             blob.insert(QStringLiteral("mfx"), tmp.toJson());
         blob.insert(QStringLiteral("mfxSwitch"), tmp.mfxSwitch());
 
         if (engine == ToneEngine::SnSynth) {
-            SnSynthToneModel sn(m_sysex);
+            SnSynthToneModel sn(m_platform);
             sn.setPartIndex(partIndex);
             if (sn.pullFromDevice())
                 blob.insert(QStringLiteral("snSynth"), sn.toJson());
@@ -337,7 +342,7 @@ QJsonObject TemporaryToneModel::toneBlobsJson(bool refreshFromDevice)
                 const auto engine = toneEngineFromBankMsb(part->bankMsb());
                 if (engine == ToneEngine::Unknown)
                     continue;
-                MfxModel tmp(m_sysex);
+                MfxModel tmp(m_platform);
                 tmp.setContext(i, engine);
                 if (tmp.pullFromDevice()) {
                     blob.insert(QStringLiteral("toneType"), static_cast<int>(engine));
@@ -390,7 +395,7 @@ bool TemporaryToneModel::pushToneBlobs(const QJsonObject &blobs)
             continue;
 
         if (blob.contains(QStringLiteral("mfx"))) {
-            MfxModel tmp(m_sysex);
+            MfxModel tmp(m_platform);
             tmp.setContext(i, engine);
             tmp.fromJson(blob.value(QStringLiteral("mfx")).toObject());
             if (!tmp.pushToDevice()) {
@@ -399,7 +404,7 @@ bool TemporaryToneModel::pushToneBlobs(const QJsonObject &blobs)
             }
         }
         if (engine == ToneEngine::SnSynth && blob.contains(QStringLiteral("snSynth"))) {
-            SnSynthToneModel sn(m_sysex);
+            SnSynthToneModel sn(m_platform);
             sn.setPartIndex(i);
             sn.fromJson(blob.value(QStringLiteral("snSynth")).toObject());
             if (!sn.pushToDevice()) {

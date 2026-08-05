@@ -44,12 +44,17 @@ open build/FAEditor.app
 ## Layout
 
 - `src/` — C++ MIDI, models, project store, undo
+- `src/platform/` — application-level instrument boundary and Roland FA production adapter
 - `qml/` — Logic-inspired dark UI
 - `resources/tones/soundlist.json` — FA-06/07/08 preset tone catalog from Roland Sound List (`scripts/import_soundlist.py`)
 - `resources/waves/waveforms.json` — waveform name catalog (`scripts/import_waveforms.py`)
 - `roland_specs/` — official PDFs (reference only)
 
 ## Notes
+
+Headless tests use `FakeInstrumentPlatform`; they never require MIDI hardware. Run them with
+`ctest --test-dir build --output-on-failure`. The fake stores tone sections per part and can
+inject deterministic connection/timeout-style failures.
 
 - Unofficial third-party tool — not affiliated with Roland Corporation.
 - SysEx only — no proprietary binary reverse engineering.

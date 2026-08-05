@@ -42,6 +42,7 @@ qt_add_executable(FAEditor
     src/midi/SysexEngine.cpp
     src/midi/RolandChecksum.cpp
     src/midi/AddressMap.cpp
+    src/platform/RolandFAPlatform.cpp
     src/model/StudioSetModel.cpp
     src/model/PartModel.cpp
     src/model/EffectsModel.cpp
@@ -249,3 +250,30 @@ if(APPLE)
         ${COREMIDI_LIBRARY} ${COREAUDIO_LIBRARY} ${COREFOUNDATION_LIBRARY})
 endif()
 add_test(NAME FAEditorMfxTests COMMAND FAEditorMfxTests)
+
+qt_add_executable(FAEditorPlatformTests
+    tests/test_platform.cpp
+)
+target_include_directories(FAEditorPlatformTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+target_link_libraries(FAEditorPlatformTests PRIVATE Qt6::Core Qt6::Test)
+add_test(NAME FAEditorPlatformTests COMMAND FAEditorPlatformTests)
+
+qt_add_executable(FAEditorToneWorkflowTests
+    tests/test_tone_workflow.cpp
+    src/model/StudioSetModel.cpp src/model/PartModel.cpp src/model/EffectsModel.cpp
+    src/model/TemporarySysexStore.cpp src/model/TemporaryToneModel.cpp
+    src/model/MfxModel.cpp src/model/MfxParamCatalog.cpp src/model/MfxUiHelpers.cpp
+    src/model/MfxTapDelayModel.cpp src/model/MfxParamListModel.cpp src/model/MfxPresetStore.cpp
+    src/model/SnSynthToneModel.cpp src/model/PcmSynthToneModel.cpp
+    src/model/SnAcousticToneModel.cpp src/model/SnAcousticInstCatalog.cpp
+    src/model/WaveformCatalog.cpp src/undo/UndoController.cpp
+    src/midi/SysexEngine.cpp src/midi/MidiDeviceModel.cpp
+    src/midi/AddressMap.cpp src/midi/RolandChecksum.cpp
+    src/platform/RolandFAPlatform.cpp
+)
+target_include_directories(FAEditorToneWorkflowTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src ${rtmidi_SOURCE_DIR})
+target_link_libraries(FAEditorToneWorkflowTests PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Test rtmidi)
+if(APPLE)
+    target_link_libraries(FAEditorToneWorkflowTests PRIVATE ${COREMIDI_LIBRARY} ${COREAUDIO_LIBRARY} ${COREFOUNDATION_LIBRARY})
+endif()
+add_test(NAME FAEditorToneWorkflowTests COMMAND FAEditorToneWorkflowTests)

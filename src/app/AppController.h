@@ -10,6 +10,7 @@
 #include "project/ProjectStore.h"
 #include "undo/UndoController.h"
 #include "midi/SysexEngine.h"
+#include "platform/RolandFAPlatform.h"
 
 #include <QObject>
 #include <QTimer>
@@ -76,6 +77,7 @@ private:
     void setHint(const QString &h);
 
     SysexEngine *m_engine = nullptr;
+    RolandFAPlatform *m_platform = nullptr;
     MidiDeviceModel *m_midi = nullptr;
     UndoController *m_undo = nullptr;
     StudioSetModel *m_studioSet = nullptr;
