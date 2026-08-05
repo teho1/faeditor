@@ -18,7 +18,7 @@ TemporaryToneModel::TemporaryToneModel(SysexEngine *engine, InstrumentPlatform *
     m_mfx = new MfxModel(platform, this);
     m_sn = new SnSynthToneModel(platform, this);
     m_pcm = new PcmSynthToneModel(platform, this);
-    m_sna = new SnAcousticToneModel(engine, this);
+    m_sna = new SnAcousticToneModel(platform, this);
     m_presets = new MfxPresetStore(this);
 
     connect(m_sna, &SnAcousticToneModel::snaChanged, this, [this]() {
@@ -299,7 +299,7 @@ QJsonObject TemporaryToneModel::capturePartBlob(int partIndex, bool fromDevice)
             if (pcm.pullFromDevice())
                 blob.insert(QStringLiteral("pcmSynth"), pcm.toJson());
         } else if (engine == ToneEngine::SnAcoustic) {
-            SnAcousticToneModel sna(m_sysex);
+            SnAcousticToneModel sna(m_platform);
             sna.setPartIndex(partIndex);
             if (sna.pullFromDevice())
                 blob.insert(QStringLiteral("snAcoustic"), sna.toJson());
@@ -422,7 +422,7 @@ bool TemporaryToneModel::pushToneBlobs(const QJsonObject &blobs)
             }
         }
         if (engine == ToneEngine::SnAcoustic && blob.contains(QStringLiteral("snAcoustic"))) {
-            SnAcousticToneModel sna(m_sysex);
+            SnAcousticToneModel sna(m_platform);
             sna.setPartIndex(i);
             sna.fromJson(blob.value(QStringLiteral("snAcoustic")).toObject());
             if (!sna.pushToDevice()) {

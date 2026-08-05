@@ -7,7 +7,7 @@
 #include <QStringList>
 #include <QVariantList>
 
-class SysexEngine;
+class InstrumentPlatform;
 
 /** SuperNATURAL Acoustic Temporary Tone — Common (Inst + Modify 1–32). */
 class SnAcousticToneModel : public QObject
@@ -71,7 +71,7 @@ class SnAcousticToneModel : public QObject
     Q_PROPERTY(QString lastError READ lastError NOTIFY lastErrorChanged)
 
 public:
-    explicit SnAcousticToneModel(SysexEngine *engine, QObject *parent = nullptr);
+    explicit SnAcousticToneModel(InstrumentPlatform *platform, QObject *parent = nullptr);
 
     QString toneName() const { return m_toneName; }
     int toneLevel() const { return m_toneLevel; }
@@ -195,7 +195,7 @@ private:
     void syncFromRaw();
     void setError(const QString &e);
 
-    SysexEngine *m_engine = nullptr;
+    InstrumentPlatform *m_platform = nullptr;
     bool m_fromDevice = false;
     int m_partIndex = 0;
     QString m_lastError;

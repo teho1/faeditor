@@ -1,6 +1,6 @@
 #include "model/SnAcousticToneModel.h"
 #include "model/SnAcousticInstCatalog.h"
-#include "midi/SysexEngine.h"
+#include "platform/InstrumentPlatform.h"
 
 #include <algorithm>
 
@@ -16,9 +16,9 @@ QVector<SnAcousticInstCatalog::ModifySlot> currentModifySlots(const SnAcousticTo
 
 } // namespace
 
-SnAcousticToneModel::SnAcousticToneModel(SysexEngine *engine, QObject *parent)
+SnAcousticToneModel::SnAcousticToneModel(InstrumentPlatform *platform, QObject *parent)
     : QObject(parent)
-    , m_engine(engine)
+    , m_platform(platform)
 {
     m_common = QByteArray(snAcousticOff::CommonSize, '\0');
     loadInitTemplate();
@@ -56,11 +56,12 @@ int SnAcousticToneModel::commonByte(quint8 offset) const
 
 void SnAcousticToneModel::writeCommonByte(quint8 offset, int value)
 {
-    if (m_fromDevice || !m_engine || !m_engine->isOpen())
+    if (m_fromDevice || !m_platform || !m_platform->isConnected())
         return;
     QByteArray d(1, static_cast<char>(value & 0x7F));
     QString err;
-    if (!m_engine->writeParam(addOffset(addr::snAcousticCommon(m_partIndex), offset), d, &err))
+    if (!m_platform->writeToneParameter(m_partIndex, ToneEngine::SnAcoustic,
+                                        InstrumentPlatform::ToneSection::SnAcousticCommon, 0, offset, d, &err))
         setError(err);
 }
 
@@ -468,13 +469,15 @@ void SnAcousticToneModel::loadInitTemplate()
 
 bool SnAcousticToneModel::pullFromDevice()
 {
-    if (!m_engine || !m_engine->isOpen()) {
+    if (!m_platform || !m_platform->isConnected()) {
         setError(QStringLiteral("Not connected"));
         return false;
     }
     QString err;
     QByteArray common;
-    if (!m_engine->read(addr::snAcousticCommon(m_partIndex), snAcousticOff::CommonSize, &common, &err)) {
+    if (!m_platform->readToneSection(m_partIndex, ToneEngine::SnAcoustic,
+                                     InstrumentPlatform::ToneSection::SnAcousticCommon,
+                                     0, snAcousticOff::CommonSize, &common, &err)) {
         setError(err);
         return false;
     }
@@ -491,12 +494,13 @@ bool SnAcousticToneModel::pullFromDevice()
 
 bool SnAcousticToneModel::pushToDevice()
 {
-    if (!m_engine || !m_engine->isOpen()) {
+    if (!m_platform || !m_platform->isConnected()) {
         setError(QStringLiteral("Not connected"));
         return false;
     }
     QString err;
-    if (!m_engine->write(addr::snAcousticCommon(m_partIndex), m_common, &err)) {
+    if (!m_platform->writeToneSection(m_partIndex, ToneEngine::SnAcoustic,
+                                      InstrumentPlatform::ToneSection::SnAcousticCommon, 0, m_common, &err)) {
         setError(err);
         return false;
     }
