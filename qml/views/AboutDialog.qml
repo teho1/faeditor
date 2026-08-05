@@ -13,7 +13,7 @@ Dialog {
     width: Math.min(560, Overlay.overlay ? Overlay.overlay.width - 40 : 560)
     height: Math.min(560, Overlay.overlay ? Overlay.overlay.height - 40 : 560)
 
-    property string appVersion: "1.0.0"
+    property string appVersion: "1.1"
     property string githubUrl: "https://github.com/teholapp/faeditor"
 
     contentItem: ScrollView {

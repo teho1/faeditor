@@ -72,6 +72,17 @@ private slots:
         QVERIFY(source.contains("preventStealing: true"));
         QVERIFY(!source.contains("mouse.x - startX"));
     }
+
+    void releaseVersionIsConsistent()
+    {
+        const auto read=[](const QString &path){QFile f(path);if(!f.open(QIODevice::ReadOnly))return QByteArray();return f.readAll();};
+        const auto root=QStringLiteral(FAEDITOR_SOURCE_DIR "/");
+        QVERIFY(read(root+QStringLiteral("CMakeLists.txt")).contains("project(FAEditor VERSION 1.1.0"));
+        QVERIFY(read(root+QStringLiteral("CMakeLists.txt")).contains("MACOSX_BUNDLE_BUNDLE_VERSION 4"));
+        QVERIFY(read(root+QStringLiteral("src/main.cpp")).contains("QStringLiteral(\"1.1\")"));
+        QVERIFY(read(root+QStringLiteral("qml/views/AboutDialog.qml")).contains("appVersion: \"1.1\""));
+        QVERIFY(read(root+QStringLiteral("qml/Main.qml")).contains("appVersion: Qt.application.version"));
+    }
 };
 
 QTEST_APPLESS_MAIN(TestRoland)

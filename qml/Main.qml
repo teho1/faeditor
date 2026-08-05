@@ -207,7 +207,7 @@ ApplicationWindow {
 
     AboutDialog {
         id: aboutDialog
-        appVersion: "1.0.0"
+        appVersion: Qt.application.version
         githubUrl: "https://github.com/teholapp/faeditor"
     }
 }
