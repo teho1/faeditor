@@ -275,6 +275,15 @@ target_include_directories(FAEditorMidiPlatformTests PRIVATE ${CMAKE_CURRENT_SOU
 target_link_libraries(FAEditorMidiPlatformTests PRIVATE Qt6::Core Qt6::Test)
 add_test(NAME FAEditorMidiPlatformTests COMMAND FAEditorMidiPlatformTests)
 
+qt_add_executable(FAEditorLibraryPerformanceTests
+    tests/test_library_performance.cpp
+    src/model/ToneBrowserModel.cpp
+    src/model/WaveformCatalog.cpp
+)
+target_include_directories(FAEditorLibraryPerformanceTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(FAEditorLibraryPerformanceTests PRIVATE Qt6::Core Qt6::Test)
+add_test(NAME FAEditorLibraryPerformanceTests COMMAND FAEditorLibraryPerformanceTests)
+
 qt_add_executable(FAEditorToneWorkflowTests
     tests/test_tone_workflow.cpp
     src/model/StudioSetModel.cpp src/model/PartModel.cpp src/model/EffectsModel.cpp
