@@ -13,6 +13,7 @@ public:
                              SnAcousticCommon };
     enum class StudioBlock { Common, Chorus, Reverb, Ifx, MasterComp, Controller,
                              PadCommon, Midi, Part, PartEq, Zone, Pad };
+    enum class AudioBlock { SystemCommon, InputEfx, Tfx, SystemController };
 
     virtual ~InstrumentPlatform() = default;
     virtual bool isConnected() const = 0;
@@ -27,6 +28,12 @@ public:
                                       const QByteArray &data, QString *error = nullptr) = 0;
     virtual bool readMasterEq(QByteArray *data, QString *error = nullptr) = 0;
     virtual bool writeMasterEq(const QByteArray &data, QString *error = nullptr) = 0;
+    virtual bool readAudioBlock(AudioBlock block, int size, QByteArray *data,
+                                QString *error = nullptr) = 0;
+    virtual bool writeAudioBlock(AudioBlock block, const QByteArray &data,
+                                 QString *error = nullptr) = 0;
+    virtual bool writeAudioParameter(AudioBlock block, int offset, const QByteArray &data,
+                                     QString *error = nullptr) = 0;
     virtual bool readToneSection(int part, roland::ToneEngine engine, ToneSection section,
                                  int sectionIndex, int size, QByteArray *data,
                                  QString *error = nullptr) = 0;

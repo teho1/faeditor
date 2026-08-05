@@ -18,7 +18,7 @@ AppController::AppController(QObject *parent)
     m_waveforms = new WaveformCatalog(this);
     // Bundled Sound List names — load every start so Tone Edit never depends on Waves.
     m_waveforms->loadCatalog();
-    m_audioFx = new AudioFxModel(m_engine, this);
+    m_audioFx = new AudioFxModel(m_platform, this);
     m_tone = new TemporaryToneModel(m_engine, m_platform, m_studioSet, this);
     if (m_tone) {
         if (auto *sn = m_tone->snSynth())

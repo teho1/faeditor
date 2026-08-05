@@ -39,6 +39,21 @@ bool RolandFAPlatform::writeStudioParameter(StudioBlock b,int i,int o,const QByt
 bool RolandFAPlatform::readMasterEq(QByteArray*d,QString*e){return m_engine&&m_engine->read(addr::kSystemMasterEq,sysOff::MasterEqSize,d,e);}
 bool RolandFAPlatform::writeMasterEq(const QByteArray&d,QString*e){return m_engine&&m_engine->write(addr::kSystemMasterEq,d,e);}
 
+Address RolandFAPlatform::audioAddress(AudioBlock block) const
+{
+    switch (block) {
+    case AudioBlock::SystemCommon: return addr::kSystemCommon;
+    case AudioBlock::InputEfx: return addr::kSystemInputEfx;
+    case AudioBlock::Tfx: return addr::kSystemTfx;
+    case AudioBlock::SystemController: return addr::kSystemController;
+    }
+    return {};
+}
+
+bool RolandFAPlatform::readAudioBlock(AudioBlock b,int s,QByteArray*d,QString*e){return m_engine&&m_engine->read(audioAddress(b),s,d,e);}
+bool RolandFAPlatform::writeAudioBlock(AudioBlock b,const QByteArray&d,QString*e){return m_engine&&m_engine->write(audioAddress(b),d,e);}
+bool RolandFAPlatform::writeAudioParameter(AudioBlock b,int o,const QByteArray&d,QString*e){return m_engine&&m_engine->writeParam(addOffset(audioAddress(b),o),d,e);}
+
 Address RolandFAPlatform::address(int part, ToneEngine engine, ToneSection section, int index) const
 {
     switch (section) {

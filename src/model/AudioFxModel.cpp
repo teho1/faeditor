@@ -1,12 +1,26 @@
 #include "model/AudioFxModel.h"
-#include "midi/SysexEngine.h"
 
 #include <QJsonObject>
 #include <algorithm>
 
-AudioFxModel::AudioFxModel(SysexEngine *engine, QObject *parent)
+namespace {
+constexpr int kSystemCommonSize = 0x30;
+constexpr int kInputEfxSize = 0x0B;
+constexpr int kTfxSize = 0x26;
+constexpr int kTfxLocation = 0x28;
+constexpr int kTfxInputGain = 0x29;
+constexpr int kKnobAssignSource = 0x22;
+constexpr int kSoundModifyKnob1 = 0x19;
+constexpr int kSwitchS1Assign = 0x14;
+constexpr int kKnobTfxPrm1 = 98;
+constexpr int kKnobTfxPrm2 = 99;
+constexpr int kKnobTfxPrm3 = 100;
+constexpr int kSwitchTfxSw = 101;
+}
+
+AudioFxModel::AudioFxModel(InstrumentPlatform *platform, QObject *parent)
     : QObject(parent)
-    , m_engine(engine)
+    , m_platform(platform)
 {
 }
 
@@ -90,49 +104,49 @@ void AudioFxModel::setControllerStatus(const QString &s)
     emit controllerStatusChanged();
 }
 
-void AudioFxModel::writeByte(const roland::Address &address, int value)
+void AudioFxModel::writeByte(InstrumentPlatform::AudioBlock block, int offset, int value)
 {
-    if (m_fromDevice || !m_engine || !m_engine->isOpen())
+    if (m_fromDevice || !m_platform || !m_platform->isConnected())
         return;
     QByteArray d(1, static_cast<char>(value & 0x7F));
     QString err;
-    if (!m_engine->writeParam(address, d, &err))
+    if (!m_platform->writeAudioParameter(block, offset, d, &err))
         setError(err);
 }
 
-#define AUDIO_SETTER_BOOL(name, member, addrExpr) \
+#define AUDIO_SETTER_BOOL(name, member, block, offset) \
 void AudioFxModel::set##name(bool v) \
 { \
     if (m_##member == v) return; \
     m_##member = v; \
     emit audioFxChanged(); \
-    writeByte(addrExpr, v ? 1 : 0); \
+    writeByte(InstrumentPlatform::AudioBlock::block, offset, v ? 1 : 0); \
 }
 
-#define AUDIO_SETTER_INT(name, member, lo, hi, addrExpr) \
+#define AUDIO_SETTER_INT(name, member, lo, hi, block, offset) \
 void AudioFxModel::set##name(int v) \
 { \
     v = std::clamp(v, lo, hi); \
     if (m_##member == v) return; \
     m_##member = v; \
     emit audioFxChanged(); \
-    writeByte(addrExpr, v); \
+    writeByte(InstrumentPlatform::AudioBlock::block, offset, v); \
 }
 
-AUDIO_SETTER_BOOL(InputReverbSwitch, inputReverbSwitch, roland::addr::inputEfxParam(0x00))
-AUDIO_SETTER_INT(InputReverbType, inputReverbType, 0, 7, roland::addr::inputEfxParam(0x01))
-AUDIO_SETTER_INT(InputReverbTime, inputReverbTime, 0, 127, roland::addr::inputEfxParam(0x02))
-AUDIO_SETTER_INT(InputReverbLevel, inputReverbLevel, 0, 127, roland::addr::inputEfxParam(0x03))
-AUDIO_SETTER_BOOL(NsSwitch, nsSwitch, roland::addr::inputEfxParam(0x04))
-AUDIO_SETTER_INT(NsThreshold, nsThreshold, 0, 127, roland::addr::inputEfxParam(0x05))
-AUDIO_SETTER_INT(NsRelease, nsRelease, 0, 127, roland::addr::inputEfxParam(0x06))
-AUDIO_SETTER_BOOL(TfxSwitch, tfxSwitch, roland::addr::tfxParam(0x00))
-AUDIO_SETTER_INT(TfxParamA, tfxParamA, 0, 127, roland::addr::tfxParam(0x02))
-AUDIO_SETTER_INT(TfxParamB, tfxParamB, 0, 127, roland::addr::tfxParam(0x03))
-AUDIO_SETTER_INT(TfxParamC, tfxParamC, 0, 127, roland::addr::tfxParam(0x04))
-AUDIO_SETTER_INT(TfxParamD, tfxParamD, 0, 127, roland::addr::tfxParam(0x05))
-AUDIO_SETTER_INT(TfxLocation, tfxLocation, 0, 1, roland::addr::systemCommonParam(roland::sysOff::TfxLocation))
-AUDIO_SETTER_INT(TfxInputGain, tfxInputGain, 0, 6, roland::addr::systemCommonParam(roland::sysOff::TfxInputGain))
+AUDIO_SETTER_BOOL(InputReverbSwitch, inputReverbSwitch, InputEfx, 0x00)
+AUDIO_SETTER_INT(InputReverbType, inputReverbType, 0, 7, InputEfx, 0x01)
+AUDIO_SETTER_INT(InputReverbTime, inputReverbTime, 0, 127, InputEfx, 0x02)
+AUDIO_SETTER_INT(InputReverbLevel, inputReverbLevel, 0, 127, InputEfx, 0x03)
+AUDIO_SETTER_BOOL(NsSwitch, nsSwitch, InputEfx, 0x04)
+AUDIO_SETTER_INT(NsThreshold, nsThreshold, 0, 127, InputEfx, 0x05)
+AUDIO_SETTER_INT(NsRelease, nsRelease, 0, 127, InputEfx, 0x06)
+AUDIO_SETTER_BOOL(TfxSwitch, tfxSwitch, Tfx, 0x00)
+AUDIO_SETTER_INT(TfxParamA, tfxParamA, 0, 127, Tfx, 0x02)
+AUDIO_SETTER_INT(TfxParamB, tfxParamB, 0, 127, Tfx, 0x03)
+AUDIO_SETTER_INT(TfxParamC, tfxParamC, 0, 127, Tfx, 0x04)
+AUDIO_SETTER_INT(TfxParamD, tfxParamD, 0, 127, Tfx, 0x05)
+AUDIO_SETTER_INT(TfxLocation, tfxLocation, 0, 1, SystemCommon, kTfxLocation)
+AUDIO_SETTER_INT(TfxInputGain, tfxInputGain, 0, 6, SystemCommon, kTfxInputGain)
 
 void AudioFxModel::setTfxType(int v)
 {
@@ -142,7 +156,7 @@ void AudioFxModel::setTfxType(int v)
     m_tfxType = v;
     emit audioFxChanged();
     // Device stores panel type numbers 01–29 (SysEx 1–29), not list index 0–28.
-    writeByte(roland::addr::tfxParam(0x01), v + 1);
+    writeByte(InstrumentPlatform::AudioBlock::Tfx, 0x01, v + 1);
 }
 
 #undef AUDIO_SETTER_BOOL
@@ -150,7 +164,7 @@ void AudioFxModel::setTfxType(int v)
 
 bool AudioFxModel::pullFromDevice()
 {
-    if (!m_engine || !m_engine->isOpen()) {
+    if (!m_platform || !m_platform->isConnected()) {
         setError(QStringLiteral("Not connected"));
         return false;
     }
@@ -159,19 +173,19 @@ bool AudioFxModel::pullFromDevice()
     QString err;
 
     QByteArray input;
-    if (!m_engine->read(roland::addr::kSystemInputEfx, roland::sysOff::InputEfxSize, &input, &err)) {
+    if (!m_platform->readAudioBlock(InstrumentPlatform::AudioBlock::InputEfx, kInputEfxSize, &input, &err)) {
         setError(err);
         setBusy(false);
         return false;
     }
     QByteArray tfx;
-    if (!m_engine->read(roland::addr::kSystemTfx, roland::sysOff::TfxSize, &tfx, &err)) {
+    if (!m_platform->readAudioBlock(InstrumentPlatform::AudioBlock::Tfx, kTfxSize, &tfx, &err)) {
         setError(err);
         setBusy(false);
         return false;
     }
     QByteArray common;
-    m_engine->read(roland::addr::kSystemCommon, 0x30, &common, &err);
+    m_platform->readAudioBlock(InstrumentPlatform::AudioBlock::SystemCommon, kSystemCommonSize, &common, &err);
 
     m_fromDevice = true;
     auto at = [](const QByteArray &d, int off, int def) {
@@ -196,10 +210,10 @@ bool AudioFxModel::pullFromDevice()
     m_tfxParamC = at(tfx, 4, 64);
     m_tfxParamD = at(tfx, 5, 64);
 
-    if (common.size() > roland::sysOff::TfxLocation)
-        m_tfxLocation = at(common, roland::sysOff::TfxLocation, 1) & 0x01;
-    if (common.size() > roland::sysOff::TfxInputGain)
-        m_tfxInputGain = std::clamp(at(common, roland::sysOff::TfxInputGain, 6), 0, 6);
+    if (common.size() > kTfxLocation)
+        m_tfxLocation = at(common, kTfxLocation, 1) & 0x01;
+    if (common.size() > kTfxInputGain)
+        m_tfxInputGain = std::clamp(at(common, kTfxInputGain, 6), 0, 6);
 
     m_fromDevice = false;
     setBusy(false);
@@ -210,14 +224,14 @@ bool AudioFxModel::pullFromDevice()
 
 bool AudioFxModel::pushToDevice()
 {
-    if (!m_engine || !m_engine->isOpen()) {
+    if (!m_platform || !m_platform->isConnected()) {
         setError(QStringLiteral("Not connected"));
         return false;
     }
     setBusy(true);
     QString err;
 
-    QByteArray input(roland::sysOff::InputEfxSize, char(0));
+    QByteArray input(kInputEfxSize, char(0));
     input[0] = char(m_inputReverbSwitch ? 1 : 0);
     input[1] = char(m_inputReverbType);
     input[2] = char(m_inputReverbTime);
@@ -226,7 +240,7 @@ bool AudioFxModel::pushToDevice()
     input[5] = char(m_nsThreshold);
     input[6] = char(m_nsRelease);
 
-    QByteArray tfx(roland::sysOff::TfxSize, char(0));
+    QByteArray tfx(kTfxSize, char(0));
     tfx[0] = char(m_tfxSwitch ? 1 : 0);
     tfx[1] = char(m_tfxType + 1);
     tfx[2] = char(m_tfxParamA);
@@ -234,15 +248,14 @@ bool AudioFxModel::pushToDevice()
     tfx[4] = char(m_tfxParamC);
     tfx[5] = char(m_tfxParamD);
 
-    if (!m_engine->write(roland::addr::kSystemInputEfx, input, &err)
-        || !m_engine->write(roland::addr::kSystemTfx, tfx, &err)) {
+    if (!m_platform->writeAudioBlock(InstrumentPlatform::AudioBlock::InputEfx, input, &err)
+        || !m_platform->writeAudioBlock(InstrumentPlatform::AudioBlock::Tfx, tfx, &err)) {
         setError(err);
         setBusy(false);
         return false;
     }
-    writeByte(roland::addr::systemCommonParam(roland::sysOff::TfxLocation), m_tfxLocation);
-    writeByte(roland::addr::systemCommonParam(roland::sysOff::TfxInputGain), m_tfxInputGain);
-
+    writeByte(InstrumentPlatform::AudioBlock::SystemCommon, kTfxLocation, m_tfxLocation);
+    writeByte(InstrumentPlatform::AudioBlock::SystemCommon, kTfxInputGain, m_tfxInputGain);
     setBusy(false);
     setControllerStatus(QStringLiteral("Pushed Input FX + TFX to FA"));
     return true;
@@ -296,23 +309,19 @@ bool AudioFxModel::fromJson(const QJsonObject &obj)
 
 bool AudioFxModel::assignDeviceControlsToTfx()
 {
-    if (!m_engine || !m_engine->isOpen()) {
+    if (!m_platform || !m_platform->isConnected()) {
         setError(QStringLiteral("Not connected"));
         return false;
     }
 
     // Knob assign source = SYS (0)
-    writeByte(roland::addr::systemControllerParam(roland::ctrlOff::KnobAssignSource), 0);
+    writeByte(InstrumentPlatform::AudioBlock::SystemController, kKnobAssignSource, 0);
     // Sound Modify knobs 1–3 → TFX_PRM1–3
-    writeByte(roland::addr::systemControllerParam(roland::ctrlOff::SoundModifyKnob1),
-              roland::ctrlOff::KnobTfxPrm1);
-    writeByte(roland::addr::systemControllerParam(static_cast<quint8>(roland::ctrlOff::SoundModifyKnob1 + 1)),
-              roland::ctrlOff::KnobTfxPrm2);
-    writeByte(roland::addr::systemControllerParam(static_cast<quint8>(roland::ctrlOff::SoundModifyKnob1 + 2)),
-              roland::ctrlOff::KnobTfxPrm3);
+    writeByte(InstrumentPlatform::AudioBlock::SystemController, kSoundModifyKnob1, kKnobTfxPrm1);
+    writeByte(InstrumentPlatform::AudioBlock::SystemController, kSoundModifyKnob1 + 1, kKnobTfxPrm2);
+    writeByte(InstrumentPlatform::AudioBlock::SystemController, kSoundModifyKnob1 + 2, kKnobTfxPrm3);
     // S1 → TFX switch
-    writeByte(roland::addr::systemControllerParam(roland::ctrlOff::SwitchS1Assign),
-              roland::ctrlOff::SwitchTfxSw);
+    writeByte(InstrumentPlatform::AudioBlock::SystemController, kSwitchS1Assign, kSwitchTfxSw);
 
     // Guitar-friendly defaults
     if (m_tfxLocation != 1)

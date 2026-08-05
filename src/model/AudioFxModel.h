@@ -1,12 +1,10 @@
 #pragma once
 
-#include "midi/AddressMap.h"
+#include "platform/InstrumentPlatform.h"
 
 #include <QJsonObject>
 #include <QObject>
 #include <QStringList>
-
-class SysexEngine;
 
 class AudioFxModel : public QObject
 {
@@ -36,7 +34,7 @@ class AudioFxModel : public QObject
     Q_PROPERTY(QString controllerStatus READ controllerStatus NOTIFY controllerStatusChanged)
 
 public:
-    explicit AudioFxModel(SysexEngine *engine, QObject *parent = nullptr);
+    explicit AudioFxModel(InstrumentPlatform *platform, QObject *parent = nullptr);
 
     bool inputReverbSwitch() const { return m_inputReverbSwitch; }
     int inputReverbType() const { return m_inputReverbType; }
@@ -90,12 +88,12 @@ signals:
     void controllerStatusChanged();
 
 private:
-    void writeByte(const roland::Address &address, int value);
+    void writeByte(InstrumentPlatform::AudioBlock block, int offset, int value);
     void setError(const QString &e);
     void setBusy(bool v);
     void setControllerStatus(const QString &s);
 
-    SysexEngine *m_engine = nullptr;
+    InstrumentPlatform *m_platform = nullptr;
     bool m_fromDevice = false;
     bool m_busy = false;
     QString m_lastError;

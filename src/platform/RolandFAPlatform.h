@@ -16,6 +16,9 @@ public:
     bool writeStudioParameter(StudioBlock, int, int, const QByteArray &, QString *) override;
     bool readMasterEq(QByteArray *, QString *) override;
     bool writeMasterEq(const QByteArray &, QString *) override;
+    bool readAudioBlock(AudioBlock, int, QByteArray *, QString *) override;
+    bool writeAudioBlock(AudioBlock, const QByteArray &, QString *) override;
+    bool writeAudioParameter(AudioBlock, int, const QByteArray &, QString *) override;
     bool readToneSection(int part, roland::ToneEngine engine, ToneSection section,
                          int sectionIndex, int size, QByteArray *data, QString *error) override;
     bool writeToneSection(int part, roland::ToneEngine engine, ToneSection section,
@@ -27,5 +30,6 @@ private:
     roland::Address address(int part, roland::ToneEngine engine, ToneSection section,
                             int sectionIndex) const;
     roland::Address studioAddress(StudioBlock block, int index) const;
+    roland::Address audioAddress(AudioBlock block) const;
     SysexEngine *m_engine = nullptr;
 };

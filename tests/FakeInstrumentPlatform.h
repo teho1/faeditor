@@ -9,9 +9,11 @@ class FakeInstrumentPlatform final : public InstrumentPlatform
 {
 public:
     struct Request { bool write; int part; roland::ToneEngine engine; ToneSection section; int index; int offset; QByteArray data; };
+    struct AudioRequest { bool write; AudioBlock block; int offset; QByteArray data; };
     bool connected = true;
     QString failure;
     QVector<Request> requests;
+    QVector<AudioRequest> audioRequests;
     int recalledMsb = -1, recalledLsb = -1, recalledProgram = -1;
     QString studioSetName = QStringLiteral("Fake Set");
 
@@ -33,6 +35,11 @@ public:
     bool writeStudioParameter(StudioBlock b,int i,int o,const QByteArray&d,QString*e) override { if(!check(e))return false; auto v=studio.value(QStringLiteral("%1:%2").arg(int(b)).arg(i)); if(v.size()<o+d.size())v.resize(o+d.size()); v.replace(o,d.size(),d); studio.insert(QStringLiteral("%1:%2").arg(int(b)).arg(i),v); return true; }
     bool readMasterEq(QByteArray*d,QString*e) override { if(!check(e))return false; if(d)*d=masterEq; return true; }
     bool writeMasterEq(const QByteArray&d,QString*e) override { if(!check(e))return false; masterEq=d; return true; }
+    void seedAudio(AudioBlock b,const QByteArray&d){audio.insert(int(b),d);}
+    QByteArray storedAudio(AudioBlock b)const{return audio.value(int(b));}
+    bool readAudioBlock(AudioBlock b,int s,QByteArray*d,QString*e) override { audioRequests.push_back({false,b,0,{}}); if(!check(e)||!d)return false; *d=audio.value(int(b)).left(s).leftJustified(s,'\0'); return true; }
+    bool writeAudioBlock(AudioBlock b,const QByteArray&d,QString*e) override { audioRequests.push_back({true,b,0,d}); if(!check(e))return false; audio.insert(int(b),d); return true; }
+    bool writeAudioParameter(AudioBlock b,int o,const QByteArray&d,QString*e) override { audioRequests.push_back({true,b,o,d}); if(!check(e))return false; auto v=audio.value(int(b)); if(v.size()<o+d.size())v.resize(o+d.size()); v.replace(o,d.size(),d); audio.insert(int(b),v); return true; }
     bool readToneSection(int part, roland::ToneEngine engine, ToneSection section, int index,
                          int size, QByteArray *data, QString *error) override
     {
@@ -62,4 +69,5 @@ private:
     QHash<QString, QByteArray> memory;
     QHash<QString, QByteArray> studio;
     QByteArray masterEq;
+    QHash<int, QByteArray> audio;
 };
