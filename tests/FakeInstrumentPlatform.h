@@ -21,11 +21,18 @@ public:
     { memory.insert(key(part, engine, section, index), data); }
     QByteArray stored(int part, roland::ToneEngine engine, ToneSection section, int index) const
     { return memory.value(key(part, engine, section, index)); }
+    void seedStudio(StudioBlock b,int i,const QByteArray&d){studio.insert(QStringLiteral("%1:%2").arg(int(b)).arg(i),d);}
+    QByteArray storedStudio(StudioBlock b,int i)const{return studio.value(QStringLiteral("%1:%2").arg(int(b)).arg(i));}
     bool isConnected() const override { return connected; }
     bool recallStudioSet(int msb, int lsb, int program, QString *error) override
     { if (!check(error)) return false; recalledMsb=msb; recalledLsb=lsb; recalledProgram=program; return true; }
     bool readTemporaryStudioSetName(QString *name, QString *error) override
     { if (!check(error)) return false; if (name) *name=studioSetName; return true; }
+    bool readStudioBlock(StudioBlock b,int i,int s,QByteArray*d,QString*e) override { if(!check(e))return false; if(d)*d=studio.value(QStringLiteral("%1:%2").arg(int(b)).arg(i),QByteArray(s,'\0')).leftJustified(s,'\0'); return true; }
+    bool writeStudioBlock(StudioBlock b,int i,const QByteArray&d,QString*e) override { if(!check(e))return false; studio.insert(QStringLiteral("%1:%2").arg(int(b)).arg(i),d); return true; }
+    bool writeStudioParameter(StudioBlock b,int i,int o,const QByteArray&d,QString*e) override { if(!check(e))return false; auto v=studio.value(QStringLiteral("%1:%2").arg(int(b)).arg(i)); if(v.size()<o+d.size())v.resize(o+d.size()); v.replace(o,d.size(),d); studio.insert(QStringLiteral("%1:%2").arg(int(b)).arg(i),v); return true; }
+    bool readMasterEq(QByteArray*d,QString*e) override { if(!check(e))return false; if(d)*d=masterEq; return true; }
+    bool writeMasterEq(const QByteArray&d,QString*e) override { if(!check(e))return false; masterEq=d; return true; }
     bool readToneSection(int part, roland::ToneEngine engine, ToneSection section, int index,
                          int size, QByteArray *data, QString *error) override
     {
@@ -53,4 +60,6 @@ public:
 private:
     bool check(QString *error) const { if (!connected || !failure.isEmpty()) { if (error) *error = failure.isEmpty() ? QStringLiteral("Not connected") : failure; return false; } return true; }
     QHash<QString, QByteArray> memory;
+    QHash<QString, QByteArray> studio;
+    QByteArray masterEq;
 };

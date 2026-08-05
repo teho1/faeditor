@@ -253,6 +253,7 @@ add_test(NAME FAEditorMfxTests COMMAND FAEditorMfxTests)
 
 qt_add_executable(FAEditorPlatformTests
     tests/test_platform.cpp
+    src/model/TemporarySysexStore.cpp
 )
 target_include_directories(FAEditorPlatformTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 target_link_libraries(FAEditorPlatformTests PRIVATE Qt6::Core Qt6::Test)

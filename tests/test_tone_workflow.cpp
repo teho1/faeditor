@@ -37,11 +37,11 @@ private slots:
     void initSnSynthSetsPartModeAndPushesSelectedPart()
     {
         FakeSysexEngine fake; UndoController undo;
-        StudioSetModel studio(&fake, &undo);
+        RolandFAPlatform platform(&fake);
+        StudioSetModel studio(&platform, &undo);
         studio.setSelectedPart(5);
         studio.selectedPartModel()->setBankMsb(87);
         fake.writes.clear();
-        RolandFAPlatform platform(&fake);
         TemporaryToneModel tone(&fake, &platform, &studio);
         QVERIFY(tone.initSnSynth());
         QCOMPARE(studio.selectedPartModel()->bankMsb(), 95);
@@ -59,10 +59,10 @@ private slots:
     void pullPushAndErrorsAreHeadless()
     {
         FakeSysexEngine fake; UndoController undo;
-        StudioSetModel studio(&fake, &undo);
+        RolandFAPlatform platform(&fake);
+        StudioSetModel studio(&platform, &undo);
         studio.setSelectedPart(2);
         studio.selectedPartModel()->setBankMsb(95);
-        RolandFAPlatform platform(&fake);
         TemporaryToneModel tone(&fake, &platform, &studio);
         QVERIFY(tone.pull());
         QVERIFY(tone.push());

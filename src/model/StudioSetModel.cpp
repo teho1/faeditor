@@ -1,5 +1,5 @@
 #include "model/StudioSetModel.h"
-#include "midi/SysexEngine.h"
+#include "platform/InstrumentPlatform.h"
 #include "midi/AddressMap.h"
 #include "undo/UndoController.h"
 
@@ -7,9 +7,9 @@
 #include <QJsonArray>
 #include <algorithm>
 
-StudioSetModel::StudioSetModel(SysexEngine *engine, UndoController *undo, QObject *parent)
+StudioSetModel::StudioSetModel(InstrumentPlatform *platform, UndoController *undo, QObject *parent)
     : QAbstractListModel(parent)
-    , m_engine(engine)
+    , m_platform(platform)
     , m_undo(undo)
     , m_effects(new EffectsModel(this))
 {
@@ -165,12 +165,12 @@ void StudioSetModel::setName(const QString &n)
     m_name = trimmed;
     emit nameChanged();
     setDirty(true);
-    if (m_engine && m_engine->isOpen()) {
+    if (m_platform && m_platform->isConnected()) {
         QByteArray data(16, ' ');
         const QByteArray utf = m_name.toLatin1();
         for (int i = 0; i < utf.size() && i < 16; ++i)
             data[i] = utf[i];
-        m_engine->writeParam(roland::addr::commonParam(0), data);
+        m_platform->writeStudioParameter(InstrumentPlatform::StudioBlock::Common,0,0,data);
     }
     emit autosaveRequested();
 }
@@ -197,9 +197,9 @@ void StudioSetModel::setSoloPart(int v)
         notifyPartRow(i);
     }
     emit soloPartChanged();
-    if (m_engine && m_engine->isOpen()) {
+    if (m_platform && m_platform->isConnected()) {
         QByteArray d(1, static_cast<char>(m_soloPart));
-        m_engine->writeParam(roland::addr::commonParam(roland::commonOff::SoloPart), d);
+        m_platform->writeStudioParameter(InstrumentPlatform::StudioBlock::Common,0,roland::commonOff::SoloPart,d);
     }
     setDirty(true);
     emit autosaveRequested();
@@ -270,13 +270,13 @@ void StudioSetModel::seedRawFromSysexBlobs()
 
 bool StudioSetModel::pullSystemMasterEq(QString *error)
 {
-    if (!m_engine || !m_engine->isOpen()) {
+    if (!m_platform || !m_platform->isConnected()) {
         if (error)
             *error = QStringLiteral("Not connected");
         return false;
     }
     QByteArray data;
-    if (!m_engine->read(roland::addr::kSystemMasterEq, roland::sysOff::MasterEqSize, &data, error))
+    if (!m_platform->readMasterEq(&data, error))
         return false;
     m_systemMasterEq = data;
     return true;
@@ -284,10 +284,10 @@ bool StudioSetModel::pullSystemMasterEq(QString *error)
 
 bool StudioSetModel::refreshLibraryBlobs()
 {
-    if (!m_engine || !m_engine->isOpen())
+    if (!m_platform || !m_platform->isConnected())
         return false;
     QString err;
-    if (!m_sysexBlobs.pullFromDevice(m_engine, &err)) {
+    if (!m_sysexBlobs.pullFromDevice(m_platform, &err)) {
         setError(err);
         return false;
     }
@@ -303,12 +303,12 @@ bool StudioSetModel::pushSystemMasterEq()
 {
     if (m_systemMasterEq.isEmpty())
         return true;
-    if (!m_engine || !m_engine->isOpen()) {
+    if (!m_platform || !m_platform->isConnected()) {
         setError(QStringLiteral("Not connected"));
         return false;
     }
     QString err;
-    if (!m_engine->write(roland::addr::kSystemMasterEq, m_systemMasterEq, &err)) {
+    if (!m_platform->writeMasterEq(m_systemMasterEq, &err)) {
         setError(err);
         return false;
     }
@@ -337,25 +337,26 @@ bool StudioSetModel::pushTypedOverlays(QString *error)
     const auto latin = m_name.toLatin1();
     for (int i = 0; i < latin.size() && i < 16; ++i)
         nameData[i] = latin[i];
-    if (!m_engine->write(roland::addr::kStudioSetCommon, nameData, error))
+    using B=InstrumentPlatform::StudioBlock;
+    if (!m_platform->writeStudioBlock(B::Common,0,nameData,error))
         return false;
 
     {
         QByteArray d(1, static_cast<char>(m_soloPart));
-        if (!m_engine->writeParam(roland::addr::commonParam(roland::commonOff::SoloPart), d, error))
+        if (!m_platform->writeStudioParameter(B::Common,0,roland::commonOff::SoloPart,d,error))
             return false;
     }
 
     for (int i = 0; i < 16; ++i) {
-        if (!m_engine->write(roland::addr::part(i), m_parts[i]->toPartBytes(), error))
+        if (!m_platform->writeStudioBlock(B::Part,i,m_parts[i]->toPartBytes(),error))
             return false;
-        if (!m_engine->write(roland::addr::zone(i), m_parts[i]->toZoneBytes(), error))
+        if (!m_platform->writeStudioBlock(B::Zone,i,m_parts[i]->toZoneBytes(),error))
             return false;
     }
 
-    if (!m_engine->write(roland::addr::kStudioSetChorus, m_effects->chorusBytes(), error)
-        || !m_engine->write(roland::addr::kStudioSetReverb, m_effects->reverbBytes(), error)
-        || !m_engine->write(roland::addr::kStudioSetMasterComp, m_effects->masterCompBytes(), error)) {
+    if (!m_platform->writeStudioBlock(B::Chorus,0,m_effects->chorusBytes(),error)
+        || !m_platform->writeStudioBlock(B::Reverb,0,m_effects->reverbBytes(),error)
+        || !m_platform->writeStudioBlock(B::MasterComp,0,m_effects->masterCompBytes(),error)) {
         return false;
     }
     return true;
@@ -363,7 +364,7 @@ bool StudioSetModel::pushTypedOverlays(QString *error)
 
 bool StudioSetModel::pullFromDevice()
 {
-    if (!m_engine || !m_engine->isOpen()) {
+    if (!m_platform || !m_platform->isConnected()) {
         setError(QStringLiteral("Not connected"));
         return false;
     }
@@ -372,7 +373,7 @@ bool StudioSetModel::pullFromDevice()
     m_suppressUndo = true;
 
     QString err;
-    if (!m_sysexBlobs.pullFromDevice(m_engine, &err)) {
+    if (!m_sysexBlobs.pullFromDevice(m_platform, &err)) {
         setError(err);
         setBusy(false);
         m_suppressUndo = false;
@@ -428,7 +429,7 @@ bool StudioSetModel::pullFromDevice()
 
 bool StudioSetModel::pushToDevice()
 {
-    if (!m_engine || !m_engine->isOpen()) {
+    if (!m_platform || !m_platform->isConnected()) {
         setError(QStringLiteral("Not connected"));
         return false;
     }
@@ -437,7 +438,7 @@ bool StudioSetModel::pushToDevice()
 
     if (!m_sysexBlobs.isEmpty()) {
         seedRawFromSysexBlobs();
-        if (!m_sysexBlobs.pushToDevice(m_engine, &err)) {
+        if (!m_sysexBlobs.pushToDevice(m_platform, &err)) {
             setError(err);
             setBusy(false);
             return false;
@@ -483,54 +484,52 @@ void StudioSetModel::onEffectsEdited(const QString &section, const QString &para
 
 void StudioSetModel::writePartParam(int partIndex, const QString &param, int value)
 {
-    if (!m_engine || !m_engine->isOpen())
+    if (!m_platform || !m_platform->isConnected())
         return;
     using namespace roland;
-    Address a{};
+    auto block = InstrumentPlatform::StudioBlock::Part;
+    int offset = -1;
     QByteArray d(1, static_cast<char>(value & 0x7F));
     if (param == QLatin1String("receiveChannel"))
-        a = addr::partParam(partIndex, partOff::ReceiveChannel);
+        offset = partOff::ReceiveChannel;
     else if (param == QLatin1String("partSwitch"))
-        a = addr::partParam(partIndex, partOff::PartSwitch);
+        offset = partOff::PartSwitch;
     else if (param == QLatin1String("bankMsb"))
-        a = addr::partParam(partIndex, partOff::ToneBankMsb);
+        offset = partOff::ToneBankMsb;
     else if (param == QLatin1String("bankLsb"))
-        a = addr::partParam(partIndex, partOff::ToneBankLsb);
+        offset = partOff::ToneBankLsb;
     else if (param == QLatin1String("program"))
-        a = addr::partParam(partIndex, partOff::ToneProgram);
+        offset = partOff::ToneProgram;
     else if (param == QLatin1String("level"))
-        a = addr::partParam(partIndex, partOff::PartLevel);
+        offset = partOff::PartLevel;
     else if (param == QLatin1String("pan"))
-        a = addr::partParam(partIndex, partOff::PartPan);
+        offset = partOff::PartPan;
     else if (param == QLatin1String("coarseTune"))
-        a = addr::partParam(partIndex, partOff::PartCoarseTune);
+        offset = partOff::PartCoarseTune;
     else if (param == QLatin1String("octaveShift"))
-        a = addr::partParam(partIndex, partOff::PartOctaveShift);
+        offset = partOff::PartOctaveShift;
     else if (param == QLatin1String("velocityLow"))
-        a = addr::partParam(partIndex, partOff::VelocityRangeLower);
+        offset = partOff::VelocityRangeLower;
     else if (param == QLatin1String("velocityHigh"))
-        a = addr::partParam(partIndex, partOff::VelocityRangeUpper);
+        offset = partOff::VelocityRangeUpper;
     else if (param == QLatin1String("mute"))
-        a = addr::partParam(partIndex, partOff::MuteSwitch);
+        offset = partOff::MuteSwitch;
     else if (param == QLatin1String("chorusSend"))
-        a = addr::partParam(partIndex, partOff::ChorusSend);
+        offset = partOff::ChorusSend;
     else if (param == QLatin1String("reverbSend"))
-        a = addr::partParam(partIndex, partOff::ReverbSend);
+        offset = partOff::ReverbSend;
     else if (param == QLatin1String("outputAssign"))
-        a = addr::partParam(partIndex, partOff::OutputAssign);
-    else if (param == QLatin1String("keyLow"))
-        a = addr::zoneParam(partIndex, zoneOff::KeyRangeLower);
-    else if (param == QLatin1String("keyHigh"))
-        a = addr::zoneParam(partIndex, zoneOff::KeyRangeUpper);
-    else if (param == QLatin1String("keyboardSwitch"))
-        a = addr::zoneParam(partIndex, zoneOff::KeyboardSwitch);
+        offset = partOff::OutputAssign;
+    else if (param == QLatin1String("keyLow")) { block=InstrumentPlatform::StudioBlock::Zone; offset=zoneOff::KeyRangeLower; }
+    else if (param == QLatin1String("keyHigh")) { block=InstrumentPlatform::StudioBlock::Zone; offset=zoneOff::KeyRangeUpper; }
+    else if (param == QLatin1String("keyboardSwitch")) { block=InstrumentPlatform::StudioBlock::Zone; offset=zoneOff::KeyboardSwitch; }
     else if (param == QLatin1String("solo")) {
         setSoloPart(value ? partIndex + 1 : 0);
         return;
     } else
         return;
 
-    m_engine->writeParam(a, d);
+    m_platform->writeStudioParameter(block,partIndex,offset,d);
     if (param == QLatin1String("bankMsb") || param == QLatin1String("bankLsb")
         || param == QLatin1String("program"))
         refreshToneNames();
@@ -538,44 +537,36 @@ void StudioSetModel::writePartParam(int partIndex, const QString &param, int val
 
 void StudioSetModel::writeEffectParam(const QString &section, const QString &param, int value)
 {
-    if (!m_engine || !m_engine->isOpen())
+    if (!m_platform || !m_platform->isConnected())
         return;
     using namespace roland;
-    Address a{};
+    auto block=InstrumentPlatform::StudioBlock::Chorus; int offset=-1;
     QByteArray d(1, static_cast<char>(value & 0x7F));
     if (section == QLatin1String("chorus")) {
         // MIDI Imple Studio Set Chorus: 00 Switch, 01 Type, 02 Level
         if (param == QLatin1String("type"))
-            a = addr::chorusParam(0x01);
+            offset=0x01;
         else if (param == QLatin1String("level"))
-            a = addr::chorusParam(0x02);
+            offset=0x02;
         else
             return;
     } else if (section == QLatin1String("reverb")) {
-        if (param == QLatin1String("type"))
-            a = addr::reverbParam(0x01);
-        else if (param == QLatin1String("level"))
-            a = addr::reverbParam(0x02);
+        if (param == QLatin1String("type")) { block=InstrumentPlatform::StudioBlock::Reverb; offset=0x01; }
+        else if (param == QLatin1String("level")) { block=InstrumentPlatform::StudioBlock::Reverb; offset=0x02; }
         else
             return;
     } else if (section == QLatin1String("masterComp")) {
-        if (param == QLatin1String("switch"))
-            a = addr::masterCompParam(0x00);
-        else if (param == QLatin1String("attack"))
-            a = addr::masterCompParam(0x01);
-        else if (param == QLatin1String("release"))
-            a = addr::masterCompParam(0x02);
-        else if (param == QLatin1String("threshold"))
-            a = addr::masterCompParam(0x03);
-        else if (param == QLatin1String("ratio"))
-            a = addr::masterCompParam(0x04);
-        else if (param == QLatin1String("gain"))
-            a = addr::masterCompParam(0x05);
+        if (param == QLatin1String("switch")) { block=InstrumentPlatform::StudioBlock::MasterComp; offset=0x00; }
+        else if (param == QLatin1String("attack")) { block=InstrumentPlatform::StudioBlock::MasterComp; offset=0x01; }
+        else if (param == QLatin1String("release")) { block=InstrumentPlatform::StudioBlock::MasterComp; offset=0x02; }
+        else if (param == QLatin1String("threshold")) { block=InstrumentPlatform::StudioBlock::MasterComp; offset=0x03; }
+        else if (param == QLatin1String("ratio")) { block=InstrumentPlatform::StudioBlock::MasterComp; offset=0x04; }
+        else if (param == QLatin1String("gain")) { block=InstrumentPlatform::StudioBlock::MasterComp; offset=0x05; }
         else
             return;
     } else
         return;
-    m_engine->writeParam(a, d);
+    m_platform->writeStudioParameter(block,0,offset,d);
 }
 
 QJsonObject StudioSetModel::toJson() const

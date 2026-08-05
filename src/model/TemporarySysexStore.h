@@ -1,20 +1,21 @@
 #pragma once
 
 #include "midi/AddressMap.h"
+#include "platform/InstrumentPlatform.h"
 
 #include <QByteArray>
 #include <QJsonObject>
 #include <QMap>
 #include <QString>
 
-class SysexEngine;
+class InstrumentPlatform;
 
 /** Raw Temporary Studio Set SysEx dumps (base64 in library JSON under sysexBlobs). */
 class TemporarySysexStore
 {
 public:
-    bool pullFromDevice(SysexEngine *engine, QString *error = nullptr);
-    bool pushToDevice(SysexEngine *engine, QString *error = nullptr) const;
+    bool pullFromDevice(InstrumentPlatform *platform, QString *error = nullptr);
+    bool pushToDevice(InstrumentPlatform *platform, QString *error = nullptr) const;
 
     QJsonObject toJson() const;
     void fromJson(const QJsonObject &obj);
@@ -32,10 +33,8 @@ public:
     static QString padKey(int index);
 
 private:
-    bool readBlock(SysexEngine *engine, const QString &key,
-                   const roland::Address &address, int size, QString *error);
-    bool writeBlock(SysexEngine *engine, const QString &key,
-                    const roland::Address &address, QString *error) const;
+    bool readBlock(InstrumentPlatform *, const QString &, InstrumentPlatform::StudioBlock, int, int, QString *);
+    bool writeBlock(InstrumentPlatform *, const QString &, InstrumentPlatform::StudioBlock, int, QString *) const;
 
     QMap<QString, QByteArray> m_blobs;
 };

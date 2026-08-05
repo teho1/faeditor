@@ -22,6 +22,23 @@ bool RolandFAPlatform::readTemporaryStudioSetName(QString *name, QString *error)
     return true;
 }
 
+Address RolandFAPlatform::studioAddress(StudioBlock b, int i) const
+{
+    switch (b) {
+    case StudioBlock::Common: return addr::kStudioSetCommon; case StudioBlock::Chorus: return addr::kStudioSetChorus;
+    case StudioBlock::Reverb: return addr::kStudioSetReverb; case StudioBlock::Ifx: return addr::kStudioSetIfx;
+    case StudioBlock::MasterComp: return addr::kStudioSetMasterComp; case StudioBlock::Controller: return addr::kStudioSetController;
+    case StudioBlock::PadCommon: return addr::kStudioSetPadCommon; case StudioBlock::Midi: return addr::midiChannel(i);
+    case StudioBlock::Part: return addr::part(i); case StudioBlock::PartEq: return addr::partEq(i);
+    case StudioBlock::Zone: return addr::zone(i); case StudioBlock::Pad: return addr::pad(i);
+    } return {};
+}
+bool RolandFAPlatform::readStudioBlock(StudioBlock b,int i,int s,QByteArray*d,QString*e){return m_engine&&m_engine->read(studioAddress(b,i),s,d,e);}
+bool RolandFAPlatform::writeStudioBlock(StudioBlock b,int i,const QByteArray&d,QString*e){return m_engine&&m_engine->write(studioAddress(b,i),d,e);}
+bool RolandFAPlatform::writeStudioParameter(StudioBlock b,int i,int o,const QByteArray&d,QString*e){return m_engine&&m_engine->writeParam(addOffset(studioAddress(b,i),o),d,e);}
+bool RolandFAPlatform::readMasterEq(QByteArray*d,QString*e){return m_engine&&m_engine->read(addr::kSystemMasterEq,sysOff::MasterEqSize,d,e);}
+bool RolandFAPlatform::writeMasterEq(const QByteArray&d,QString*e){return m_engine&&m_engine->write(addr::kSystemMasterEq,d,e);}
+
 Address RolandFAPlatform::address(int part, ToneEngine engine, ToneSection section, int index) const
 {
     switch (section) {

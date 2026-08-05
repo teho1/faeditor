@@ -11,6 +11,11 @@ public:
     bool isConnected() const override;
     bool recallStudioSet(int bankMsb, int bankLsb, int program, QString *error) override;
     bool readTemporaryStudioSetName(QString *name, QString *error) override;
+    bool readStudioBlock(StudioBlock, int, int, QByteArray *, QString *) override;
+    bool writeStudioBlock(StudioBlock, int, const QByteArray &, QString *) override;
+    bool writeStudioParameter(StudioBlock, int, int, const QByteArray &, QString *) override;
+    bool readMasterEq(QByteArray *, QString *) override;
+    bool writeMasterEq(const QByteArray &, QString *) override;
     bool readToneSection(int part, roland::ToneEngine engine, ToneSection section,
                          int sectionIndex, int size, QByteArray *data, QString *error) override;
     bool writeToneSection(int part, roland::ToneEngine engine, ToneSection section,
@@ -21,5 +26,6 @@ public:
 private:
     roland::Address address(int part, roland::ToneEngine engine, ToneSection section,
                             int sectionIndex) const;
+    roland::Address studioAddress(StudioBlock block, int index) const;
     SysexEngine *m_engine = nullptr;
 };

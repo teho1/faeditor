@@ -1,5 +1,5 @@
 #include "model/TemporarySysexStore.h"
-#include "midi/SysexEngine.h"
+#include "platform/InstrumentPlatform.h"
 
 #include <QJsonObject>
 
@@ -50,28 +50,28 @@ void TemporarySysexStore::setBlob(const QString &key, const QByteArray &data)
         m_blobs.insert(key, data);
 }
 
-bool TemporarySysexStore::readBlock(SysexEngine *engine, const QString &key,
-                                    const roland::Address &address, int size, QString *error)
+bool TemporarySysexStore::readBlock(InstrumentPlatform *engine, const QString &key,
+                                    InstrumentPlatform::StudioBlock block, int index, int size, QString *error)
 {
     QByteArray data;
-    if (!engine->read(address, size, &data, error))
+    if (!engine->readStudioBlock(block, index, size, &data, error))
         return false;
     m_blobs.insert(key, data);
     return true;
 }
 
-bool TemporarySysexStore::writeBlock(SysexEngine *engine, const QString &key,
-                                     const roland::Address &address, QString *error) const
+bool TemporarySysexStore::writeBlock(InstrumentPlatform *engine, const QString &key,
+                                     InstrumentPlatform::StudioBlock block, int index, QString *error) const
 {
     const auto data = m_blobs.value(key);
     if (data.isEmpty())
         return true;
-    return engine->write(address, data, error);
+    return engine->writeStudioBlock(block, index, data, error);
 }
 
-bool TemporarySysexStore::pullFromDevice(SysexEngine *engine, QString *error)
+bool TemporarySysexStore::pullFromDevice(InstrumentPlatform *engine, QString *error)
 {
-    if (!engine || !engine->isOpen()) {
+    if (!engine || !engine->isConnected()) {
         if (error)
             *error = QStringLiteral("Not connected");
         return false;
@@ -80,31 +80,22 @@ bool TemporarySysexStore::pullFromDevice(SysexEngine *engine, QString *error)
     using namespace roland;
     m_blobs.clear();
 
-    if (!readBlock(engine, QStringLiteral("common"), addr::kStudioSetCommon, ssOff::CommonSize, error)
-        || !readBlock(engine, QStringLiteral("chorus"), addr::kStudioSetChorus, ssOff::ChorusSize, error)
-        || !readBlock(engine, QStringLiteral("reverb"), addr::kStudioSetReverb, ssOff::ReverbSize, error)
-        || !readBlock(engine, QStringLiteral("ifx"), addr::kStudioSetIfx, ssOff::IfxSize, error)
-        || !readBlock(engine, QStringLiteral("masterComp"), addr::kStudioSetMasterComp, ssOff::MasterCompSize, error)
-        || !readBlock(engine, QStringLiteral("controller"), addr::kStudioSetController, ssOff::ControllerSize, error)
-        || !readBlock(engine, QStringLiteral("padCommon"), addr::kStudioSetPadCommon, ssOff::PadCommonSize, error)) {
+    using B=InstrumentPlatform::StudioBlock;
+    if (!readBlock(engine,"common",B::Common,0,ssOff::CommonSize,error)||!readBlock(engine,"chorus",B::Chorus,0,ssOff::ChorusSize,error)||!readBlock(engine,"reverb",B::Reverb,0,ssOff::ReverbSize,error)||!readBlock(engine,"ifx",B::Ifx,0,ssOff::IfxSize,error)||!readBlock(engine,"masterComp",B::MasterComp,0,ssOff::MasterCompSize,error)||!readBlock(engine,"controller",B::Controller,0,ssOff::ControllerSize,error)||!readBlock(engine,"padCommon",B::PadCommon,0,ssOff::PadCommonSize,error)) {
         return false;
     }
 
     for (int i = 0; i < 16; ++i) {
-        if (!readBlock(engine, midiKey(i), addr::midiChannel(i), ssOff::MidiChSize, error)
-            || !readBlock(engine, partKey(i), addr::part(i), partOff::PartSize, error)
-            || !readBlock(engine, partEqKey(i), addr::partEq(i), ssOff::PartEqSize, error)
-            || !readBlock(engine, zoneKey(i), addr::zone(i), zoneOff::ZoneSize, error)
-            || !readBlock(engine, padKey(i), addr::pad(i), ssOff::PadSize, error)) {
+        if (!readBlock(engine,midiKey(i),B::Midi,i,ssOff::MidiChSize,error)||!readBlock(engine,partKey(i),B::Part,i,partOff::PartSize,error)||!readBlock(engine,partEqKey(i),B::PartEq,i,ssOff::PartEqSize,error)||!readBlock(engine,zoneKey(i),B::Zone,i,zoneOff::ZoneSize,error)||!readBlock(engine,padKey(i),B::Pad,i,ssOff::PadSize,error)) {
             return false;
         }
     }
     return true;
 }
 
-bool TemporarySysexStore::pushToDevice(SysexEngine *engine, QString *error) const
+bool TemporarySysexStore::pushToDevice(InstrumentPlatform *engine, QString *error) const
 {
-    if (!engine || !engine->isOpen()) {
+    if (!engine || !engine->isConnected()) {
         if (error)
             *error = QStringLiteral("Not connected");
         return false;
@@ -114,22 +105,13 @@ bool TemporarySysexStore::pushToDevice(SysexEngine *engine, QString *error) cons
 
     using namespace roland;
 
-    if (!writeBlock(engine, QStringLiteral("common"), addr::kStudioSetCommon, error)
-        || !writeBlock(engine, QStringLiteral("chorus"), addr::kStudioSetChorus, error)
-        || !writeBlock(engine, QStringLiteral("reverb"), addr::kStudioSetReverb, error)
-        || !writeBlock(engine, QStringLiteral("ifx"), addr::kStudioSetIfx, error)
-        || !writeBlock(engine, QStringLiteral("masterComp"), addr::kStudioSetMasterComp, error)
-        || !writeBlock(engine, QStringLiteral("controller"), addr::kStudioSetController, error)
-        || !writeBlock(engine, QStringLiteral("padCommon"), addr::kStudioSetPadCommon, error)) {
+    using B=InstrumentPlatform::StudioBlock;
+    if (!writeBlock(engine,"common",B::Common,0,error)||!writeBlock(engine,"chorus",B::Chorus,0,error)||!writeBlock(engine,"reverb",B::Reverb,0,error)||!writeBlock(engine,"ifx",B::Ifx,0,error)||!writeBlock(engine,"masterComp",B::MasterComp,0,error)||!writeBlock(engine,"controller",B::Controller,0,error)||!writeBlock(engine,"padCommon",B::PadCommon,0,error)) {
         return false;
     }
 
     for (int i = 0; i < 16; ++i) {
-        if (!writeBlock(engine, midiKey(i), addr::midiChannel(i), error)
-            || !writeBlock(engine, partKey(i), addr::part(i), error)
-            || !writeBlock(engine, partEqKey(i), addr::partEq(i), error)
-            || !writeBlock(engine, zoneKey(i), addr::zone(i), error)
-            || !writeBlock(engine, padKey(i), addr::pad(i), error)) {
+        if (!writeBlock(engine,midiKey(i),B::Midi,i,error)||!writeBlock(engine,partKey(i),B::Part,i,error)||!writeBlock(engine,partEqKey(i),B::PartEq,i,error)||!writeBlock(engine,zoneKey(i),B::Zone,i,error)||!writeBlock(engine,padKey(i),B::Pad,i,error)) {
             return false;
         }
     }

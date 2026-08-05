@@ -10,7 +10,7 @@
 #include <QJsonObject>
 #include <functional>
 
-class SysexEngine;
+class InstrumentPlatform;
 class UndoController;
 
 class StudioSetModel : public QAbstractListModel
@@ -48,7 +48,7 @@ public:
         OutputAssignRole
     };
 
-    explicit StudioSetModel(SysexEngine *engine, UndoController *undo, QObject *parent = nullptr);
+    explicit StudioSetModel(InstrumentPlatform *platform, UndoController *undo, QObject *parent = nullptr);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
@@ -116,7 +116,7 @@ private:
     bool pullSystemMasterEq(QString *error);
     bool pushTypedOverlays(QString *error);
 
-    SysexEngine *m_engine = nullptr;
+    InstrumentPlatform *m_platform = nullptr;
     UndoController *m_undo = nullptr;
     QVector<PartModel *> m_parts;
     EffectsModel *m_effects = nullptr;

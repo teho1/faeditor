@@ -11,7 +11,7 @@ AppController::AppController(QObject *parent)
     m_platform = new RolandFAPlatform(m_engine);
     m_midi = new MidiDeviceModel(m_engine, this);
     m_undo = new UndoController(this);
-    m_studioSet = new StudioSetModel(m_engine, m_undo, this);
+    m_studioSet = new StudioSetModel(m_platform, m_undo, this);
     m_studioSets = new StudioSetBrowserModel(m_platform, m_studioSet, this);
     m_tones = new ToneBrowserModel(this);
     m_tones->loadCatalog();
