@@ -4,7 +4,32 @@ This document records reverse-engineering observations used to develop offline
 Roland FA backup import. It is not an official Roland file-format specification.
 All multi-byte integers observed in the FA sample are big-endian.
 
+The description is the result of independent interoperability research on
+lawfully obtained files and equipment. It contains our own observations and
+implementation notes, not Roland source code, firmware, factory sound data, or
+confidential material. Roland product names and trademarks belong to their
+respective owner. FAEditor is not affiliated with or endorsed by Roland.
+
 ![Observed SVD1 container layout](svd-format.svg)
+
+## Evidence levels
+
+Statements in this document use the following evidence levels. A field should
+not be treated as writable merely because its position is known.
+
+| Level | Meaning |
+| --- | --- |
+| **Official** | Parameter meaning, address, range, or device-side encoding is stated in a public Roland manual. Roland does not document the packed SVD1 layout. |
+| **Verified** | Reproduced from more than one controlled observation, or matched between an SVD record and a USB SysEx pull from the FA-08. |
+| **Observed** | Present consistently in the available samples, but its semantics or universality have not been independently established. |
+| **Inferred** | Best explanation of offsets, boundaries, or purpose based on surrounding structure. It may change when new fixtures become available. |
+| **Unknown** | Preserved without interpretation. Writers must not synthesize a value for it. |
+
+The names in the layout tables may combine two kinds of evidence: the packed
+bit position is independently observed, while the semantic name and legal value
+range come from Roland's public MIDI Implementation or Parameter Guide. Such a
+row is marked **Verified**, not **Official**, because the manuals do not describe
+where that value is stored in an SVD file.
 
 ## Container layout
 
@@ -206,6 +231,55 @@ or other Roland products.
   the bit mapping itself is therefore reverse-engineered evidence, not an
   official Roland specification.
 
+### Tests performed
+
+The following checks have been performed during development:
+
+| Check | Evidence/result |
+| --- | --- |
+| Container parsing | The private FA `SVD1`/`MI73` fixture enumerates the areas and record sizes shown above. A structurally different `SVD0`/`XP50` fixture is rejected by the FA importer. |
+| Controlled record comparison | `MyC3Rock1`, repeated `INIT TONE` records, and related controlled variants were compared bit by bit to locate changing fields and fixed boundaries. |
+| USB comparison | `Full Grand 1` was pulled from an FA-08 over USB. Its Common and MFX logical values matched the independently decoded SVD record, including all 32 MFX parameters. |
+| Device playback | Imported `SNTaMI73` tones were written only to the selected part's FA Temporary Tone blocks and auditioned on an FA-08. All 128 SN Acoustic entries in the available backup were exercised; an initially incorrect one-based instrument conversion was found and removed. |
+| Synthetic unit fixture | `tests/test_svd_import.cpp` constructs an original, minimal SVD1/MI73 record in memory and checks packed decoding, device-block sizes, selected-part routing through `InstrumentPlatform`, and rejection of a wrong version or truncated input. No private backup is required by the automated test. |
+
+These tests support FA `SVD1`/`MI73` SuperNATURAL Acoustic import. They do not
+establish compatibility with Integra-7 `MI69`, other Roland models, the still
+undecoded FA tone areas, permanent User-memory writes, or complete backup
+restore. Those remain explicitly outside the verified implementation boundary.
+
+## Publication and provenance policy
+
+This document and FAEditor's decoder may be published as an independently
+written interoperability specification and implementation. To keep that
+provenance clear:
+
+- describe offsets, bit widths, algorithms, and test results in our own words;
+- include only original source code and synthetic test records;
+- identify private evidence by a checksum, never by distributing the backup;
+- do not commit user `.SVD` files, Roland firmware or expansion binaries,
+  factory sound data, manuals, or copied manual tables/screenshots;
+- do not publish third-party editor binaries, decompiler output, or code copied
+  from another project; and
+- retain license attribution and compatibility checks before reusing any code
+  from comparative open-source projects.
+
+The private fixtures may contain user-created names and settings as well as
+sound-program data of uncertain provenance. Their hashes make the observations
+reproducible for a person who already lawfully possesses the same files without
+redistributing their contents.
+
+The legal basis is not part of the format specification, but the research was
+conducted for interoperability. Finnish Copyright Act sections 25 j and 25 k
+cover observation/testing of a program and, under narrower conditions,
+interoperability information obtained through code reproduction or translation.
+The Finnish Trade Secrets Act and Article 3 of EU Directive 2016/943 also
+recognize observation, study, disassembly, or testing of a lawfully possessed or
+publicly available product in the absence of a duty restricting acquisition.
+Any applicable download license, EULA, NDA, or other contractual restriction
+must still be respected. This paragraph records the project's working rationale,
+not legal advice.
+
 ## References
 
 - [Audiofanzine discussion: Fichier SVD](https://fr.audiofanzine.com/workstation/roland/Fantom-X6/forums/t.107849,fichier-svd.html) — original container diagram and MI69 structure research by forum user Gerbilles.
@@ -214,6 +288,10 @@ or other Roland products.
 - [JDTools](https://github.com/sagamusix/JDTools) — BSD-licensed C++ conversion code for newer Roland SVD5/SVZ/BIN formats.
 - [JD08PatchManager](https://github.com/NilsKr/JD08PatchManager) — GPL-licensed Python tooling for copying JD-08/JX-08 SVD5 entries.
 - [Roland FA-06/FA-07/FA-08 support and manuals](https://www.roland.com/global/products/fa-06/support/) — Reference Manual, Parameter Guide, Sound List, and MIDI Implementation.
+- [Finnish Copyright Act, sections 25 j and 25 k](https://finlex.fi/fi/lainsaadanto/1961/404) — observation and testing, and the limited interoperability exception for program-code reproduction or translation.
+- [Finnish Trade Secrets Act](https://finlex.fi/fi/lainsaadanto/2018/595) — lawful acquisition through observation, study, disassembly, or testing under the stated conditions.
+- [EU Directive 2016/943, Article 3](https://eur-lex.europa.eu/eli/dir/2016/943/oj/eng) — EU framework for lawful acquisition of trade-secret information, including reverse engineering under its conditions.
+- [EU Software Directive 2009/24/EC](https://eur-lex.europa.eu/legal-content/en/LSU/?uri=CELEX%3A32009L0024) — protection of program expression rather than ideas and principles, plus the observation/testing and interoperability framework.
 
 The SVD5 projects are useful comparative references but do not specify the FA
 SVD1/MI73 parameter layout. Their code must not be copied into FAEditor without
