@@ -36,8 +36,8 @@ int main(int argc, char *argv[])
 #if defined(FAEDITOR_PRODUCT_FANTOM)
     app.setApplicationVersion(QStringLiteral(FAEDITOR_APPLICATION_VERSION));
 #else
-    // Keep the released FA application version literal and unchanged.
-    app.setApplicationVersion(QStringLiteral("1.1"));
+    // Keep the FA release version explicit and regression-tested.
+    app.setApplicationVersion(QStringLiteral("1.2"));
 #endif
 
     // Prefer bundle .icns (Dock/Finder), fall back to embedded PNG.

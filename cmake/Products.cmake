@@ -1,6 +1,6 @@
 function(faeditor_product_metadata product out_target out_name out_bundle_id out_version out_bundle_version out_qml_uri out_qml_main)
     if(product STREQUAL "FA")
-        set(values "FAEditor;FA Editor;com.righthere.faeditor;1.1;4;FAEditor;Main")
+        set(values "FAEditor;FA Editor;com.righthere.faeditor;1.2;5;FAEditor;Main")
     elseif(product STREQUAL "FANTOM")
         set(values "FantomEditor;Fantom Editor;com.righthere.fantomeditor;0.1;1;FantomEditor;FantomMain")
     else()

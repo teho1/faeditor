@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(FAEditor VERSION 1.1.0 LANGUAGES CXX)
+project(FAEditor VERSION 1.2.0 LANGUAGES CXX)
 
 set(FAEDITOR_PRODUCT "FA" CACHE STRING "Product to build (FA or FANTOM)")
 set_property(CACHE FAEDITOR_PRODUCT PROPERTY STRINGS FA FANTOM)
@@ -226,9 +226,9 @@ if(APPLE)
     find_library(COREAUDIO_LIBRARY CoreAudio)
     find_library(COREFOUNDATION_LIBRARY CoreFoundation)
     if(FAEDITOR_PRODUCT STREQUAL "FA")
-        # Keep the released FA bundle metadata literal and unchanged.
+        # Keep the FA release bundle metadata explicit and regression-tested.
         set_target_properties(${APP_TARGET} PROPERTIES
-            MACOSX_BUNDLE_BUNDLE_VERSION 4
+            MACOSX_BUNDLE_BUNDLE_VERSION 5
             MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
             MACOSX_BUNDLE_ICON_FILE "AppIcon"
         )
