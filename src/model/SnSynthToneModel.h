@@ -17,6 +17,7 @@ class SnSynthToneModel : public QObject
     Q_PROPERTY(QString toneName READ toneName WRITE setToneName NOTIFY snChanged)
     Q_PROPERTY(int toneLevel READ toneLevel WRITE setToneLevel NOTIFY snChanged)
     Q_PROPERTY(bool monoSwitch READ monoSwitch WRITE setMonoSwitch NOTIFY snChanged)
+    Q_PROPERTY(bool ringSwitch READ ringSwitch NOTIFY snChanged)
     Q_PROPERTY(int selectedPartial READ selectedPartial WRITE setSelectedPartial NOTIFY selectedPartialChanged)
 
     Q_PROPERTY(int oscWave READ oscWave WRITE setOscWave NOTIFY snChanged)
@@ -63,10 +64,14 @@ public:
     void setWaveformCatalog(WaveformCatalog *catalog);
 
     Q_INVOKABLE QString partialDisplayName(int index) const;
+    Q_INVOKABLE bool partialEnabled(int index) const;
+    Q_INVOKABLE void setPartialEnabled(int index, bool enabled);
 
     QString toneName() const { return m_toneName; }
     int toneLevel() const { return m_toneLevel; }
     bool monoSwitch() const { return m_monoSwitch; }
+    bool ringSwitch() const
+    { return m_common.size() > 0x1f && m_common.at(0x1f) != 0; }
     int selectedPartial() const { return m_selectedPartial; }
 
     int oscWave() const;

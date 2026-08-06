@@ -46,6 +46,9 @@ private slots:
         QVERIFY(tone.initSnSynth());
         QCOMPARE(studio.selectedPartModel()->bankMsb(), 95);
         QVERIFY(tone.isSnSynth());
+        QVERIFY(tone.snSynth()->partialEnabled(0));
+        QVERIFY(!tone.snSynth()->partialEnabled(1));
+        QVERIFY(!tone.snSynth()->partialEnabled(2));
         QVERIFY(!fake.writes.isEmpty());
         bool wroteSelectedTone = false;
         const auto base = roland::addressToU32(roland::addr::temporaryTone(5));
@@ -55,6 +58,15 @@ private slots:
             wroteSelectedTone = wroteSelectedTone || (address >= base && address < next);
         }
         QVERIFY(wroteSelectedTone);
+
+        fake.writes.clear();
+        tone.snSynth()->setPartialEnabled(1, true);
+        QVERIFY(tone.snSynth()->partialEnabled(1));
+        QCOMPARE(fake.writes.size(), 1);
+        QCOMPARE(fake.writes.constFirst().address,
+                 roland::addOffset(roland::addr::snSynthCommon(5),
+                                   roland::snSynthOff::CommonPartial1Switch + 2));
+        QCOMPARE(fake.writes.constFirst().data, QByteArray(1, '\1'));
     }
     void pullPushAndErrorsAreHeadless()
     {

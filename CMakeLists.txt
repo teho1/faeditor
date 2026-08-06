@@ -373,6 +373,7 @@ qt_add_executable(FAEditorSvdImportTests
     src/model/MfxModel.cpp src/model/MfxParamCatalog.cpp
     src/model/MfxUiHelpers.cpp src/model/MfxTapDelayModel.cpp src/model/MfxParamListModel.cpp
     src/model/SnAcousticToneModel.cpp src/model/SnAcousticInstCatalog.cpp
+    src/model/SnSynthToneModel.cpp src/model/WaveformCatalog.cpp
     src/undo/UndoController.cpp
 )
 target_include_directories(FAEditorSvdImportTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/tests)

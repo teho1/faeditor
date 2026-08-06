@@ -1,5 +1,8 @@
 # Roland SVD1 research notes
 
+> This is an independently created interoperability document and is not
+> intended to reproduce or replace Roland documentation.
+
 This document records reverse-engineering observations used to develop offline
 Roland FA backup import. It is not an official Roland file-format specification.
 All multi-byte integers observed in the FA sample are big-endian.
@@ -122,14 +125,52 @@ reported logical composition is:
 - PCM Synth: Common + Common MFX + PMT + 4 Partials + Common 2
 - PCM Drum: Common + Common MFX + Common Comp/EQ + 88 Partials (Common 2 was
   reported missing in the Integra-7 research)
-- SN Synth: Common + Common MFX + 3 Partials + an undocumented block
+- SN Synth: Common + Common MFX + 3 Partials + Misc
 - SN Acoustic: Common + MFX
 - SN Drum: Common + MFX + Common Comp/EQ + 62 Notes + an additional EQ block
 
-These compositions are research leads, not yet a safe decoding schema. FAEditor
-must reject a packed entry unless every field boundary, range, output block size,
-and target engine has been validated. Import work must initially target Temporary
-Tone memory only; permanent User writes remain an explicit operation on the FA.
+Except for the verified `SNTaMI73` and structurally verified `SHPaMI73` sections
+below, these compositions are research leads, not yet safe decoding schemas.
+FAEditor must reject a packed entry unless every field boundary, range, output
+block size, and target engine has been validated. Import work must initially
+target Temporary Tone memory only; permanent User writes remain an explicit
+operation on the FA.
+
+## Verified `SHPaMI73` structural layout
+
+The FA SuperNATURAL Synth (`SHPaMI73`) entry is 280 bytes (2,240 bits). Its
+top-level boundaries were established from all 512 entries in the available FA
+backup and agree exactly with the FA MIDI Implementation's Common, MFX, three
+Partial, and Misc device blocks:
+
+```text
+SHPaMI73 (2240 bits)
+├─ Common: bits 0..239 (240 bits)
+│  ├─ packed fields: 0..227
+│  └─ padding: 228..239
+├─ MFX: bits 240..863 (624 bits)
+├─ Partial 1: bits 864..1231 (368 bits)
+│  ├─ packed fields: 864..1213
+│  └─ padding: 1214..1231
+├─ Partial 2: bits 1232..1599 (368 bits)
+├─ Partial 3: bits 1600..1967 (368 bits)
+└─ Misc: bits 1968..2239 (272 bits)
+   ├─ 37 × 7-bit fields: 1968..2226
+   └─ padding: 2227..2239
+```
+
+The MFX packing is the same 624-bit layout verified for `SNTaMI73`. Each
+Partial accounts for every field in the official 61-byte SN-S Partial block;
+the four-nibble Wave Number is represented by one packed 16-bit value. Compact
+fields restore the fixed high bits required by the device encoding: OSC Pitch
+adds 32, Filter Cutoff Keyfollow adds 32, and AMP Level Keyfollow adds 48.
+
+Automated synthetic-fixture tests verify decoding sizes and representative
+values, all three Partial writes, the Misc and MFX writes, selected-part routing,
+and SN-S engine recall. All 512 private-fixture records also satisfy the
+documented narrow-field ranges at these boundaries. An imported `SHPaMI73` tone
+was then pushed to FA Temporary SN-S memory and successfully auditioned on an
+FA-08, promoting the complete mapping to device-verified.
 
 ## Verified `SNTaMI73` layout
 
@@ -269,17 +310,6 @@ sound-program data of uncertain provenance. Their hashes make the observations
 reproducible for a person who already lawfully possesses the same files without
 redistributing their contents.
 
-The legal basis is not part of the format specification, but the research was
-conducted for interoperability. Finnish Copyright Act sections 25 j and 25 k
-cover observation/testing of a program and, under narrower conditions,
-interoperability information obtained through code reproduction or translation.
-The Finnish Trade Secrets Act and Article 3 of EU Directive 2016/943 also
-recognize observation, study, disassembly, or testing of a lawfully possessed or
-publicly available product in the absence of a duty restricting acquisition.
-Any applicable download license, EULA, NDA, or other contractual restriction
-must still be respected. This paragraph records the project's working rationale,
-not legal advice.
-
 ## References
 
 - [Audiofanzine discussion: Fichier SVD](https://fr.audiofanzine.com/workstation/roland/Fantom-X6/forums/t.107849,fichier-svd.html) — original container diagram and MI69 structure research by forum user Gerbilles.
@@ -288,10 +318,6 @@ not legal advice.
 - [JDTools](https://github.com/sagamusix/JDTools) — BSD-licensed C++ conversion code for newer Roland SVD5/SVZ/BIN formats.
 - [JD08PatchManager](https://github.com/NilsKr/JD08PatchManager) — GPL-licensed Python tooling for copying JD-08/JX-08 SVD5 entries.
 - [Roland FA-06/FA-07/FA-08 support and manuals](https://www.roland.com/global/products/fa-06/support/) — Reference Manual, Parameter Guide, Sound List, and MIDI Implementation.
-- [Finnish Copyright Act, sections 25 j and 25 k](https://finlex.fi/fi/lainsaadanto/1961/404) — observation and testing, and the limited interoperability exception for program-code reproduction or translation.
-- [Finnish Trade Secrets Act](https://finlex.fi/fi/lainsaadanto/2018/595) — lawful acquisition through observation, study, disassembly, or testing under the stated conditions.
-- [EU Directive 2016/943, Article 3](https://eur-lex.europa.eu/eli/dir/2016/943/oj/eng) — EU framework for lawful acquisition of trade-secret information, including reverse engineering under its conditions.
-- [EU Software Directive 2009/24/EC](https://eur-lex.europa.eu/legal-content/en/LSU/?uri=CELEX%3A32009L0024) — protection of program expression rather than ideas and principles, plus the observation/testing and interoperability framework.
 
 The SVD5 projects are useful comparative references but do not specify the FA
 SVD1/MI73 parameter layout. Their code must not be copied into FAEditor without

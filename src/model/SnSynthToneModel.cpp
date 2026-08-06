@@ -65,6 +65,27 @@ QString SnSynthToneModel::partialDisplayName(int index) const
     return QStringLiteral("Partial %1").arg(index + 1);
 }
 
+bool SnSynthToneModel::partialEnabled(int index) const
+{
+    if (index < 0 || index >= snSynthOff::PartialCount)
+        return false;
+    const int offset = snSynthOff::CommonPartial1Switch + index * 2;
+    return offset < m_common.size() && m_common.at(offset) != 0;
+}
+
+void SnSynthToneModel::setPartialEnabled(int index, bool enabled)
+{
+    if (index < 0 || index >= snSynthOff::PartialCount)
+        return;
+    const int offset = snSynthOff::CommonPartial1Switch + index * 2;
+    const char value = enabled ? 1 : 0;
+    if (offset >= m_common.size() || m_common.at(offset) == value)
+        return;
+    m_common[offset] = value;
+    emit snChanged();
+    writeCommonByte(static_cast<quint8>(offset), value);
+}
+
 QStringList SnSynthToneModel::oscWaveNames() const
 {
     return {

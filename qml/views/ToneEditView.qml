@@ -432,14 +432,29 @@ Rectangle {
                                      && root.stage !== "organ" && root.stage !== "common"
                             Repeater {
                                 model: root.partialCount
-                                FaButton {
-                                    text: root.partialDisplayName(index)
-                                    secondaryText: tone.isPcmSynth
-                                                   ? pcm.partialWaveLabels[index]
-                                                   : ""
-                                    enabled: root.bodyEditable
-                                    checked: root.body.selectedPartial === index
-                                    onClicked: root.body.selectedPartial = index
+                                Column {
+                                    spacing: 2
+                                    FaButton {
+                                        text: root.partialDisplayName(index)
+                                        secondaryText: tone.isPcmSynth
+                                                       ? pcm.partialWaveLabels[index]
+                                                       : ""
+                                        enabled: root.bodyEditable
+                                        checked: root.body.selectedPartial === index
+                                        onClicked: root.body.selectedPartial = index
+                                    }
+                                    CheckBox {
+                                        anchors.horizontalCenter: parent.horizontalCenter
+                                        visible: tone.isSnSynth
+                                        height: visible ? implicitHeight : 0
+                                        text: "On"
+                                        checked: tone.isSnSynth && sn.partialEnabled(index)
+                                        onToggled: {
+                                            if (tone.isSnSynth
+                                                    && sn.partialEnabled(index) !== checked)
+                                                sn.setPartialEnabled(index, checked)
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -601,7 +616,8 @@ Rectangle {
                         }
 
                         GridLayout {
-                            visible: !snOscSection.pcmWave
+                            visible: sn.oscWave === 2
+                                     && !(sn.ringSwitch && sn.selectedPartial < 2)
                             columns: 2
                             columnSpacing: 14
                             rowSpacing: 10
@@ -626,6 +642,19 @@ Rectangle {
                                     Layout.preferredWidth: 28
                                 }
                             }
+                        }
+
+                        Label {
+                            visible: !snOscSection.pcmWave
+                                     && (sn.oscWave !== 2
+                                         || (sn.ringSwitch && sn.selectedPartial < 2))
+                            Layout.fillWidth: true
+                            wrapMode: Text.WordWrap
+                            text: sn.ringSwitch && sn.selectedPartial < 2
+                                  ? "Pulse Width is inactive for Partials 1–2 while Ring is on."
+                                  : "Pulse Width is available when OSC Wave is PW-SQR."
+                            color: LogicTheme.textSecondary
+                            font.pixelSize: LogicTheme.fontSizeSmall
                         }
                     }
 
