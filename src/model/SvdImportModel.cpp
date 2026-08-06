@@ -10,6 +10,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QJsonObject>
+#include <QThread>
 #include <QUrl>
 
 namespace {
@@ -221,11 +222,14 @@ bool SvdImportModel::pushTone(int row)
         return false;
     }
 
-    // Select the matching User SN-A slot so the part uses the correct engine;
-    // subsequent writes target only this part's Temporary Tone memory.
+    // Select a known preset SN-A tone only to establish the correct Temporary
+    // Tone engine. Do not depend on the same-numbered User slot: the imported
+    // backup is not necessarily installed on this FA, and an empty/late User
+    // recall can otherwise overwrite the Temporary data below.
     part->setBankMsb(89);
-    part->setBankLsb(0);
-    part->setProgram(row);
+    part->setBankLsb(64);
+    part->setProgram(0);
+    QThread::msleep(250);
     part->setToneName(m_tones.at(row).name);
 
     SnAcousticToneModel sna(m_platform);

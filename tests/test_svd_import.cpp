@@ -119,6 +119,8 @@ private slots:
         QCOMPARE(model.data(model.index(0), SvdImportModel::NameRole).toString(), QStringLiteral("Test Grand"));
         QVERIFY2(model.pushTone(0), qPrintable(model.lastError()));
         QCOMPARE(studio.selectedPartModel()->bankMsb(), 89);
+        QCOMPARE(studio.selectedPartModel()->bankLsb(), 64);
+        QCOMPARE(studio.selectedPartModel()->program(), 0);
         QCOMPARE(platform.stored(4, roland::ToneEngine::SnAcoustic,
                                  InstrumentPlatform::ToneSection::SnAcousticCommon, 0).size(), 71);
         QCOMPARE(platform.stored(4, roland::ToneEngine::SnAcoustic,
