@@ -67,6 +67,7 @@ no guessed MIDI or SysEx.
 - `resources/tones/soundlist.json` — FA-06/07/08 preset tone catalog from Roland Sound List (`scripts/import_soundlist.py`)
 - `resources/waves/waveforms.json` — waveform name catalog (`scripts/import_waveforms.py`)
 - `roland_specs/` — official PDFs (reference only)
+- [`docs/svd-format.md`](docs/svd-format.md) — experimental SVD1/MI73 container and packed-tone research notes
 
 ## Notes
 
@@ -75,7 +76,8 @@ Headless tests use `FakeInstrumentPlatform`; they never require MIDI hardware. R
 inject deterministic connection/timeout-style failures.
 
 - Unofficial third-party tool — not affiliated with Roland Corporation.
-- SysEx only — no proprietary binary reverse engineering.
+- Device editing uses documented SysEx. Experimental offline SVD1 research is
+  isolated and must validate complete parameter schemas before enabling device writes.
 - FA exposes Studio Set *data* only as Temporary (`18 00 00 00`); User/Preset slots are recalled via Setup Bank Select (`01 00 00 04`).
 
 ## Privacy
