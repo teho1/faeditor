@@ -172,7 +172,9 @@ bool SvdImportModel::decodeSnAcoustic(const QByteArray &packed, QByteArray *comm
     c[0x1e] = char(r.read(3) + 60);
     c[0x1f] = char(r.read(1));
     c[0x20] = char(r.read(7));
-    c[0x21] = char(r.read(7) + 1);
+    // SVD and FA SysEx both store the internal instrument selector. The
+    // one-based number shown on the FA panel is presentation only.
+    c[0x21] = char(r.read(7));
     for (int i = 0x22; i <= 0x41; ++i) c[i] = char(r.read(7));
     c[0x42] = char(r.read(2));
     c[0x43] = char(r.read(5));

@@ -94,7 +94,7 @@ private slots:
         QCOMPARE(quint8(common[0x1c]), quint8(2));
         QCOMPARE(quint8(common[0x1d]), quint8(10));
         QCOMPARE(quint8(common[0x20]), quint8(5));
-        QCOMPARE(quint8(common[0x21]), quint8(24));
+        QCOMPARE(quint8(common[0x21]), quint8(23));
         QCOMPARE(mfx.size(), 145);
         QCOMPARE(quint8(mfx[0]), quint8(21));
         QCOMPARE(quint8(mfx[5]), quint8(18));

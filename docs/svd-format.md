@@ -127,7 +127,7 @@ tone.
 | `194..196` | 3 | Phrase Octave Shift | Verified |
 | `197` | 1 | MFX Switch | Verified |
 | `198..204` | 7 | Instrument Variation | Verified |
-| `205..211` | 7 | Instrument Number, zero-based in SVD | Verified; the equivalent FA SysEx value is one-based |
+| `205..211` | 7 | Internal Instrument Number | Stored unchanged in FA SysEx; the panel presents a separately mapped one-based instrument number |
 | `212..435` | 224 | Modify Parameters 1–32, 32 × 7 bits | Verified |
 | `436..437` | 2 | Bend Mode | Field width follows the official map; all observed values are zero (`NORMAL`) |
 | `438..442` | 5 | Reserved field at device offset `0x43` | Structurally accounted; all observed values are zero |
