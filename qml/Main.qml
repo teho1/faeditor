@@ -82,14 +82,13 @@ ApplicationWindow {
         nameFilters: ["Roland backup (*.SVD *.svd)", "All files (*)"]
         fileMode: FileDialog.OpenFile
         onAccepted: {
-            if (App.svdImport.loadFile(selectedFile))
-                svdImportDialog.open()
-            else
+            if (App.svdImport.loadFile(selectedFile)) {
+                changeToneView.svdImportVisible = true
+                App.mainTab = 0
+            } else
                 svdImportError.open()
         }
     }
-
-    SvdImportDialog { id: svdImportDialog }
 
     MessageDialog {
         id: svdImportError
@@ -148,7 +147,10 @@ ApplicationWindow {
                 Layout.fillHeight: true
                 currentIndex: App.mainTab
 
-                ChangeToneView {}
+                ChangeToneView {
+                    id: changeToneView
+                    onBrowseSvdRequested: svdFileDialog.open()
+                }
                 MixerView {}
                 EffectsEditView {}
                 ToneEditView {}

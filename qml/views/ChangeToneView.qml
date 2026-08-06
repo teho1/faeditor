@@ -4,7 +4,10 @@ import QtQuick.Layouts
 import FAEditor
 
 Rectangle {
+    id: root
     color: LogicTheme.windowBg
+    property bool svdImportVisible: false
+    signal browseSvdRequested()
 
     ColumnLayout {
         anchors.fill: parent
@@ -160,6 +163,23 @@ Rectangle {
                 Layout.minimumWidth: 0
                 Layout.fillHeight: true
                 embedded: true
+            }
+
+            Rectangle {
+                visible: root.svdImportVisible
+                width: visible ? 1 : 0
+                Layout.fillHeight: true
+                color: LogicTheme.hairline
+            }
+
+            SvdImportPanel {
+                visible: root.svdImportVisible
+                Layout.fillWidth: visible
+                Layout.preferredWidth: visible ? 1 : 0
+                Layout.minimumWidth: 0
+                Layout.fillHeight: true
+                onBrowseRequested: root.browseSvdRequested()
+                onCloseRequested: root.svdImportVisible = false
             }
         }
     }

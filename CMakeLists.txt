@@ -140,7 +140,7 @@ if(FAEDITOR_PRODUCT STREQUAL "FA")
         qml/views/LibraryView.qml
         qml/views/AboutDialog.qml
         qml/views/HelpDialog.qml
-        qml/views/SvdImportDialog.qml
+        qml/views/SvdImportPanel.qml
         RESOURCES
         resources/tones/soundlist.json
         resources/waves/waveforms.json
