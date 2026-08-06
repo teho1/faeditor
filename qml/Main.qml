@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Dialogs
 import FAEditor
 
 ApplicationWindow {
@@ -46,6 +47,8 @@ ApplicationWindow {
             Action { text: "Save As…"; onTriggered: App.library.saveAs(App.studioSet.name) }
             Action { text: "Refresh Library"; onTriggered: App.library.refresh() }
             MenuSeparator {}
+            Action { text: "Import Roland SVD…"; onTriggered: svdFileDialog.open() }
+            MenuSeparator {}
             Action { text: "Quit"; shortcut: "Ctrl+Q"; onTriggered: Qt.quit() }
         }
         Menu {
@@ -72,6 +75,27 @@ ApplicationWindow {
     }
 
     footer: StatusBar {}
+
+    FileDialog {
+        id: svdFileDialog
+        title: "Import Roland FA Backup"
+        nameFilters: ["Roland backup (*.SVD *.svd)", "All files (*)"]
+        fileMode: FileDialog.OpenFile
+        onAccepted: {
+            if (App.svdImport.loadFile(selectedFile))
+                svdImportDialog.open()
+            else
+                svdImportError.open()
+        }
+    }
+
+    SvdImportDialog { id: svdImportDialog }
+
+    MessageDialog {
+        id: svdImportError
+        title: "Could not import SVD"
+        text: App.svdImport.lastError
+    }
 
     ColumnLayout {
         anchors.fill: parent

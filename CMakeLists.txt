@@ -76,6 +76,7 @@ if(FAEDITOR_PRODUCT STREQUAL "FA")
     src/model/PcmSynthToneModel.cpp
     src/model/SnAcousticInstCatalog.cpp
     src/model/SnAcousticToneModel.cpp
+    src/model/SvdImportModel.cpp
     src/model/TemporaryToneModel.cpp
     src/model/MfxPresetStore.cpp
     src/project/ProjectStore.cpp
@@ -139,6 +140,7 @@ if(FAEDITOR_PRODUCT STREQUAL "FA")
         qml/views/LibraryView.qml
         qml/views/AboutDialog.qml
         qml/views/HelpDialog.qml
+        qml/views/SvdImportDialog.qml
         RESOURCES
         resources/tones/soundlist.json
         resources/waves/waveforms.json
@@ -363,3 +365,16 @@ if(APPLE)
     target_link_libraries(FAEditorToneWorkflowTests PRIVATE ${COREMIDI_LIBRARY} ${COREAUDIO_LIBRARY} ${COREFOUNDATION_LIBRARY})
 endif()
 add_test(NAME FAEditorToneWorkflowTests COMMAND FAEditorToneWorkflowTests)
+
+qt_add_executable(FAEditorSvdImportTests
+    tests/test_svd_import.cpp
+    src/model/SvdImportModel.cpp src/model/StudioSetModel.cpp src/model/PartModel.cpp
+    src/model/EffectsModel.cpp src/model/TemporarySysexStore.cpp
+    src/model/MfxModel.cpp src/model/MfxParamCatalog.cpp
+    src/model/MfxUiHelpers.cpp src/model/MfxTapDelayModel.cpp src/model/MfxParamListModel.cpp
+    src/model/SnAcousticToneModel.cpp src/model/SnAcousticInstCatalog.cpp
+    src/undo/UndoController.cpp
+)
+target_include_directories(FAEditorSvdImportTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+target_link_libraries(FAEditorSvdImportTests PRIVATE Qt6::Core Qt6::Gui Qt6::Test)
+add_test(NAME FAEditorSvdImportTests COMMAND FAEditorSvdImportTests)

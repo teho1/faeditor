@@ -27,6 +27,14 @@ AppController::AppController(QObject *parent)
             pcm->setWaveformCatalog(m_waveforms);
     }
     m_library = new ProjectStore(m_studioSet, m_audioFx, m_tone, this);
+    m_svdImport = new SvdImportModel(m_platform, m_studioSet, this);
+    connect(m_svdImport, &SvdImportModel::tonePushed, this,
+            [this](const QString &name, int part) {
+        setHint(QStringLiteral("Imported “%1” to Part %2 Temporary SN-A tone. Use Write on the FA to store it permanently.")
+                    .arg(name).arg(part));
+        if (m_tone)
+            m_tone->pull();
+    });
 
     m_studioSet->setToneNameResolver([this](int msb, int lsb, int pc) {
         return m_tones->resolveName(msb, lsb, pc);

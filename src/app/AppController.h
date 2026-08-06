@@ -7,6 +7,7 @@
 #include "model/WaveformCatalog.h"
 #include "model/AudioFxModel.h"
 #include "model/TemporaryToneModel.h"
+#include "model/SvdImportModel.h"
 #include "project/ProjectStore.h"
 #include "undo/UndoController.h"
 #include "midi/SysexEngine.h"
@@ -26,6 +27,7 @@ class AppController : public QObject
     Q_PROPERTY(AudioFxModel *audioFx READ audioFx CONSTANT)
     Q_PROPERTY(TemporaryToneModel *tone READ tone CONSTANT)
     Q_PROPERTY(ProjectStore *library READ library CONSTANT)
+    Q_PROPERTY(SvdImportModel *svdImport READ svdImport CONSTANT)
     Q_PROPERTY(UndoController *undo READ undo CONSTANT)
     Q_PROPERTY(int mainTab READ mainTab WRITE setMainTab NOTIFY mainTabChanged)
     Q_PROPERTY(bool connectDialogOpen READ connectDialogOpen WRITE setConnectDialogOpen NOTIFY connectDialogOpenChanged)
@@ -43,6 +45,7 @@ public:
     AudioFxModel *audioFx() const { return m_audioFx; }
     TemporaryToneModel *tone() const { return m_tone; }
     ProjectStore *library() const { return m_library; }
+    SvdImportModel *svdImport() const { return m_svdImport; }
     UndoController *undo() const { return m_undo; }
 
     int mainTab() const { return m_mainTab; }
@@ -87,6 +90,7 @@ private:
     AudioFxModel *m_audioFx = nullptr;
     TemporaryToneModel *m_tone = nullptr;
     ProjectStore *m_library = nullptr;
+    SvdImportModel *m_svdImport = nullptr;
     QTimer m_autosaveTimer;
     int m_mainTab = 0;
     bool m_connectDialogOpen = false;
