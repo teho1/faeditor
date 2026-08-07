@@ -66,16 +66,15 @@ private slots:
         QVERIFY(!fake.supportsWorkspace(InstrumentPlatform::Workspace::Library,true));
         QCOMPARE(fake.workspaceAccess(InstrumentPlatform::Workspace::AudioFx),InstrumentPlatform::FeatureAccess::Unavailable);
     }
-    void skeletonAdaptersFailSafely()
+    void capabilityAdaptersReflectImplementedSupport()
     {
         RolandFantomPlatform fantom; YamahaPlatform yamaha; QString error;
         QCOMPARE(fantom.profile().manufacturer,QStringLiteral("Roland"));
         QCOMPARE(yamaha.profile().manufacturer,QStringLiteral("Yamaha"));
-        QVERIFY(!fantom.supportsWorkspace(InstrumentPlatform::Workspace::ToneEditing));
+        QVERIFY(fantom.supportsWorkspace(InstrumentPlatform::Workspace::ToneEditing,true));
         QVERIFY(yamaha.supportsWorkspace(InstrumentPlatform::Workspace::Library));
         QVERIFY(!yamaha.supportsWorkspace(InstrumentPlatform::Workspace::Library,true));
         QVERIFY(!fantom.openMidiConnection(0,0,&error));
-        QCOMPARE(error,QStringLiteral("Not implemented for this instrument profile"));
     }
 };
 QTEST_APPLESS_MAIN(TestPlatform)

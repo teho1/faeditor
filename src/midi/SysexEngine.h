@@ -27,6 +27,9 @@ public:
 
     void setDeviceId(quint8 id);
     quint8 deviceId() const { return m_deviceId; }
+    /** Roland model id bytes between device id and command (FA: 00 00 77, FANTOM-0: 00 00 00 5B). */
+    void setModelId(const QByteArray &modelId);
+    QByteArray modelId() const { return m_modelId; }
 
     /** Blocking RQ1 with timeout; returns DT1 payload (data only) on success. */
     virtual bool read(const roland::Address &address, int size, QByteArray *outData, QString *error = nullptr,
@@ -41,6 +44,7 @@ public:
     bool sendIdentityRequest(QString *error = nullptr);
     /** Wait for Identity Reply; returns true if Roland FA signature seen. */
     bool waitIdentityReply(quint8 *deviceIdOut, int timeoutMs = 2000);
+    QByteArray lastIdentityReply() const;
 
     /** Send raw MIDI (e.g. note on/off for tone preview). */
     bool sendMessage(const QByteArray &message, QString *error = nullptr);
@@ -60,6 +64,7 @@ private:
     std::unique_ptr<RtMidiIn> m_in;
     std::unique_ptr<RtMidiOut> m_out;
     quint8 m_deviceId = roland::kDefaultDeviceId;
+    QByteArray m_modelId = QByteArray::fromHex("000077");
 
     mutable QMutex m_mutex;
     QWaitCondition m_cond;
@@ -68,5 +73,6 @@ private:
     bool m_gotDt1 = false;
     bool m_gotIdentity = false;
     quint8 m_identityDeviceId = roland::kDefaultDeviceId;
+    QByteArray m_identityReply;
     std::atomic<bool> m_open{false};
 };

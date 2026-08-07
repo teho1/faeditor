@@ -54,7 +54,7 @@ Popup {
         }
 
         Label {
-            text: "Use FA music ports — ignore DAW CTRL / Mackie Control. After power-cycling the FA, click Refresh or Auto FA."
+            text: "Use the FA or FANTOM music ports — ignore DAW CTRL / Mackie Control. Device type is identified automatically after connecting."
             color: LogicTheme.textSecondary
             font.pixelSize: LogicTheme.fontSizeSmall
             wrapMode: Text.WordWrap
@@ -110,9 +110,9 @@ Popup {
                 onClicked: App.midi.refresh()
             }
             Button {
-                text: "Auto FA"
+                text: "Auto"
                 onClicked: {
-                    if (App.midi.autoConnectFa())
+                    if (App.midi.autoConnectInstrument())
                         root.close()
                 }
             }

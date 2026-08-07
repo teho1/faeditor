@@ -51,6 +51,7 @@ public:
     Q_INVOKABLE QStringList outputNames() const;
     Q_INVOKABLE bool connectSelected();
     Q_INVOKABLE bool autoConnectFa();
+    Q_INVOKABLE bool autoConnectInstrument() { return autoConnectFa(); }
     Q_INVOKABLE void disconnectDevice();
     Q_INVOKABLE bool probeIdentity();
     /** True if current selection still refers to valid ports. */

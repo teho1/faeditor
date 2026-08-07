@@ -11,7 +11,8 @@ class InstrumentPlatform
 public:
     enum class FeatureAccess { Unavailable, ReadOnly, ReadWrite };
     enum class Workspace { MidiConnection, DeviceIdentity, StudioSets, ToneEditing, AudioFx, NotePreview, Library };
-    enum class ToneEngineCapability { SuperNaturalSynth, PcmSynth, SuperNaturalAcoustic, PcmDrum, SuperNaturalDrum };
+    enum class ToneEngineCapability { SuperNaturalSynth, PcmSynth, SuperNaturalAcoustic, PcmDrum, SuperNaturalDrum,
+                                      ZCore, VirtualToneWheel, ExpansionSuperNatural, ModelTone };
     struct WorkspaceCapability { Workspace workspace; FeatureAccess access = FeatureAccess::Unavailable; };
     struct DeviceProfile {
         QString manufacturer;
@@ -48,13 +49,19 @@ public:
                                     QString *error = nullptr) = 0;
     virtual void closeMidiConnection() = 0;
     virtual bool midiConnectionHealthy() const = 0;
-    virtual bool detectRolandFA(quint8 *deviceId, int timeoutMs = 1500,
-                                QString *error = nullptr) = 0;
+    virtual bool detectDevice(quint8 *deviceId, int timeoutMs = 1500,
+                              QString *error = nullptr) = 0;
+    bool detectRolandFA(quint8 *deviceId, int timeoutMs = 1500, QString *error = nullptr)
+    { return detectDevice(deviceId, timeoutMs, error); }
     virtual bool sendPreviewNote(int channel, int note, int velocity, bool noteOn,
                                  QString *error = nullptr) = 0;
-    virtual bool recallStudioSet(int bankMsb, int bankLsb, int program,
-                                 QString *error = nullptr) = 0;
-    virtual bool readTemporaryStudioSetName(QString *name, QString *error = nullptr) = 0;
+    virtual bool recallPerformance(int bankMsb, int bankLsb, int program,
+                                   QString *error = nullptr) = 0;
+    virtual bool readTemporaryPerformanceName(QString *name, QString *error = nullptr) = 0;
+    bool recallStudioSet(int bankMsb, int bankLsb, int program, QString *error = nullptr)
+    { return recallPerformance(bankMsb, bankLsb, program, error); }
+    bool readTemporaryStudioSetName(QString *name, QString *error = nullptr)
+    { return readTemporaryPerformanceName(name, error); }
     virtual bool readStudioBlock(StudioBlock block, int index, int size, QByteArray *data,
                                  QString *error = nullptr) = 0;
     virtual bool writeStudioBlock(StudioBlock block, int index, const QByteArray &data,

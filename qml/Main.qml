@@ -9,7 +9,7 @@ ApplicationWindow {
     width: 1440
     height: 900
     visible: true
-    title: "FA Editor — " + (App.studioSet.name || "Studio Set")
+    title: "FA Editor — " + (App.fantomDevice ? (App.scene.name || "Scene") : (App.studioSet.name || "Studio Set"))
     color: LogicTheme.windowBg
 
     readonly property bool _editingText: {
@@ -57,7 +57,7 @@ ApplicationWindow {
         Menu {
             title: "MIDI"
             Action { text: "Connect…"; onTriggered: App.openMidiDialog() }
-            Action { text: "Auto-connect FA"; onTriggered: App.startupConnect() }
+            Action { text: "Auto-connect instrument"; onTriggered: App.startupConnect() }
             Action { text: "Disconnect"; onTriggered: App.midi.disconnectDevice() }
             MenuSeparator {}
             Action { text: "Pull Temporary"; shortcut: "Ctrl+R"; onTriggered: App.pull() }
@@ -141,6 +141,7 @@ ApplicationWindow {
 
         TabBar {
             id: tabs
+            visible: !App.fantomDevice
             Layout.fillWidth: true
             focusPolicy: Qt.StrongFocus
             TabButton { text: "1. Sets & Tones"; width: implicitWidth }
@@ -164,6 +165,7 @@ ApplicationWindow {
             Layout.fillWidth: true
             Layout.fillHeight: true
             spacing: 0
+            visible: !App.fantomDevice
 
             StackLayout {
                 Layout.fillWidth: true
@@ -243,6 +245,12 @@ ApplicationWindow {
                     }
                 }
             }
+        }
+
+        FantomSceneView {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            visible: App.fantomDevice
         }
     }
 

@@ -36,14 +36,14 @@ Rectangle {
         Item { Layout.fillWidth: true }
 
         Label {
-            visible: App.studioSet.busy
+            visible: App.fantomDevice ? App.scene.busy : App.studioSet.busy
             text: "Busy…"
             color: LogicTheme.warning
             font.pixelSize: LogicTheme.fontSizeSmall
         }
 
         Label {
-            visible: App.studioSet.lastError.length > 0
+            visible: !App.fantomDevice && App.studioSet.lastError.length > 0
             text: App.studioSet.lastError
             color: LogicTheme.danger
             font.pixelSize: LogicTheme.fontSizeSmall
@@ -52,8 +52,8 @@ Rectangle {
         }
 
         Label {
-            text: App.studioSet.dirty ? "● Edited" : "Saved"
-            color: App.studioSet.dirty ? LogicTheme.warning : LogicTheme.textMuted
+            text: (App.fantomDevice ? App.scene.edited : App.studioSet.dirty) ? "● Edited" : "Saved"
+            color: (App.fantomDevice ? App.scene.edited : App.studioSet.dirty) ? LogicTheme.warning : LogicTheme.textMuted
             font.pixelSize: LogicTheme.fontSizeSmall
         }
     }

@@ -12,10 +12,10 @@ public:
     bool openMidiConnection(int, int, QString *e) override { return unsupported(e); }
     void closeMidiConnection() override {}
     bool midiConnectionHealthy() const override { return false; }
-    bool detectRolandFA(quint8 *, int, QString *e) override { return unsupported(e); }
+    bool detectDevice(quint8 *, int, QString *e) override { return unsupported(e); }
     bool sendPreviewNote(int, int, int, bool, QString *e) override { return unsupported(e); }
-    bool recallStudioSet(int,int,int,QString*e) override{return unsupported(e);}
-    bool readTemporaryStudioSetName(QString*,QString*e) override{return unsupported(e);}
+    bool recallPerformance(int,int,int,QString*e) override{return unsupported(e);}
+    bool readTemporaryPerformanceName(QString*,QString*e) override{return unsupported(e);}
     bool readStudioBlock(StudioBlock,int,int,QByteArray*,QString*e) override{return unsupported(e);}
     bool writeStudioBlock(StudioBlock,int,const QByteArray&,QString*e) override{return unsupported(e);}
     bool writeStudioParameter(StudioBlock,int,int,const QByteArray&,QString*e) override{return unsupported(e);}

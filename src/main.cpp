@@ -8,6 +8,8 @@
 
 #if defined(FAEDITOR_PRODUCT_FANTOM)
 #include "app/FantomAppController.h"
+#include "model/FantomSceneModel.h"
+#include "midi/MidiDeviceModel.h"
 #else
 #include "app/AppController.h"
 #include "model/PartModel.h"
@@ -65,6 +67,8 @@ int main(int argc, char *argv[])
 #if defined(FAEDITOR_PRODUCT_FANTOM)
     qmlRegisterUncreatableType<FantomAppController>("FantomEditor", 1, 0, "FantomAppController",
                                                     QStringLiteral("Use App context property"));
+    qmlRegisterUncreatableType<FantomSceneModel>("FantomEditor",1,0,"FantomSceneModel",QStringLiteral("Use App.scene"));
+    qmlRegisterUncreatableType<MidiDeviceModel>("FantomEditor",1,0,"MidiDeviceModel",QStringLiteral("Use App.midi"));
     FantomAppController controller;
 #else
     qmlRegisterUncreatableType<PartModel>("FAEditor", 1, 0, "PartModel",
@@ -87,6 +91,8 @@ int main(int argc, char *argv[])
                                                QStringLiteral("Obtained from AppController"));
     qmlRegisterUncreatableType<AppController>("FAEditor", 1, 0, "AppController",
                                               QStringLiteral("Use App context property"));
+    qmlRegisterUncreatableType<FantomSceneModel>("FAEditor",1,0,"FantomSceneModel",
+                                                 QStringLiteral("Obtained from AppController"));
     qmlRegisterUncreatableType<MfxModel>("FAEditor", 1, 0, "MfxModel",
                                          QStringLiteral("Obtained from TemporaryToneModel"));
     qmlRegisterUncreatableType<MfxTapDelayModel>("FAEditor", 1, 0, "MfxTapDelayModel",

@@ -27,7 +27,7 @@ Rectangle {
         spacing: 6
 
         Label {
-            text: "FA Editor"
+            text: App.fantomDevice ? "FA Editor · FANTOM" : "FA Editor"
             color: LogicTheme.textPrimary
             font.pixelSize: LogicTheme.fontSizeTitle
             font.bold: true
@@ -35,9 +35,10 @@ Rectangle {
 
         TextField {
             Layout.preferredWidth: 180
-            text: App.studioSet.name
+            text: App.fantomDevice ? App.scene.name : App.studioSet.name
+            readOnly: App.fantomDevice
             font.pixelSize: LogicTheme.fontSize
-            onEditingFinished: App.studioSet.name = text
+            onEditingFinished: if (!App.fantomDevice) App.studioSet.name = text
         }
 
         Item { Layout.fillWidth: true }

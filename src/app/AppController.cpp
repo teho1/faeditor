@@ -9,7 +9,7 @@ AppController::AppController(QObject *parent)
     : QObject(parent)
 {
     m_engine = new SysexEngine(this);
-    m_platform = new RolandFAPlatform(m_engine);
+    m_platform = new AutoDetectRolandPlatform(m_engine);
     m_midi = new MidiDeviceModel(m_platform, this);
     m_undo = new UndoController(this);
     m_studioSet = new StudioSetModel(m_platform, m_undo, this);
@@ -29,6 +29,7 @@ AppController::AppController(QObject *parent)
     }
     m_library = new ProjectStore(m_studioSet, m_audioFx, m_tone, this);
     m_svdImport = new SvdImportModel(m_platform, m_studioSet, this);
+    m_scene = new FantomSceneModel(m_platform, this);
     connect(m_svdImport, &SvdImportModel::tonePushed, this,
             [this](const QString &name, int part) {
         setHint(QStringLiteral("Imported “%1” to Part %2 Temporary SN-A tone. Use Write on the FA to store it permanently.")
@@ -58,6 +59,7 @@ AppController::AppController(QObject *parent)
     });
 
     connect(m_midi, &MidiDeviceModel::connectedChanged, this, [this]() {
+        QTimer::singleShot(0,this,[this](){emit deviceFamilyChanged();});
         if (!m_midi->connected())
             setHint(m_midi->statusText().isEmpty()
                         ? QStringLiteral("FA disconnected — cable unplugged or powered off")
@@ -65,7 +67,7 @@ AppController::AppController(QObject *parent)
     });
 
     m_library->recoverAutosaveIfNeeded();
-    setHint(QStringLiteral("Looking for FA…"));
+    setHint(QStringLiteral("Looking for a Roland FA or FANTOM-0…"));
 
     // After the UI is up, auto-connect and pull Temporary data.
     QTimer::singleShot(500, this, &AppController::startupConnect);
@@ -103,9 +105,18 @@ void AppController::startupConnect()
         return;
     }
 
-    setHint(QStringLiteral("Looking for FA MIDI ports…"));
+    setHint(QStringLiteral("Looking for Roland FA / FANTOM-0 MIDI ports…"));
     if (!m_midi->autoConnectFa()) {
-        setHint(QStringLiteral("No FA found — power on / plug in USB, then click MIDI ○ (or MIDI → Auto-connect FA)."));
+        setHint(QStringLiteral("No supported Roland found — power on / plug in USB, then click MIDI."));
+        return;
+    }
+
+    emit deviceFamilyChanged();
+
+    if (fantomDevice()) {
+        setHint(QStringLiteral("Connected to %1 — pulling Temporary Scene…").arg(m_platform->profile().model));
+        if (m_scene->pull()) setHint(QStringLiteral("Ready — Temporary Scene “%1”. All edits remain temporary until saved on the FANTOM.").arg(m_scene->name()));
+        else setHint(QStringLiteral("FANTOM connected, but Scene pull failed: %1").arg(m_scene->status()));
         return;
     }
 
@@ -200,6 +211,12 @@ void AppController::previewTone(int toneRow)
 
 bool AppController::pull()
 {
+    if (fantomDevice()) {
+        const bool ok = m_scene && m_scene->pull();
+        if (ok)
+            setHint(QStringLiteral("Pulled Temporary Scene “%1”.").arg(m_scene->name()));
+        return ok;
+    }
     const bool ok = m_studioSet->pullFromDevice();
     if (ok)
         setHint(QStringLiteral("Pulled Temporary Studio Set “%1”. Select a part and change its tone.")
@@ -209,6 +226,12 @@ bool AppController::pull()
 
 bool AppController::push()
 {
+    if (fantomDevice()) {
+        const bool ok = m_scene && m_scene->push();
+        setHint(ok ? QStringLiteral("Pushed Temporary Scene. Save it on the FANTOM if you want to keep it.")
+                   : m_scene->status());
+        return ok;
+    }
     // Blobs + typed studio overlays, then tone blobs, then System Audio FX + Master EQ.
     if (!m_studioSet->pushToDevice())
         return false;
@@ -231,6 +254,20 @@ bool AppController::push()
     }
     setHint(QStringLiteral("Pushed Temporary Studio Set, tones, Audio FX, and Master EQ. Permanent store: Write on the FA."));
     return true;
+}
+
+bool AppController::fantomDevice() const
+{
+    return m_platform && m_platform->isFantom0();
+}
+
+void AppController::previewFantomZone(int zone,int note,int velocity,bool on)
+{
+    if (!m_platform || !fantomDevice())
+        return;
+    QString error;
+    m_platform->sendPreviewNote(qBound(0,zone,15),qBound(0,note,127),
+                                qBound(0,velocity,127),on,&error);
 }
 
 bool AppController::openStudioSet(int row)

@@ -14,10 +14,10 @@ public:
     bool openMidiConnection(int, int, QString *) override;
     void closeMidiConnection() override;
     bool midiConnectionHealthy() const override;
-    bool detectRolandFA(quint8 *, int, QString *) override;
+    bool detectDevice(quint8 *, int, QString *) override;
     bool sendPreviewNote(int, int, int, bool, QString *) override;
-    bool recallStudioSet(int bankMsb, int bankLsb, int program, QString *error) override;
-    bool readTemporaryStudioSetName(QString *name, QString *error) override;
+    bool recallPerformance(int bankMsb, int bankLsb, int program, QString *error) override;
+    bool readTemporaryPerformanceName(QString *name, QString *error) override;
     bool readStudioBlock(StudioBlock, int, int, QByteArray *, QString *) override;
     bool writeStudioBlock(StudioBlock, int, const QByteArray &, QString *) override;
     bool writeStudioParameter(StudioBlock, int, int, const QByteArray &, QString *) override;

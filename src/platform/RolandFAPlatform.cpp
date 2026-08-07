@@ -47,7 +47,7 @@ bool RolandFAPlatform::discoverMidiPorts(QVector<MidiPort> *inputs,QVector<MidiP
 bool RolandFAPlatform::openMidiConnection(int in,int out,QString *error){return m_engine&&m_engine->openPorts(in,out,error);}
 void RolandFAPlatform::closeMidiConnection(){if(m_engine)m_engine->closePorts();}
 bool RolandFAPlatform::midiConnectionHealthy()const{return m_engine&&m_engine->portsHealthy();}
-bool RolandFAPlatform::detectRolandFA(quint8 *deviceId,int timeoutMs,QString *error)
+bool RolandFAPlatform::detectDevice(quint8 *deviceId,int timeoutMs,QString *error)
 {
     if (error) error->clear();
     if (!m_engine || !m_engine->sendIdentityRequest(error)) return false;
@@ -61,7 +61,7 @@ bool RolandFAPlatform::sendPreviewNote(int channel,int note,int velocity,bool on
     return m_engine&&m_engine->sendMessage(message,error);
 }
 
-bool RolandFAPlatform::recallStudioSet(int msb, int lsb, int program, QString *error)
+bool RolandFAPlatform::recallPerformance(int msb, int lsb, int program, QString *error)
 {
     if (!isConnected()) { if (error) *error = QStringLiteral("Not connected"); return false; }
     if (!m_engine->writeParam(Address{{0x01, 0x00, 0x00, 0x00}}, QByteArray(1, char(1)), error))
@@ -70,7 +70,7 @@ bool RolandFAPlatform::recallStudioSet(int msb, int lsb, int program, QString *e
     return m_engine->write(Address{{0x01, 0x00, 0x00, 0x04}}, select, error);
 }
 
-bool RolandFAPlatform::readTemporaryStudioSetName(QString *name, QString *error)
+bool RolandFAPlatform::readTemporaryPerformanceName(QString *name, QString *error)
 {
     QByteArray data;
     if (!m_engine || !m_engine->read(addr::kStudioSetCommon, 16, &data, error, 2500)) return false;

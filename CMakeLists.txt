@@ -60,6 +60,8 @@ if(FAEDITOR_PRODUCT STREQUAL "FA")
     src/midi/RolandChecksum.cpp
     src/midi/AddressMap.cpp
     src/platform/RolandFAPlatform.cpp
+    src/platform/RolandFantomPlatform.cpp
+    src/platform/AutoDetectRolandPlatform.cpp
     src/model/StudioSetModel.cpp
     src/model/PartModel.cpp
     src/model/EffectsModel.cpp
@@ -79,12 +81,21 @@ if(FAEDITOR_PRODUCT STREQUAL "FA")
     src/model/SnAcousticToneModel.cpp
     src/model/SvdImportModel.cpp
     src/model/TemporaryToneModel.cpp
+    src/model/FantomSceneModel.cpp
     src/model/MfxPresetStore.cpp
     src/project/ProjectStore.cpp
     src/undo/UndoController.cpp
     )
 else()
-    list(APPEND COMMON_APP_SOURCES src/app/FantomAppController.h)
+    list(APPEND COMMON_APP_SOURCES
+        src/app/FantomAppController.cpp
+        src/model/FantomSceneModel.cpp
+        src/platform/RolandFantomPlatform.cpp
+        src/midi/MidiDeviceModel.cpp
+        src/midi/SysexEngine.cpp
+        src/midi/RolandChecksum.cpp
+        src/midi/AddressMap.cpp
+    )
 endif()
 
 qt_add_executable(${APP_TARGET} ${COMMON_APP_SOURCES})
@@ -142,6 +153,7 @@ if(FAEDITOR_PRODUCT STREQUAL "FA")
         qml/views/AboutDialog.qml
         qml/views/HelpDialog.qml
         qml/views/SvdImportPanel.qml
+        qml/views/FantomSceneView.qml
         RESOURCES
         resources/tones/soundlist.json
         resources/waves/waveforms.json
@@ -317,10 +329,26 @@ add_test(NAME FAEditorMfxTests COMMAND FAEditorMfxTests)
 qt_add_executable(FAEditorPlatformTests
     tests/test_platform.cpp
     src/model/TemporarySysexStore.cpp
+    src/platform/RolandFantomPlatform.cpp
+    src/midi/SysexEngine.cpp src/midi/RolandChecksum.cpp src/midi/AddressMap.cpp
 )
-target_include_directories(FAEditorPlatformTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/tests)
-target_link_libraries(FAEditorPlatformTests PRIVATE Qt6::Core Qt6::Test)
+target_include_directories(FAEditorPlatformTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/tests ${rtmidi_SOURCE_DIR})
+target_link_libraries(FAEditorPlatformTests PRIVATE Qt6::Core Qt6::Test rtmidi)
+if(APPLE)
+    target_link_libraries(FAEditorPlatformTests PRIVATE ${COREMIDI_LIBRARY} ${COREAUDIO_LIBRARY} ${COREFOUNDATION_LIBRARY})
+endif()
 add_test(NAME FAEditorPlatformTests COMMAND FAEditorPlatformTests)
+
+qt_add_executable(FantomSceneTests
+    tests/test_fantom_scene.cpp src/model/FantomSceneModel.cpp
+    src/platform/RolandFantomPlatform.cpp src/midi/SysexEngine.cpp
+    src/midi/RolandChecksum.cpp src/midi/AddressMap.cpp)
+target_include_directories(FantomSceneTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/tests ${rtmidi_SOURCE_DIR})
+target_link_libraries(FantomSceneTests PRIVATE Qt6::Core Qt6::Test rtmidi)
+if(APPLE)
+    target_link_libraries(FantomSceneTests PRIVATE ${COREMIDI_LIBRARY} ${COREAUDIO_LIBRARY} ${COREFOUNDATION_LIBRARY})
+endif()
+add_test(NAME FantomSceneTests COMMAND FantomSceneTests)
 
 qt_add_executable(FAEditorAudioFxTests
     tests/test_audio_fx.cpp

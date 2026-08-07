@@ -79,6 +79,12 @@ void SysexEngine::setDeviceId(quint8 id)
     m_deviceId = id;
 }
 
+void SysexEngine::setModelId(const QByteArray &modelId)
+{
+    if (!modelId.isEmpty())
+        m_modelId = modelId;
+}
+
 void SysexEngine::rtMidiCallback(double deltaTime, std::vector<unsigned char> *message, void *userData)
 {
     auto *self = static_cast<SysexEngine *>(userData);
@@ -105,31 +111,32 @@ void SysexEngine::onMidiMessage(double, std::vector<unsigned char> *message)
         && static_cast<quint8>(raw[5]) == 0x41) {
         QMutexLocker lock(&m_mutex);
         m_identityDeviceId = static_cast<quint8>(raw[2]);
-        // FA model family / model number often includes 00 00 77 somewhere; accept Roland reply
+        m_identityReply = raw;
         m_gotIdentity = true;
         m_cond.wakeAll();
         return;
     }
 
-    // DT1: F0 41 dev 00 00 77 12 aa bb cc dd data... sum F7
-    if (raw.size() >= 13
+    // DT1: F0 41 dev <variable model id> 12 aa bb cc dd data... sum F7
+    const int commandOffset = 3 + m_modelId.size();
+    const int addressOffset = commandOffset + 1;
+    const int dataOffset = addressOffset + 4;
+    if (raw.size() >= dataOffset + 3
         && static_cast<quint8>(raw[1]) == roland::kManufacturerId
-        && static_cast<quint8>(raw[3]) == roland::kModelId0
-        && static_cast<quint8>(raw[4]) == roland::kModelId1
-        && static_cast<quint8>(raw[5]) == roland::kModelId2
-        && static_cast<quint8>(raw[6]) == roland::kCmdDt1) {
+        && raw.mid(3, m_modelId.size()) == m_modelId
+        && static_cast<quint8>(raw[commandOffset]) == roland::kCmdDt1) {
         const auto device = static_cast<quint8>(raw[2]);
         Q_UNUSED(device);
         roland::Address address{{
-            static_cast<quint8>(raw[7]),
-            static_cast<quint8>(raw[8]),
-            static_cast<quint8>(raw[9]),
-            static_cast<quint8>(raw[10])
+            static_cast<quint8>(raw[addressOffset]),
+            static_cast<quint8>(raw[addressOffset + 1]),
+            static_cast<quint8>(raw[addressOffset + 2]),
+            static_cast<quint8>(raw[addressOffset + 3])
         }};
-        const int dataLen = raw.size() - 12; // minus header(11) + sum + F7 => start at 11, end before last 2
+        const int dataLen = raw.size() - dataOffset - 2;
         if (dataLen <= 0)
             return;
-        QByteArray data = raw.mid(11, dataLen);
+        QByteArray data = raw.mid(dataOffset, dataLen);
 
         QMutexLocker lock(&m_mutex);
         if (m_pendingDt1Data.isEmpty()) {
@@ -155,9 +162,7 @@ QByteArray SysexEngine::buildRq1(const roland::Address &address, int size) const
     msg.append(char(0xF0));
     msg.append(char(roland::kManufacturerId));
     msg.append(char(m_deviceId));
-    msg.append(char(roland::kModelId0));
-    msg.append(char(roland::kModelId1));
-    msg.append(char(roland::kModelId2));
+    msg.append(m_modelId);
     msg.append(char(roland::kCmdRq1));
     msg.append(body);
     msg.append(char(sum));
@@ -176,9 +181,7 @@ QByteArray SysexEngine::buildDt1(const roland::Address &address, const QByteArra
     msg.append(char(0xF0));
     msg.append(char(roland::kManufacturerId));
     msg.append(char(m_deviceId));
-    msg.append(char(roland::kModelId0));
-    msg.append(char(roland::kModelId1));
-    msg.append(char(roland::kModelId2));
+    msg.append(m_modelId);
     msg.append(char(roland::kCmdDt1));
     msg.append(body);
     msg.append(char(sum));
@@ -305,6 +308,7 @@ bool SysexEngine::sendIdentityRequest(QString *error)
     {
         QMutexLocker lock(&m_mutex);
         m_gotIdentity = false;
+        m_identityReply.clear();
     }
     // F0 7E 7F 06 01 F7
     QByteArray msg;
@@ -315,6 +319,12 @@ bool SysexEngine::sendIdentityRequest(QString *error)
     msg.append(char(0x01));
     msg.append(char(0xF7));
     return sendRaw(msg, error);
+}
+
+QByteArray SysexEngine::lastIdentityReply() const
+{
+    QMutexLocker lock(&m_mutex);
+    return m_identityReply;
 }
 
 bool SysexEngine::waitIdentityReply(quint8 *deviceIdOut, int timeoutMs)

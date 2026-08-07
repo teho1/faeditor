@@ -1,6 +1,6 @@
 # FA Editor
 
-macOS Studio Set and Temporary Tone editor for Roland FA-06 / FA-07 / FA-08.
+macOS editor for Roland FA-06/07/08, with experimental Temporary Scene support for FANTOM-06/07/08.
 
 Qt 6.11 QML UI + C++ models/controllers over documented Roland SysEx.
 
@@ -27,8 +27,9 @@ A signed binary is available as **[Editor for Roland FA](https://apps.apple.com/
 
 ## Build
 
-The `FAEDITOR_PRODUCT` CMake cache option selects `FA` or `FANTOM` and defaults to `FA`.
-The default command and target remain unchanged:
+The normal `FA` build is the shipping application. It detects a connected FA or
+FANTOM-0 from Roland's Universal Identity Reply and selects the matching protocol
+adapter automatically. The default command and target remain unchanged:
 
 ```bash
 cmake -S . -B build -DCMAKE_PREFIX_PATH=/Volumes/Datastore/Qt/6.11.1/macos
@@ -37,7 +38,7 @@ ctest --test-dir build --output-on-failure
 open build/FAEditor.app
 ```
 
-Build the separate Fantom shell with:
+An optional standalone FANTOM development shell can still be built for adapter work:
 
 ```bash
 cmake -S . -B build-fantom -DFAEDITOR_PRODUCT=FANTOM -DCMAKE_PREFIX_PATH=/Volumes/Datastore/Qt/6.11.1/macos
@@ -46,14 +47,14 @@ ctest --test-dir build-fantom --output-on-failure
 open build-fantom/FantomEditor.app
 ```
 
-The Fantom product currently provides its own workflow shell and selects the safe
-Fantom capability profile. Device-specific editing is not implemented and it sends
-no guessed MIDI or SysEx.
+The standalone shell and the normal app use the same documented FANTOM-0 adapter.
+The normal app is the intended user workflow; a second installation is not required.
+FANTOM writes target documented Temporary Scene/Tone areas only.
 
 ## Usage
 
 1. On the FA: System → USB Driver → **Vendor (MIDI+Audio)**; install Roland USB driver if needed.
-2. In the app: **MIDI → Auto-connect FA** (or pick ports — skip DAW CTRL).
+2. In the app: **MIDI → Auto-connect instrument** (or pick ports — skip DAW CTRL). The app identifies FA versus FANTOM-0 automatically.
 3. Tab **1. Sets & Tones**: pick a User/Preset slot from the **FA Set** dropdown (top bar) to recall it, select a part (left), click a tone to assign (right; icon previews). Optional **Scan** for User names. Local projects are in the **Library** tab.
 4. **Mixer**, **Effects**, and **Tone** edit Temporary data on the FA. **Push Temp** for a full Temporary rewrite. To keep a **User** slot permanently, use **Write** on the FA itself (SysEx only edits Temporary).
 
@@ -64,11 +65,11 @@ no guessed MIDI or SysEx.
 
 ## Layout
 
-- `src/app/` — product controllers (`AppController` for FA, safe `FantomAppController` shell)
-- `src/platform/` — shared capability boundary and verified/skeleton device adapters
+- `src/app/` — shared application controller plus the optional standalone development shell
+- `src/platform/` — shared capability boundary, automatic Roland identification, and device address adapters
 - `src/model/`, `src/project/`, `src/undo/` — reusable model, local-backup/library, and undo primitives
 - `qml/components/`, `qml/theme/` — shared Logic-inspired controls and theme
-- `qml/Main.qml`, `qml/FantomMain.qml` — separate product workflows selected by CMake
+- `qml/Main.qml` — shipping workflow with automatic FA/FANTOM-0 workspace selection; `qml/FantomMain.qml` is the optional adapter-development shell
 - `resources/tones/soundlist.json` — FA-06/07/08 preset tone catalog from Roland Sound List (`scripts/import_soundlist.py`)
 - `resources/waves/waveforms.json` — waveform name catalog (`scripts/import_waveforms.py`)
 - `roland_specs/` — official PDFs (reference only)

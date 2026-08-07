@@ -46,11 +46,11 @@ public:
     bool openMidiConnection(int in,int out,QString*e) override { Q_UNUSED(in);Q_UNUSED(out); if(!openSucceeds||!failure.isEmpty()){if(e)*e=failure.isEmpty()?QStringLiteral("Open failed"):failure;connected=false;return false;} connected=true;return true; }
     void closeMidiConnection() override { connected=false; }
     bool midiConnectionHealthy() const override { return connected&&healthy; }
-    bool detectRolandFA(quint8*id,int,QString*e) override { if(!check(e))return false;if(id)*id=identityReply?identityDeviceId:quint8(0x10);return identityReply; }
+    bool detectDevice(quint8*id,int,QString*e) override { if(!check(e))return false;if(id)*id=identityReply?identityDeviceId:quint8(0x10);return identityReply; }
     bool sendPreviewNote(int ch,int note,int velocity,bool on,QString*e) override { if(!check(e))return false;previews.push_back({ch,note,velocity,on});return true; }
-    bool recallStudioSet(int msb, int lsb, int program, QString *error) override
+    bool recallPerformance(int msb, int lsb, int program, QString *error) override
     { if (!check(error)) return false; recalledMsb=msb; recalledLsb=lsb; recalledProgram=program; return true; }
-    bool readTemporaryStudioSetName(QString *name, QString *error) override
+    bool readTemporaryPerformanceName(QString *name, QString *error) override
     { if (!check(error)) return false; if (name) *name=studioSetName; return true; }
     bool readStudioBlock(StudioBlock b,int i,int s,QByteArray*d,QString*e) override { if(!check(e))return false; if(d)*d=studio.value(QStringLiteral("%1:%2").arg(int(b)).arg(i),QByteArray(s,'\0')).leftJustified(s,'\0'); return true; }
     bool writeStudioBlock(StudioBlock b,int i,const QByteArray&d,QString*e) override { if(!check(e))return false; studio.insert(QStringLiteral("%1:%2").arg(int(b)).arg(i),d); return true; }

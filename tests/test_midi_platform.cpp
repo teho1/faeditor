@@ -39,7 +39,7 @@ void MidiPlatformTests::identityReplyIsReported()
     FakeInstrumentPlatform fake; fake.identityDeviceId=0x2a;
     MidiDeviceModel model(&fake);
     QVERIFY(model.probeIdentity());
-    QCOMPARE(model.statusText(),QStringLiteral("FA Identity OK (device 2a)"));
+        QCOMPARE(model.statusText(),QStringLiteral("Test Instrument Identity OK (device 2a)"));
 }
 
 void MidiPlatformTests::unhealthyPortDisconnects()

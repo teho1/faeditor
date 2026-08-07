@@ -1,39 +1,35 @@
 #pragma once
 
-#include "platform/RolandFantomPlatform.h"
-
 #include <QObject>
-#include <QString>
+#include <memory>
+#include "midi/MidiDeviceModel.h"
+#include "model/FantomSceneModel.h"
 
-// Product shell controller only. Device operations remain unavailable until a
-// verified Fantom protocol adapter is implemented.
+class SysexEngine;
+class RolandFantomPlatform;
+
 class FantomAppController final : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QString productName READ productName CONSTANT)
-    Q_PROPERTY(QString deviceProfile READ deviceProfile CONSTANT)
-    Q_PROPERTY(QString implementationStatus READ implementationStatus CONSTANT)
-    Q_PROPERTY(bool deviceEditingAvailable READ deviceEditingAvailable CONSTANT)
-    Q_PROPERTY(bool localLibraryAvailable READ localLibraryAvailable CONSTANT)
-
+    Q_PROPERTY(QString deviceProfile READ deviceProfile NOTIFY deviceProfileChanged)
+    Q_PROPERTY(QString safetyNotice READ safetyNotice CONSTANT)
+    Q_PROPERTY(MidiDeviceModel* midi READ midi CONSTANT)
+    Q_PROPERTY(FantomSceneModel* scene READ scene CONSTANT)
 public:
-    explicit FantomAppController(QObject *parent = nullptr) : QObject(parent) {}
-
-    QString productName() const { return QStringLiteral("Fantom Editor"); }
-    QString deviceProfile() const { return m_platform.profile().model; }
-    QString implementationStatus() const
-    {
-        return QStringLiteral("Device-specific Fantom editing is not implemented yet. No MIDI or SysEx is sent.");
-    }
-    bool deviceEditingAvailable() const
-    {
-        return m_platform.supportsWorkspace(InstrumentPlatform::Workspace::ToneEditing, true);
-    }
-    bool localLibraryAvailable() const
-    {
-        return m_platform.supportsWorkspace(InstrumentPlatform::Workspace::Library, true);
-    }
-
+    explicit FantomAppController(QObject *parent=nullptr);
+    ~FantomAppController() override;
+    QString productName() const{return QStringLiteral("Fantom Editor");}
+    QString deviceProfile() const;
+    QString safetyNotice() const{return QStringLiteral("All Push and live edits target Temporary memory only. Save on the FANTOM to make changes permanent.");}
+    MidiDeviceModel *midi() const{return m_midi.get();}
+    FantomSceneModel *scene() const{return m_scene.get();}
+    Q_INVOKABLE void previewNote(int zone,int note,int velocity,bool on);
+signals:
+    void deviceProfileChanged();
 private:
-    RolandFantomPlatform m_platform;
+    std::unique_ptr<SysexEngine> m_engine;
+    std::unique_ptr<RolandFantomPlatform> m_platform;
+    std::unique_ptr<MidiDeviceModel> m_midi;
+    std::unique_ptr<FantomSceneModel> m_scene;
 };

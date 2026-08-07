@@ -8,10 +8,11 @@
 #include "model/AudioFxModel.h"
 #include "model/TemporaryToneModel.h"
 #include "model/SvdImportModel.h"
+#include "model/FantomSceneModel.h"
 #include "project/ProjectStore.h"
 #include "undo/UndoController.h"
 #include "midi/SysexEngine.h"
-#include "platform/RolandFAPlatform.h"
+#include "platform/AutoDetectRolandPlatform.h"
 
 #include <QObject>
 #include <QTimer>
@@ -30,6 +31,10 @@ class AppController : public QObject
     Q_PROPERTY(ProjectStore *library READ library CONSTANT)
     Q_PROPERTY(SvdImportModel *svdImport READ svdImport CONSTANT)
     Q_PROPERTY(UndoController *undo READ undo CONSTANT)
+    Q_PROPERTY(FantomSceneModel *scene READ scene CONSTANT)
+    Q_PROPERTY(bool fantomDevice READ fantomDevice NOTIFY deviceFamilyChanged)
+    Q_PROPERTY(QString performanceLabel READ performanceLabel NOTIFY deviceFamilyChanged)
+    Q_PROPERTY(QString partLabel READ partLabel NOTIFY deviceFamilyChanged)
     Q_PROPERTY(int mainTab READ mainTab WRITE setMainTab NOTIFY mainTabChanged)
     Q_PROPERTY(bool connectDialogOpen READ connectDialogOpen WRITE setConnectDialogOpen NOTIFY connectDialogOpenChanged)
     Q_PROPERTY(QString workflowHint READ workflowHint NOTIFY workflowHintChanged)
@@ -48,6 +53,10 @@ public:
     ProjectStore *library() const { return m_library; }
     SvdImportModel *svdImport() const { return m_svdImport; }
     UndoController *undo() const { return m_undo; }
+    FantomSceneModel *scene() const{return m_scene;}
+    bool fantomDevice() const;
+    QString performanceLabel() const{return fantomDevice()?QStringLiteral("Scene"):QStringLiteral("Studio Set");}
+    QString partLabel() const{return fantomDevice()?QStringLiteral("Zone"):QStringLiteral("Part");}
 
     int mainTab() const { return m_mainTab; }
     void setMainTab(int v);
@@ -73,17 +82,19 @@ public:
     Q_INVOKABLE void startupConnect();
     Q_INVOKABLE bool exportStudioSetMidi(const QUrl &url);
     Q_INVOKABLE bool exportToneNamesMidnam(const QUrl &url);
+    Q_INVOKABLE void previewFantomZone(int zone,int note,int velocity,bool on);
 
 signals:
     void mainTabChanged();
     void connectDialogOpenChanged();
     void workflowHintChanged();
+    void deviceFamilyChanged();
 
 private:
     void setHint(const QString &h);
 
     SysexEngine *m_engine = nullptr;
-    RolandFAPlatform *m_platform = nullptr;
+    AutoDetectRolandPlatform *m_platform = nullptr;
     MidiDeviceModel *m_midi = nullptr;
     UndoController *m_undo = nullptr;
     StudioSetModel *m_studioSet = nullptr;
@@ -94,6 +105,7 @@ private:
     TemporaryToneModel *m_tone = nullptr;
     ProjectStore *m_library = nullptr;
     SvdImportModel *m_svdImport = nullptr;
+    FantomSceneModel *m_scene = nullptr;
     QTimer m_autosaveTimer;
     int m_mainTab = 0;
     bool m_connectDialogOpen = false;

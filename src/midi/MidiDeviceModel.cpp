@@ -136,7 +136,7 @@ void MidiDeviceModel::refresh()
         if (m_platform && m_platform->isConnected()) m_platform->closeMidiConnection();
         m_connected = false;
         m_connectedName.clear();
-        setStatus(QStringLiteral("FA disconnected — cable unplugged or powered off"));
+        setStatus(QStringLiteral("Instrument disconnected — cable unplugged or powered off"));
         emit connectedChanged();
     }
 
@@ -206,7 +206,7 @@ bool MidiDeviceModel::autoConnectFa()
     if (!selectionValid()
         || !m_inputs.at(m_selectedInput).looksLikeFa
         || !m_outputs.at(m_selectedOutput).looksLikeFa) {
-        setStatus(QStringLiteral("No FA MIDI port found (ignoring DAW CTRL)"));
+        setStatus(QStringLiteral("No matching instrument MIDI port found (ignoring DAW CTRL)"));
         if (m_connected)
             disconnectDevice();
         return false;
@@ -268,7 +268,7 @@ void MidiDeviceModel::pollConnection()
         if (m_platform) m_platform->closeMidiConnection();
         m_connected = false;
         m_connectedName.clear();
-        setStatus(QStringLiteral("FA disconnected — MIDI error"));
+        setStatus(QStringLiteral("Instrument disconnected — MIDI error"));
         emit connectedChanged();
         refresh();
         return;
@@ -283,7 +283,7 @@ void MidiDeviceModel::pollConnection()
         if (m_platform) m_platform->closeMidiConnection();
         m_connected = false;
         m_connectedName.clear();
-        setStatus(QStringLiteral("FA disconnected — cable unplugged or powered off"));
+        setStatus(QStringLiteral("Instrument disconnected — cable unplugged or powered off"));
         emit connectedChanged();
         refresh();
     }
@@ -299,8 +299,8 @@ bool MidiDeviceModel::probeIdentity()
         return false;
     QString err;
     quint8 dev = 0x10;
-    if (m_platform->detectRolandFA(&dev,1500,&err)) {
-        setStatus(QStringLiteral("FA Identity OK (device %1)").arg(dev, 2, 16, QChar('0')));
+    if (m_platform->detectDevice(&dev,1500,&err)) {
+        setStatus(QStringLiteral("%1 Identity OK (device %2)").arg(m_platform->profile().model).arg(dev, 2, 16, QChar('0')));
         return true;
     }
     if (!err.isEmpty()) {
