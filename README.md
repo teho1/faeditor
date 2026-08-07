@@ -57,6 +57,11 @@ no guessed MIDI or SysEx.
 3. Tab **1. Sets & Tones**: pick a User/Preset slot from the **FA Set** dropdown (top bar) to recall it, select a part (left), click a tone to assign (right; icon previews). Optional **Scan** for User names. Local projects are in the **Library** tab.
 4. **Mixer**, **Effects**, and **Tone** edit Temporary data on the FA. **Push Temp** for a full Temporary rewrite. To keep a **User** slot permanently, use **Write** on the FA itself (SysEx only edits Temporary).
 
+## DAW export
+
+- **File → Export Current Studio Set as MIDI…** writes a Standard MIDI File type 1 with a conductor track and 16 named part tracks. Each part carries its MIDI channel, Bank Select MSB/LSB, Program Change, volume, pan, chorus send, and reverb send. Import the file into a DAW and route the resulting tracks to the FA MIDI port.
+- **File → Export FA Tone Names (.midnam)…** writes the complete bundled FA tone catalog as a MIDI Name Document, grouped by the FA bank MSB/LSB values. Pro Tools and other MIDNAM-aware software can use it for named patch selection. Logic Pro does not document direct MIDNAM import; use the Studio Set MIDI export for Logic projects.
+
 ## Layout
 
 - `src/app/` — product controllers (`AppController` for FA, safe `FantomAppController` shell)

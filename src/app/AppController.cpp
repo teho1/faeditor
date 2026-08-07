@@ -1,5 +1,6 @@
 #include "app/AppController.h"
 #include "model/PartModel.h"
+#include "export/DawExporter.h"
 
 #include <QThread>
 #include <QTimer>
@@ -119,6 +120,26 @@ void AppController::startupConnect()
     } else {
         setHint(QStringLiteral("MIDI connected, but pull failed — click Pull Temp (FA must be ready)."));
     }
+}
+
+bool AppController::exportStudioSetMidi(const QUrl &url)
+{
+    QString error;
+    const QString path = url.isLocalFile() ? url.toLocalFile() : url.toString();
+    const bool ok = DawExporter::writeStudioSetMidi(*m_studioSet, path, &error);
+    setHint(ok ? QStringLiteral("Exported Studio Set MIDI setup.")
+               : QStringLiteral("Studio Set export failed: %1").arg(error));
+    return ok;
+}
+
+bool AppController::exportToneNamesMidnam(const QUrl &url)
+{
+    QString error;
+    const QString path = url.isLocalFile() ? url.toLocalFile() : url.toString();
+    const bool ok = DawExporter::writeMidnam(*m_tones, path, &error);
+    setHint(ok ? QStringLiteral("Exported Roland FA tone names (.midnam).")
+               : QStringLiteral("Tone-name export failed: %1").arg(error));
+    return ok;
 }
 
 void AppController::setMainTab(int v)

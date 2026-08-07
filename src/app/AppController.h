@@ -15,6 +15,7 @@
 
 #include <QObject>
 #include <QTimer>
+#include <QUrl>
 
 class AppController : public QObject
 {
@@ -70,6 +71,8 @@ public:
     Q_INVOKABLE void openMidiDialog();
     /** Auto-connect FA and pull Temporary + Audio FX. */
     Q_INVOKABLE void startupConnect();
+    Q_INVOKABLE bool exportStudioSetMidi(const QUrl &url);
+    Q_INVOKABLE bool exportToneNamesMidnam(const QUrl &url);
 
 signals:
     void mainTabChanged();

@@ -54,6 +54,7 @@ set(COMMON_APP_SOURCES src/main.cpp)
 if(FAEDITOR_PRODUCT STREQUAL "FA")
     list(APPEND COMMON_APP_SOURCES
     src/app/AppController.cpp
+    src/export/DawExporter.cpp
     src/midi/MidiDeviceModel.cpp
     src/midi/SysexEngine.cpp
     src/midi/RolandChecksum.cpp
@@ -345,6 +346,17 @@ qt_add_executable(FAEditorLibraryPerformanceTests
 target_include_directories(FAEditorLibraryPerformanceTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(FAEditorLibraryPerformanceTests PRIVATE Qt6::Core Qt6::Test)
 add_test(NAME FAEditorLibraryPerformanceTests COMMAND FAEditorLibraryPerformanceTests)
+
+qt_add_executable(FAEditorDawExportTests
+    tests/test_daw_export.cpp
+    src/export/DawExporter.cpp
+    src/model/ToneBrowserModel.cpp
+    src/model/StudioSetModel.cpp src/model/PartModel.cpp src/model/EffectsModel.cpp
+    src/model/TemporarySysexStore.cpp src/undo/UndoController.cpp
+)
+target_include_directories(FAEditorDawExportTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+target_link_libraries(FAEditorDawExportTests PRIVATE Qt6::Core Qt6::Gui Qt6::Test)
+add_test(NAME FAEditorDawExportTests COMMAND FAEditorDawExportTests)
 
 qt_add_executable(FAEditorToneWorkflowTests
     tests/test_tone_workflow.cpp

@@ -98,6 +98,7 @@ Dialog {
                 color: LogicTheme.textPrimary
                 Layout.topMargin: 6
             }
+
             Label {
                 Layout.fillWidth: true
                 wrapMode: Text.WordWrap
@@ -106,6 +107,24 @@ Dialog {
                 text:
                     "Channel strips stay on the left. The Tone row opens a tone picker that replaces part details in the inspector; use ^ to close. "
                     + "Chorus/Reverb sends and Main/Sub output are edited on the Effects tab."
+            }
+
+            Label {
+                text: "DAW export"
+                font.bold: true
+                color: LogicTheme.textPrimary
+                Layout.topMargin: 6
+            }
+            Label {
+                Layout.fillWidth: true
+                wrapMode: Text.WordWrap
+                color: LogicTheme.textSecondary
+                font.pixelSize: LogicTheme.fontSize
+                text:
+                    "File → Export Current Studio Set as MIDI creates a Standard MIDI File with one named track for each of the 16 parts. "
+                    + "Import it into a DAW, assign the tracks to the FA MIDI output, and the file selects each part’s bank, tone, level, pan, chorus, and reverb send. "
+                    + "File → Export FA Tone Names creates a .midnam patch-name catalog for Pro Tools and other compatible software. "
+                    + "Logic Pro does not directly import .midnam files; use the Studio Set MIDI export there."
             }
 
             Label {

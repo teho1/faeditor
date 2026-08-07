@@ -49,6 +49,9 @@ ApplicationWindow {
             MenuSeparator {}
             Action { text: "Import Roland SVD…"; onTriggered: svdFileDialog.open() }
             MenuSeparator {}
+            Action { text: "Export Current Studio Set as MIDI…"; onTriggered: studioSetMidiDialog.open() }
+            Action { text: "Export FA Tone Names (.midnam)…"; onTriggered: midnamDialog.open() }
+            MenuSeparator {}
             Action { text: "Quit"; shortcut: "Ctrl+Q"; onTriggered: Qt.quit() }
         }
         Menu {
@@ -88,6 +91,26 @@ ApplicationWindow {
             } else
                 svdImportError.open()
         }
+    }
+
+    FileDialog {
+        id: studioSetMidiDialog
+        title: "Export Current Studio Set as MIDI"
+        nameFilters: ["Standard MIDI file (*.mid)"]
+        fileMode: FileDialog.SaveFile
+        defaultSuffix: "mid"
+        currentFile: App.studioSet.name + ".mid"
+        onAccepted: App.exportStudioSetMidi(selectedFile)
+    }
+
+    FileDialog {
+        id: midnamDialog
+        title: "Export Roland FA Tone Names"
+        nameFilters: ["MIDI Name Document (*.midnam)"]
+        fileMode: FileDialog.SaveFile
+        defaultSuffix: "midnam"
+        currentFile: "Roland_FA.midnam"
+        onAccepted: App.exportToneNamesMidnam(selectedFile)
     }
 
     MessageDialog {

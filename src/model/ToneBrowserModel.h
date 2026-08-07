@@ -52,6 +52,7 @@ public:
     Q_INVOKABLE QVariantMap toneAt(int row) const;
     /// Filtered-list row for bank/PC, or -1 if not in the current filter.
     Q_INVOKABLE int indexOfTone(int bankMsb, int bankLsb, int program) const;
+    QVector<ToneEntry> catalogEntries() const { return m_all; }
 
 signals:
     void filterChanged();
