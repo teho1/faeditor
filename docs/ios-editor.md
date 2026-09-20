@@ -12,9 +12,10 @@ xcodebuild -project build-ios-editor/FAEditor.xcodeproj -scheme FAEditor -config
 ```
 
 Open that Xcode project and select your iPhone or **My Mac (Designed for iPad)**
-to run. The iOS development bundle ID is `com.righthere.faeditor.ios`, separate
-from the shipping macOS app and connection tester. Signing team defaults to the
-existing project team and can be overridden with `FAEDITOR_IOS_TEAM`.
+to run. iOS uses the same bundle ID as macOS, `com.righthere.faeditor`. The
+connection tester stays on `com.righthere.faeditor.connectiontest`. Signing
+team defaults to the existing project team and can be overridden with
+`FAEDITOR_IOS_TEAM`.
 
 For rapid desktop layout checks, build the normal macOS target and launch its
 executable with `--mobile-ui`. This uses the mobile QML with Fusion controls;

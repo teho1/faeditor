@@ -9,7 +9,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from asc_api import find_app, find_bundle_id, request  # noqa: E402
 
-BUNDLE_ID = "com.righthere.faeditor.ios"
+BUNDLE_ID = "com.righthere.faeditor"
 
 
 def log(message: str) -> None:
@@ -17,7 +17,7 @@ def log(message: str) -> None:
 
 
 def main() -> None:
-    bundle = find_bundle_id(BUNDLE_ID, "IOS")
+    bundle = find_bundle_id(BUNDLE_ID)
     if bundle is None:
         log(f"Creating bundle ID {BUNDLE_ID}")
         bundle = request(
@@ -28,7 +28,7 @@ def main() -> None:
                     "type": "bundleIds",
                     "attributes": {
                         "identifier": BUNDLE_ID,
-                        "name": "FA Editor iOS",
+                        "name": "FA Editor",
                         "platform": "IOS",
                     },
                 }
@@ -40,7 +40,7 @@ def main() -> None:
     if app is None:
         log(
             f"No App Store Connect app for {BUNDLE_ID}. "
-            "Create that iOS app once in App Store Connect, then uploads can go to TestFlight. "
+            "Add the iOS platform to the existing app in App Store Connect, then uploads can go to TestFlight. "
             "Continuing the archive."
         )
         return

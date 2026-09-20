@@ -98,13 +98,15 @@ def find_app(bundle_id: str) -> dict | None:
     return items[0] if items else None
 
 
-def find_bundle_id(identifier: str, platform: str = "IOS") -> dict | None:
+def find_bundle_id(identifier: str, platform: str | None = None) -> dict | None:
     payload = request(
         "GET",
         f"/v1/bundleIds?filter[identifier]={quote(identifier, safe='')}&limit=50",
     )
     for item in payload.get("data") or []:
         attributes = item.get("attributes") or {}
-        if attributes.get("identifier") == identifier and attributes.get("platform") == platform:
+        if attributes.get("identifier") != identifier:
+            continue
+        if platform is None or attributes.get("platform") == platform:
             return item
     return None

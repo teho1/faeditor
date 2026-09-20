@@ -10,7 +10,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from asc_api import find_app, request  # noqa: E402
 
-BUNDLE_ID = "com.righthere.faeditor.ios"
+BUNDLE_ID = "com.righthere.faeditor"
 
 
 def main() -> None:
