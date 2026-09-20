@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 3.21)
 project(FAEditor VERSION 1.2.0 LANGUAGES CXX)
 
+option(FAEDITOR_CONNECTION_PROBE "Build the standalone MIDI connection tester" OFF)
+if(FAEDITOR_CONNECTION_PROBE)
+    include(cmake/ConnectionProbe.cmake)
+    return()
+endif()
+
 set(FAEDITOR_PRODUCT "FA" CACHE STRING "Product to build (FA or FANTOM)")
 set_property(CACHE FAEDITOR_PRODUCT PROPERTY STRINGS FA FANTOM)
 string(TOUPPER "${FAEDITOR_PRODUCT}" FAEDITOR_PRODUCT)
@@ -21,7 +27,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-if(NOT DEFINED CMAKE_PREFIX_PATH AND EXISTS "/Volumes/Datastore/Qt/6.11.1/macos")
+if(NOT IOS AND NOT DEFINED CMAKE_PREFIX_PATH AND EXISTS "/Volumes/Datastore/Qt/6.11.1/macos")
     set(CMAKE_PREFIX_PATH "/Volumes/Datastore/Qt/6.11.1/macos" CACHE PATH "Qt prefix")
 endif()
 
@@ -33,11 +39,16 @@ find_package(Qt6 6.11 REQUIRED COMPONENTS
     QuickControls2
     Svg
     Concurrent
-    Test
 )
+if(NOT IOS)
+    find_package(Qt6 6.11 REQUIRED COMPONENTS Test)
+endif()
 
 qt_standard_project_setup(REQUIRES 6.5)
 
+if(IOS)
+    include(cmake/IosRtMidi.cmake)
+else()
 include(FetchContent)
 FetchContent_Declare(
     rtmidi
@@ -49,6 +60,8 @@ set(RTMIDI_BUILD_STATIC_LIBS ON CACHE BOOL "" FORCE)
 set(RTMIDI_BUILD_TESTING OFF CACHE BOOL "" FORCE)
 set(RTMIDI_API_CORE ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(rtmidi)
+
+endif()
 
 set(COMMON_APP_SOURCES src/main.cpp)
 if(FAEDITOR_PRODUCT STREQUAL "FA")
@@ -109,6 +122,9 @@ if(FAEDITOR_PRODUCT STREQUAL "FA")
         VERSION 1.0
         QML_FILES
         qml/Main.qml
+        qml/MobileMain.qml
+        qml/views/MobileSetsView.qml
+        qml/components/MobileEditorViewport.qml
         qml/theme/LogicTheme.qml
         qml/theme/FaIcons.qml
         qml/components/ChannelStrip.qml
@@ -209,7 +225,33 @@ if(FAEDITOR_PRODUCT STREQUAL "FANTOM")
     target_compile_definitions(${APP_TARGET} PRIVATE FAEDITOR_PRODUCT_FANTOM=1)
 endif()
 
-if(APPLE)
+if(IOS)
+    set(FAEDITOR_IOS_TEAM "K8DLLLGA28" CACHE STRING "Apple development team")
+    set(FAEDITOR_IOS_BUNDLE_ID "${APP_BUNDLE_ID}.ios" CACHE STRING "iOS bundle identifier")
+    set(FAEDITOR_IOS_MARKETING_VERSION "${APP_VERSION}" CACHE STRING "iOS CFBundleShortVersionString")
+    set(FAEDITOR_IOS_BUILD_NUMBER "${APP_BUNDLE_VERSION}" CACHE STRING "iOS CFBundleVersion")
+    set(FAEDITOR_IOS_ASSETS "${CMAKE_CURRENT_SOURCE_DIR}/resources/ios/Assets.xcassets")
+    set(FAEDITOR_IOS_PRIVACY "${CMAKE_CURRENT_SOURCE_DIR}/cmake/PrivacyInfo.xcprivacy")
+    set_source_files_properties(${FAEDITOR_IOS_ASSETS} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+    set_source_files_properties(${FAEDITOR_IOS_PRIVACY} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+    target_sources(${APP_TARGET} PRIVATE ${FAEDITOR_IOS_ASSETS} ${FAEDITOR_IOS_PRIVACY})
+    set_target_properties(${APP_TARGET} PROPERTIES
+        MACOSX_BUNDLE TRUE
+        MACOSX_BUNDLE_GUI_IDENTIFIER "${FAEDITOR_IOS_BUNDLE_ID}"
+        MACOSX_BUNDLE_BUNDLE_NAME "${APP_DISPLAY_NAME}"
+        MACOSX_BUNDLE_SHORT_VERSION_STRING "${FAEDITOR_IOS_MARKETING_VERSION}"
+        MACOSX_BUNDLE_BUNDLE_VERSION "${FAEDITOR_IOS_BUILD_NUMBER}"
+        MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/cmake/IosInfo.plist.in"
+        XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "${FAEDITOR_IOS_BUNDLE_ID}"
+        XCODE_ATTRIBUTE_CODE_SIGN_STYLE "Automatic"
+        XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "${FAEDITOR_IOS_TEAM}"
+        XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2"
+        XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET "16.0"
+        XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon"
+        XCODE_ATTRIBUTE_CURRENT_PROJECT_VERSION "${FAEDITOR_IOS_BUILD_NUMBER}"
+        XCODE_ATTRIBUTE_MARKETING_VERSION "${FAEDITOR_IOS_MARKETING_VERSION}"
+        XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS "${CMAKE_CURRENT_SOURCE_DIR}/cmake/FAEditorIos.entitlements")
+elseif(APPLE)
     if(NOT CMAKE_OSX_DEPLOYMENT_TARGET)
         set(CMAKE_OSX_DEPLOYMENT_TARGET "12.0" CACHE STRING "Minimum macOS version" FORCE)
     endif()
@@ -238,10 +280,16 @@ if(APPLE)
     find_library(COREMIDI_LIBRARY CoreMIDI)
     find_library(COREAUDIO_LIBRARY CoreAudio)
     find_library(COREFOUNDATION_LIBRARY CoreFoundation)
+    set(FAEDITOR_MAC_BUNDLE_VERSION "" CACHE STRING "Override macOS CFBundleVersion for CI")
     if(FAEDITOR_PRODUCT STREQUAL "FA")
         # Keep the FA release bundle metadata explicit and regression-tested.
+        if(FAEDITOR_MAC_BUNDLE_VERSION)
+            set(_fa_mac_bundle_version "${FAEDITOR_MAC_BUNDLE_VERSION}")
+        else()
+            set(_fa_mac_bundle_version 5)
+        endif()
         set_target_properties(${APP_TARGET} PROPERTIES
-            MACOSX_BUNDLE_BUNDLE_VERSION 5
+            MACOSX_BUNDLE_BUNDLE_VERSION "${_fa_mac_bundle_version}"
             MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
             MACOSX_BUNDLE_ICON_FILE "AppIcon"
         )
@@ -287,6 +335,11 @@ if(APPLE)
     else()
         message(WARNING "macdeployqt not found; Release/Archive builds will be incomplete for TestFlight")
     endif()
+endif()
+
+# Desktop tests exercise shared models; do not package test apps for iOS.
+if(IOS)
+    return()
 endif()
 
 enable_testing()

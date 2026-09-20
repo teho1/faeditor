@@ -59,7 +59,8 @@ int main(int argc, char *argv[])
 
     // Qt Quick Controls 2: prefer native macOS style when available.
 #if defined(Q_OS_MACOS)
-    QQuickStyle::setStyle(QStringLiteral("macOS"));
+    QQuickStyle::setStyle(app.arguments().contains(QStringLiteral("--mobile-ui"))
+                         ? QStringLiteral("Fusion") : QStringLiteral("macOS"));
 #else
     QQuickStyle::setStyle(QStringLiteral("Fusion"));
 #endif
@@ -110,7 +111,14 @@ int main(int argc, char *argv[])
     QObject::connect(
         &engine, &QQmlApplicationEngine::objectCreationFailed, &app,
         []() { QCoreApplication::exit(-1); }, Qt::QueuedConnection);
+    #if !defined(FAEDITOR_PRODUCT_FANTOM)
+    const bool mobileUi = QGuiApplication::platformName() == QStringLiteral("ios")
+        || app.arguments().contains(QStringLiteral("--mobile-ui"));
+    engine.loadFromModule(QStringLiteral(FAEDITOR_QML_URI),
+                          mobileUi ? QStringLiteral("MobileMain") : QStringLiteral(FAEDITOR_QML_MAIN));
+#else
     engine.loadFromModule(QStringLiteral(FAEDITOR_QML_URI), QStringLiteral(FAEDITOR_QML_MAIN));
+#endif
 
     if (engine.rootObjects().isEmpty())
         return -1;

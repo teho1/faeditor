@@ -4,6 +4,7 @@
 
 #include <QThread>
 #include <QTimer>
+#include <QGuiApplication>
 
 AppController::AppController(QObject *parent)
     : QObject(parent)
@@ -69,8 +70,25 @@ AppController::AppController(QObject *parent)
     m_library->recoverAutosaveIfNeeded();
     setHint(QStringLiteral("Looking for a Roland FA or FANTOM-0…"));
 
-    // After the UI is up, auto-connect and pull Temporary data.
-    QTimer::singleShot(500, this, &AppController::startupConnect);
+    if (QGuiApplication::platformName() == QStringLiteral("ios")
+        || QCoreApplication::arguments().contains(QStringLiteral("--mobile-ui"))) {
+        setHint(QStringLiteral("Connect MIDI to read your FA. Use GENERIC USB mode."));
+        connect(qGuiApp, &QGuiApplication::applicationStateChanged, this,
+                [this](Qt::ApplicationState state) {
+            if (state == Qt::ApplicationSuspended || state == Qt::ApplicationHidden) {
+                m_autosaveTimer.stop();
+                m_library->autosave();
+                m_studioSets->cancelScan();
+                m_midi->disconnectDevice();
+                setHint(QStringLiteral("MIDI paused. Reconnect to read the current instrument state."));
+            } else if (state == Qt::ApplicationActive) {
+                m_midi->refresh();
+            }
+        });
+    } else {
+        // After the desktop UI is up, auto-connect and pull Temporary data.
+        QTimer::singleShot(500, this, &AppController::startupConnect);
+    }
 }
 
 void AppController::setHint(const QString &h)

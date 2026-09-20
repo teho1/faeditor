@@ -203,7 +203,7 @@ Rectangle {
                 readonly property bool assigned: root.isAssignedTone(bankMsb, bankLsb, program)
 
                 width: ListView.view.width
-                height: root._tight ? 28 : 32
+                height: LogicTheme.mobile ? 48 : (root._tight ? 28 : 32)
                 color: {
                     if (assigned)
                         return LogicTheme.selectedBg

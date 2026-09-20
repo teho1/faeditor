@@ -6,7 +6,7 @@ Qt 6.11 QML UI + C++ models/controllers over documented Roland SysEx.
 
 ## Mac App Store
 
-A signed binary is available as **[Editor for Roland FA](https://apps.apple.com/fi/app/editor-for-roland-fa/id6794627204?mt=12)** on the Mac App Store (**USD $9.99** / local currency). Source in this repository remains free under MIT for building yourself.
+A signed binary is available as **[Editor for Roland FA](https://apps.apple.com/fi/app/editor-for-roland-fa/id6794627204?mt=12)** on the Mac App Store (**USD $9.99** / local currency). An iPad/iPhone build uses the same editor with a touch layout (`MobileMain.qml`). Public Actions here only compile and test; signed TestFlight uploads run from a private workflow (see [`docs/CI_RELEASE.md`](docs/CI_RELEASE.md) and [`docs/ios-editor.md`](docs/ios-editor.md)). Source in this repository remains free under MIT for building yourself.
 
 <p>
   <img src="docs/screenshots/01-mixer.jpg" alt="Mixer" width="420" />

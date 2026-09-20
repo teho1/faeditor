@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  QT_VERSION: '6.11.1'
+
+jobs:
+  macos-tests:
+    name: macOS tests
+    runs-on: macos-26-intel
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode 26
+        run: sudo xcode-select --switch /Applications/Xcode_26.5.app
+
+      - name: Install Qt for macOS
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          target: desktop
+          cache: true
+
+      - name: Configure
+        run: >-
+          cmake -S . -B build/macos-debug -G Ninja
+          -DCMAKE_BUILD_TYPE=Debug
+          -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR"
+
+      - name: Build
+        run: cmake --build build/macos-debug --parallel 4
+
+      - name: Test
+        run: ctest --test-dir build/macos-debug --output-on-failure
+
+  ios-compile:
+    name: iOS compile
+    runs-on: macos-26-intel
+    timeout-minutes: 90
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode 26
+        run: sudo xcode-select --switch /Applications/Xcode_26.5.app
+
+      - name: Install Qt for iOS
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          target: ios
+          cache: true
+
+      - name: Configure iOS
+        run: >-
+          "$QT_ROOT_DIR/bin/qt-cmake" -S . -B build/ios-debug -G Xcode
+          -DCMAKE_BUILD_TYPE=Debug
+          -DCMAKE_SYSTEM_NAME=iOS
+          -DCMAKE_OSX_SYSROOT=iphoneos
+          -DCMAKE_OSX_ARCHITECTURES=arm64
+
+      - name: Build iOS app unsigned
+        run: >-
+          xcodebuild -project build/ios-debug/FAEditor.xcodeproj
+          -scheme FAEditor -configuration Debug
+          -sdk iphoneos -destination 'generic/platform=iOS'
+          CODE_SIGNING_ALLOWED=NO
+          CODE_SIGNING_REQUIRED=NO
+          build

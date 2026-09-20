@@ -140,7 +140,7 @@ Rectangle {
                 readonly property bool isCurrent: root.hasProject && path === App.library.currentPath
 
                 width: ListView.view.width
-                height: root.embedded ? 32 : 40
+                height: LogicTheme.mobile ? 48 : (root.embedded ? 32 : 40)
                 color: isCurrent ? LogicTheme.selectedBg : LogicTheme.panelBg
                 radius: root.embedded ? 3 : 4
                 border.width: isCurrent ? 1 : 0
@@ -237,7 +237,7 @@ Rectangle {
         modal: true
         anchors.centerIn: parent
         standardButtons: Dialog.Ok | Dialog.Cancel
-        width: 360
+        width: Math.min(360, Overlay.overlay ? Overlay.overlay.width - 24 : 360)
 
         ColumnLayout {
             anchors.fill: parent
@@ -267,7 +267,7 @@ Rectangle {
         modal: true
         anchors.centerIn: parent
         title: "Unsaved changes"
-        width: 420
+        width: Math.min(420, Overlay.overlay ? Overlay.overlay.width - 24 : 420)
         standardButtons: Dialog.NoButton
 
         ColumnLayout {
@@ -322,10 +322,9 @@ Rectangle {
         anchors.centerIn: parent
         title: "Delete library file?"
         standardButtons: Dialog.Yes | Dialog.No
-        width: 400
+        width: Math.min(400, Overlay.overlay ? Overlay.overlay.width - 24 : 400)
 
-        Label {
-            width: parent ? parent.width : 360
+        contentItem: Label {
             wrapMode: Text.WordWrap
             color: LogicTheme.textSecondary
             text: "Delete “" + root._pendingDeleteName + "”? This cannot be undone."
@@ -350,10 +349,9 @@ Rectangle {
         anchors.centerIn: parent
         title: "Push to FA?"
         standardButtons: Dialog.Yes | Dialog.No
-        width: 400
+        width: Math.min(400, Overlay.overlay ? Overlay.overlay.width - 24 : 400)
 
-        Label {
-            width: parent ? parent.width : 360
+        contentItem: Label {
             wrapMode: Text.WordWrap
             color: LogicTheme.textSecondary
             text: "Library project “" + App.library.currentName + "” is loaded in the editor. Push Temporary Studio Set, tone blobs, Audio FX, and Master EQ to the FA now?"

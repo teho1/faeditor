@@ -2,6 +2,8 @@ pragma Singleton
 import QtQuick
 
 QtObject {
+    readonly property bool mobile: Qt.platform.os === "ios" || Qt.application.arguments.indexOf("--mobile-ui") >= 0
+    readonly property int touchHeight: mobile ? 44 : 28
     // Follow macOS appearance when using Qt Quick Controls macOS/Fusion styles.
     readonly property bool dark: {
         try {
@@ -32,14 +34,14 @@ QtObject {
     readonly property color zoneFill: dark ? "#5E9CE680" : "#007AFF66"
     readonly property color selectedBg: dark ? "#3A5A80" : "#CCDDF5"
 
-    readonly property int toolbarHeight: 40
+    readonly property int toolbarHeight: mobile ? 56 : 40
     readonly property int statusHeight: 24
-    readonly property int stripWidth: 72
+    readonly property int stripWidth: mobile ? 104 : 72
     readonly property int inspectorWidth: 280
     readonly property int radius: 6
 
-    readonly property int fontSize: 13
-    readonly property int fontSizeSmall: 11
-    readonly property int fontSizeTitle: 13
+    readonly property int fontSize: mobile ? 15 : 13
+    readonly property int fontSizeSmall: mobile ? 13 : 11
+    readonly property int fontSizeTitle: mobile ? 16 : 13
     readonly property string fontFamily: ".AppleSystemUIFont"
 }

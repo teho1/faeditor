@@ -22,7 +22,7 @@ Item {
                         required property int index; required property int zoneNumber; required property int toneMsb; required property int toneLsb; required property int toneProgram
                         required property int midiChannel; required property bool muted; required property bool receiveEnabled; required property bool keyboardEnabled; required property int level; required property int pan
                         width: zones.width-16; height: 82; padding: 7
-                        background: Rectangle { color: LogicTheme.panelBg; border.color: muted ? "#e05a5a" : LogicTheme.border; radius: 5 }
+                        background: Rectangle { color: LogicTheme.panelBg; border.color: muted ? "#e05a5a" : LogicTheme.hairline; radius: 5 }
                         RowLayout { anchors.fill: parent; spacing: 8
                             Label { text: "ZONE\n"+zoneNumber; color: LogicTheme.accent; font.bold: true; horizontalAlignment: Text.AlignHCenter; Layout.preferredWidth: 52 }
                             Label { text: toneMsb+":"+toneLsb+":"+toneProgram+"\nCh "+midiChannel; color: LogicTheme.textPrimary; Layout.preferredWidth: 105 }

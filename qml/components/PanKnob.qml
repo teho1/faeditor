@@ -10,8 +10,8 @@ Item {
     property real dragSensitivity: 1
     property real fineScale: 0.2
     signal moved(real v)
-    width: 36
-    height: 36
+    width: LogicTheme.mobile ? 44 : 36
+    height: width
 
     Rectangle {
         anchors.fill: parent

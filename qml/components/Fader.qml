@@ -9,7 +9,7 @@ Item {
     property real to: 127
     signal moved(real v)
 
-    width: 28
+    width: LogicTheme.mobile ? 44 : 28
     height: 160
 
     Rectangle {

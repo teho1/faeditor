@@ -78,7 +78,7 @@ private slots:
         const auto read=[](const QString &path){QFile f(path);if(!f.open(QIODevice::ReadOnly))return QByteArray();return f.readAll();};
         const auto root=QStringLiteral(FAEDITOR_SOURCE_DIR "/");
         QVERIFY(read(root+QStringLiteral("CMakeLists.txt")).contains("project(FAEditor VERSION 1.2.0"));
-        QVERIFY(read(root+QStringLiteral("CMakeLists.txt")).contains("MACOSX_BUNDLE_BUNDLE_VERSION 5"));
+        QVERIFY(read(root+QStringLiteral("CMakeLists.txt")).contains("set(_fa_mac_bundle_version 5)"));
         const auto products=read(root+QStringLiteral("cmake/Products.cmake"));
         QVERIFY(products.contains("FAEditor;FA Editor;com.righthere.faeditor;1.2;5;FAEditor;Main"));
         QVERIFY(read(root+QStringLiteral("qml/views/AboutDialog.qml")).contains("appVersion: \"1.2\""));

@@ -54,8 +54,8 @@ Rectangle {
 
             Button {
                 text: "M"
-                width: 24
-                height: 22
+                Layout.preferredWidth: LogicTheme.mobile ? 44 : 24
+                Layout.preferredHeight: LogicTheme.mobile ? 44 : 22
                 checkable: true
                 checked: part ? part.mute : false
                 onClicked: if (part) part.mute = checked
@@ -75,8 +75,8 @@ Rectangle {
 
             Button {
                 text: "S"
-                width: 24
-                height: 22
+                Layout.preferredWidth: LogicTheme.mobile ? 44 : 24
+                Layout.preferredHeight: LogicTheme.mobile ? 44 : 22
                 checkable: true
                 checked: part ? part.solo : false
                 onClicked: if (part) part.solo = checked

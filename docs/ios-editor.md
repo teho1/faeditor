@@ -1,0 +1,49 @@
+# iOS editor development build
+
+The full FA editor now has an iPhone/iPad entry point (`MobileMain.qml`) sharing
+its C++ controllers, models, library and Roland protocol adapters with macOS.
+The small connection tester remains available with `FAEDITOR_CONNECTION_PROBE=ON`.
+
+## Build
+
+```sh
+/Volumes/Datastore/Qt/6.11.1/ios/bin/qt-cmake -S . -B build-ios-editor -DFAEDITOR_CONNECTION_PROBE=OFF
+xcodebuild -project build-ios-editor/FAEditor.xcodeproj -scheme FAEditor -configuration Debug -destination 'generic/platform=iOS' -allowProvisioningUpdates build
+```
+
+Open that Xcode project and select your iPhone or **My Mac (Designed for iPad)**
+to run. The iOS development bundle ID is `com.righthere.faeditor.ios`, separate
+from the shipping macOS app and connection tester. Signing team defaults to the
+existing project team and can be overridden with `FAEDITOR_IOS_TEAM`.
+
+For rapid desktop layout checks, build the normal macOS target and launch its
+executable with `--mobile-ui`. This uses the mobile QML with Fusion controls;
+it does not reproduce UIKit, iOS file pickers, or iOS suspension behavior.
+
+## Current mobile behavior
+
+- Connect explicitly, then pull the current Studio Set. FA USB driver must be
+  GENERIC (MIDI only), saved and applied with a keyboard restart.
+- Sets: side-by-side parts and tones at tablet widths; a part picker on phones.
+- Mixer: wider channel strips and touch targets; part controls in a drawer.
+- Effects/Tone: shared editors, horizontally scrollable on narrow displays.
+- Library: separate tab, using the app's sandbox storage.
+- The action menu provides local save, temporary push, SVD import and exports.
+- Backgrounding saves local state and disconnects MIDI; reconnect on return.
+  Background MIDI is not enabled.
+
+This is an initial device-test build. Full transfer operations still use the
+existing synchronous model APIs and may pause interaction during a pull/push.
+Native document import/export and a physical iPad still need device validation.
+The full phone layout is secondary to the iPad layout; dense editors can scroll.
+
+## Hardware acceptance checks
+
+1. Connect FA-08 in GENERIC mode; verify the current set and all 16 part names.
+2. Change a part level/pan and confirm the keyboard follows; pull to verify it.
+3. Select a tone for one part and confirm the change on the keyboard.
+4. Open Effects and Tone, verify their parameters match the selected part.
+5. Save/load a local copy; test imported/exported documents through Files.
+6. Disconnect/reconnect USB and background/foreground the app, then reconnect.
+7. Repeat at iPad portrait and landscape sizes. Mac testing cannot verify touch
+   accuracy, keyboard avoidance or physical iPad USB behavior.

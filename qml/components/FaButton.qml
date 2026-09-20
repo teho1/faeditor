@@ -17,8 +17,8 @@ Item {
     signal clicked()
     signal toggled()
 
-    implicitWidth: Math.max(36, contentCol.implicitWidth + 14)
-    implicitHeight: Math.max(26, contentCol.implicitHeight + 8)
+    implicitWidth: Math.max(LogicTheme.mobile ? 44 : 36, contentCol.implicitWidth + 14)
+    implicitHeight: Math.max(LogicTheme.mobile ? 44 : 26, contentCol.implicitHeight + 8)
     opacity: enabled ? 1 : 0.45
 
     Rectangle {

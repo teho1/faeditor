@@ -1,16 +1,16 @@
 # Privacy Policy for FA Editor
 
-**Last updated:** 25 July 2026
+**Last updated:** 20 September 2026
 
-FA Editor (“the app”) is a desktop Studio Set editor for Roland FA-06 / FA-07 / FA-08 keyboards. This policy describes what information the app handles.
+FA Editor (“the app”) is a Studio Set editor for Roland FA-06 / FA-07 / FA-08 keyboards on macOS, iPad, and iPhone. This policy describes what information the app handles.
 
 ## Summary
 
-FA Editor does **not** collect, sell, or share personal data. It does not use analytics, advertising, or tracking. Work stays on your Mac and on your connected instrument over USB MIDI.
+FA Editor does **not** collect, sell, or share personal data. It does not use analytics, advertising, or tracking. Work stays on your device and on your connected instrument over USB or Bluetooth MIDI.
 
-## Data the app stores on your Mac
+## Data the app stores on your device
 
-The app may save files only on your computer, in its Application Support folder, for example:
+The app may save files only on your computer or in the iOS app sandbox, for example:
 
 - Local Studio Set library projects (JSON)
 - Tone favourites and related preferences
@@ -20,11 +20,11 @@ You control these files. Uninstalling the app or deleting that folder removes th
 
 ## MIDI and USB
 
-When you connect a Roland FA, the app exchanges MIDI SysEx with the instrument to read and write Studio Set and related parameters. That traffic stays between your Mac and the device. The app does not send MIDI data to external servers.
+When you connect a Roland FA, the app exchanges MIDI SysEx with the instrument to read and write Studio Set and related parameters. That traffic stays between your device and the instrument. The app does not send MIDI data to external servers. On iPad and iPhone the editor disconnects MIDI while it is in the background.
 
 ## Network use
 
-The app does not require an internet connection for normal editing.
+The app does not require an internet connection for normal editing. On iOS, Bluetooth permission is requested only if you connect a Bluetooth MIDI interface.
 
 If you open Help/About links (for example GitHub or Qt licensing pages), macOS may open those URLs in your browser. That browsing is outside the app and subject to those sites’ own policies.
 
