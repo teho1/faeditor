@@ -12,6 +12,7 @@ import time
 import urllib.error
 import urllib.request
 from pathlib import Path
+from urllib.parse import quote
 
 
 API = "https://api.appstoreconnect.apple.com"
@@ -98,7 +99,10 @@ def find_app(bundle_id: str) -> dict | None:
 
 
 def find_bundle_id(identifier: str, platform: str = "IOS") -> dict | None:
-    payload = request("GET", "/v1/bundleIds?limit=200")
+    payload = request(
+        "GET",
+        f"/v1/bundleIds?filter[identifier]={quote(identifier, safe='')}&limit=50",
+    )
     for item in payload.get("data") or []:
         attributes = item.get("attributes") or {}
         if attributes.get("identifier") == identifier and attributes.get("platform") == platform:
