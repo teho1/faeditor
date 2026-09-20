@@ -12,7 +12,7 @@ have Apple signing secrets.
 
 ```sh
 gh workflow run "FA Editor store release" -R teho1/ReminderApp --ref main \
-  -f version=1.2.0 -f platform=ios -f submit_ios_review=false -f checkout_ref=main
+  -f version=1.0 -f platform=ios -f submit_ios_review=false -f checkout_ref=main
 ```
 
 Do not add Apple `.p12` or `.p8` material as secrets on this public
