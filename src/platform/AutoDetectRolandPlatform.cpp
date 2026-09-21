@@ -28,6 +28,7 @@ bool AutoDetectRolandPlatform::openMidiConnection(int in,int out,QString*error)
     return m_engine&&m_engine->openPorts(in,out,error);
 }
 void AutoDetectRolandPlatform::closeMidiConnection(){if(m_engine){m_engine->closePorts();m_engine->setModelId(QByteArray::fromHex("000077"));}m_family=Family::Unknown;}
+void AutoDetectRolandPlatform::resetMidiHost(){closeMidiConnection();if(m_engine)m_engine->resetHostMidi();}
 
 bool AutoDetectRolandPlatform::detectDevice(quint8*deviceId,int timeoutMs,QString*error)
 {

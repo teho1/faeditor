@@ -19,6 +19,7 @@ public:
     bool discoverMidiPorts(QVector<MidiPort>*,QVector<MidiPort>*,QString*) override;
     bool openMidiConnection(int,int,QString*) override;
     void closeMidiConnection() override;
+    void resetMidiHost() override;
     bool midiConnectionHealthy()const override;
     bool detectDevice(quint8*,int,QString*) override;
     bool sendPreviewNote(int a,int b,int c,bool d,QString*e)override{return active()->sendPreviewNote(a,b,c,d,e);}

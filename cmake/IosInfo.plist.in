@@ -50,5 +50,16 @@
 	<true/>
 	<key>UISupportsDocumentBrowser</key>
 	<true/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>${MACOSX_BUNDLE_GUI_IDENTIFIER}</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>faeditor</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

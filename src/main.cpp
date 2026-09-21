@@ -5,6 +5,8 @@
 #include <QIcon>
 #include <QFile>
 #include <QCoreApplication>
+#include <QEvent>
+#include <QFileOpenEvent>
 
 #if defined(FAEDITOR_PRODUCT_FANTOM)
 #include "app/FantomAppController.h"
@@ -28,6 +30,32 @@
 #endif
 
 #include <qqml.h>
+
+#if !defined(FAEDITOR_PRODUCT_FANTOM)
+class LaunchUrlFilter : public QObject
+{
+public:
+    explicit LaunchUrlFilter(AppController *controller, QObject *parent = nullptr)
+        : QObject(parent)
+        , m_controller(controller)
+    {
+    }
+
+protected:
+    bool eventFilter(QObject *watched, QEvent *event) override
+    {
+        if (event->type() == QEvent::FileOpen) {
+            const auto *open = static_cast<QFileOpenEvent *>(event);
+            if (m_controller && m_controller->handleLaunchUrl(open->url()))
+                return true;
+        }
+        return QObject::eventFilter(watched, event);
+    }
+
+private:
+    AppController *m_controller = nullptr;
+};
+#endif
 
 int main(int argc, char *argv[])
 {
@@ -107,6 +135,9 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty(QStringLiteral("App"), &controller);
+#if !defined(FAEDITOR_PRODUCT_FANTOM)
+    app.installEventFilter(new LaunchUrlFilter(&controller, &app));
+#endif
 
     QObject::connect(
         &engine, &QQmlApplicationEngine::objectCreationFailed, &app,

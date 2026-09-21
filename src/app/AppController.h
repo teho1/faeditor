@@ -39,6 +39,7 @@ class AppController : public QObject
     Q_PROPERTY(bool connectDialogOpen READ connectDialogOpen WRITE setConnectDialogOpen NOTIFY connectDialogOpenChanged)
     Q_PROPERTY(QString workflowHint READ workflowHint NOTIFY workflowHintChanged)
     Q_PROPERTY(QString qtLicenseNotice READ qtLicenseNotice CONSTANT)
+    Q_PROPERTY(QString storeScreenshotView READ storeScreenshotView NOTIFY storeScreenshotViewChanged)
 
 public:
     explicit AppController(QObject *parent = nullptr);
@@ -63,6 +64,7 @@ public:
     bool connectDialogOpen() const { return m_connectDialogOpen; }
     void setConnectDialogOpen(bool v);
     QString workflowHint() const { return m_workflowHint; }
+    QString storeScreenshotView() const { return m_storeScreenshotView; }
     /** Qt LGPLv3 liability / attribution notice (same text pattern as righthere-app). */
     QString qtLicenseNotice() const;
 
@@ -85,20 +87,28 @@ public:
     Q_INVOKABLE bool exportStudioSetMidi(const QUrl &url);
     Q_INVOKABLE bool exportToneNamesMidnam(const QUrl &url);
     Q_INVOKABLE void previewFantomZone(int zone,int note,int velocity,bool on);
+    /** Seed fixture Studio Set data and open a store-screenshot view. */
+    Q_INVOKABLE bool applyStoreScreenshot(const QString &view);
+    bool handleLaunchUrl(const QUrl &url);
 
 signals:
     void mainTabChanged();
     void connectDialogOpenChanged();
     void workflowHintChanged();
     void deviceFamilyChanged();
+    void storeScreenshotViewChanged();
 
 private:
     void setHint(const QString &h);
     bool isMobileUi() const;
     void handleApplicationState(Qt::ApplicationState state);
+    void pauseInstrumentForBackground();
     void startForegroundReconnect();
     void tryForegroundReconnect();
     void finishSessionAfterMidiConnect();
+    void consumeLaunchArguments();
+    QString normalizeStoreScreenshotView(const QString &view) const;
+    bool loadStoreScreenshotFixture();
 
     SysexEngine *m_engine = nullptr;
     AutoDetectRolandPlatform *m_platform = nullptr;
@@ -121,4 +131,5 @@ private:
     bool m_keepInstrumentConnection = false;
     bool m_reconnectingForeground = false;
     QString m_workflowHint;
+    QString m_storeScreenshotView;
 };

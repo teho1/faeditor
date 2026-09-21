@@ -184,7 +184,8 @@ if(FAEDITOR_PRODUCT STREQUAL "FA")
         resources/icons/pull.svg
         resources/icons/push.svg
         resources/icons/save.svg
-            resources/icons/appicon.png
+        resources/icons/appicon.png
+        demo/studio-set.json
     )
 else()
     qt_add_qml_module(${APP_TARGET}

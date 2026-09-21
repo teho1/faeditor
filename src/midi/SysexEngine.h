@@ -21,6 +21,8 @@ public:
 
     bool openPorts(int inIndex, int outIndex, QString *error = nullptr);
     void closePorts();
+    /** Close ports and restart CoreMIDI so USB endpoints after sleep are live. */
+    void resetHostMidi();
     virtual bool isOpen() const;
     /** True if ports are open and RtMidi still reports them open (unplug / power-off). */
     bool portsHealthy() const;

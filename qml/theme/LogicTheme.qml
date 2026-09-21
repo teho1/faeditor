@@ -7,6 +7,8 @@ QtObject {
     // Follow macOS appearance when using Qt Quick Controls macOS/Fusion styles.
     readonly property bool dark: {
         try {
+            if (typeof App !== "undefined" && App.storeScreenshotView && App.storeScreenshotView.length)
+                return true
             return Qt.styleHints.colorScheme === Qt.ColorScheme.Dark
         } catch (e) {
             return false

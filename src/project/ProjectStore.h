@@ -58,6 +58,8 @@ public:
     Q_INVOKABLE bool exportFile(int row, const QString &destPath);
     Q_INVOKABLE void autosave();
     Q_INVOKABLE bool recoverAutosaveIfNeeded();
+    /** Write a library JSON from current models without talking to MIDI. */
+    bool saveNamedCopy(const QString &name);
 
 signals:
     void currentPathChanged();

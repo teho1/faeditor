@@ -53,6 +53,8 @@ public:
     Q_INVOKABLE bool autoConnectFa();
     Q_INVOKABLE bool autoConnectInstrument() { return autoConnectFa(); }
     Q_INVOKABLE void disconnectDevice();
+    /** Show MIDI as connected without opening ports (store screenshots). */
+    void setPreviewConnected(const QString &name);
     Q_INVOKABLE bool probeIdentity();
     /** True if current selection still refers to valid ports. */
     Q_INVOKABLE bool selectionValid() const;
@@ -70,16 +72,20 @@ private:
     void startConnectionPoll();
     void stopConnectionPoll();
     bool connectedPortStillPresent() const;
+    bool connectWithCurrentSelection(bool resetHost);
 
     InstrumentPlatform *m_platform = nullptr;
     QVector<MidiPortInfo> m_inputs;
     QVector<MidiPortInfo> m_outputs;
     bool m_connected = false;
+    bool m_previewConnected = false;
     QString m_connectedName;
     QString m_statusText = QStringLiteral("Disconnected");
     int m_selectedInput = -1;
     int m_selectedOutput = -1;
     QTimer m_connectionPoll;
+    int m_unhealthyPolls = 0;
+    qint64 m_pollGraceUntilMs = 0;
 
 private slots:
     void pollConnection();

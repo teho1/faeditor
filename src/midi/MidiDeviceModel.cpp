@@ -1,5 +1,8 @@
 #include "midi/MidiDeviceModel.h"
 #include <algorithm>
+#include <QDateTime>
+#include <QThread>
+#include <QtGlobal>
 
 MidiDeviceModel::MidiDeviceModel(InstrumentPlatform *platform, QObject *parent)
     : QAbstractListModel(parent)
@@ -131,7 +134,8 @@ void MidiDeviceModel::refresh()
     endResetModel();
 
     // If we thought we were connected but the engine/ports are gone (FA power-cycled), clear flag.
-    if (m_connected && (!m_platform || !m_platform->isConnected() || !connectedPortStillPresent())) {
+    if (m_connected && !m_previewConnected
+        && (!m_platform || !m_platform->isConnected() || !connectedPortStillPresent())) {
         stopConnectionPoll();
         if (m_platform && m_platform->isConnected()) m_platform->closeMidiConnection();
         m_connected = false;
@@ -162,18 +166,48 @@ QStringList MidiDeviceModel::outputNames() const
 
 bool MidiDeviceModel::connectSelected()
 {
+    return connectWithCurrentSelection(true);
+}
+
+bool MidiDeviceModel::connectWithCurrentSelection(bool resetHost)
+{
     if (!m_platform || !m_platform->supportsWorkspace(InstrumentPlatform::Workspace::MidiConnection, true)) {
         setStatus(QStringLiteral("MIDI connection is not supported by this instrument"));
         return false;
     }
 
+    const QString wantIn = selectionValid() ? m_inputs.at(m_selectedInput).name : QString();
+    const QString wantOut = selectionValid() ? m_outputs.at(m_selectedOutput).name : QString();
+
+    if (resetHost) {
+#if defined(Q_OS_IOS)
+        m_platform->resetMidiHost();
+        QThread::msleep(400);
+#endif
+    }
+
     refresh();
+    if (!wantIn.isEmpty() || !wantOut.isEmpty()) {
+        for (const auto &p : m_inputs) {
+            if (!wantIn.isEmpty() && p.name == wantIn) {
+                m_selectedInput = p.index;
+                break;
+            }
+        }
+        for (const auto &p : m_outputs) {
+            if (!wantOut.isEmpty() && p.name == wantOut) {
+                m_selectedOutput = p.index;
+                break;
+            }
+        }
+        emit selectionChanged();
+    }
+
     if (!selectionValid()) {
         setStatus(QStringLiteral("Select MIDI in/out ports"));
         return false;
     }
 
-    // Re-open cleanly (important after FA reboot / CoreMIDI renumber)
     if (m_platform->isConnected()) m_platform->closeMidiConnection();
 
     QString err;
@@ -185,13 +219,25 @@ bool MidiDeviceModel::connectSelected()
         return false;
     }
 
+#if defined(Q_OS_IOS)
+    if (!probeIdentity()) {
+        m_platform->closeMidiConnection();
+        m_connected = false;
+        m_connectedName.clear();
+        setStatus(QStringLiteral("MIDI opened but the FA did not reply — wait a moment and tap Connect"));
+        emit connectedChanged();
+        return false;
+    }
+#else
+    probeIdentity();
+#endif
+
     const QString inName = m_inputs.at(m_selectedInput).name;
     m_connected = true;
     m_connectedName = inName;
     setStatus(QStringLiteral("Connected: %1").arg(inName));
     emit connectedChanged();
     startConnectionPoll();
-    probeIdentity();
     return true;
 }
 
@@ -201,22 +247,61 @@ bool MidiDeviceModel::autoConnectFa()
         setStatus(QStringLiteral("MIDI connection is not supported by this instrument"));
         return false;
     }
+#if defined(Q_OS_IOS)
+    m_platform->resetMidiHost();
+    QThread::msleep(400);
+#endif
     refresh();
-    preferFaSelection(true);
-    if (!selectionValid()
-        || !m_inputs.at(m_selectedInput).looksLikeFa
-        || !m_outputs.at(m_selectedOutput).looksLikeFa) {
+
+    struct Pair { int in = -1; int out = -1; };
+    QVector<Pair> pairs;
+    for (const auto &in : m_inputs) {
+        if (!in.looksLikeFa)
+            continue;
+        for (const auto &out : m_outputs) {
+            if (out.looksLikeFa && out.name == in.name)
+                pairs.push_back({in.index, out.index});
+        }
+    }
+    if (pairs.isEmpty()) {
+        preferFaSelection(true);
+        if (selectionValid()
+            && m_inputs.at(m_selectedInput).looksLikeFa
+            && m_outputs.at(m_selectedOutput).looksLikeFa)
+            pairs.push_back({m_selectedInput, m_selectedOutput});
+    }
+    if (pairs.isEmpty()) {
         setStatus(QStringLiteral("No matching instrument MIDI port found (ignoring DAW CTRL)"));
         if (m_connected)
             disconnectDevice();
         return false;
     }
-    return connectSelected();
+
+    for (const auto &pair : pairs) {
+        m_selectedInput = pair.in;
+        m_selectedOutput = pair.out;
+        emit selectionChanged();
+        if (connectWithCurrentSelection(false))
+            return true;
+    }
+    setStatus(QStringLiteral("FA MIDI port found but it did not reply — wait and tap Connect"));
+    return false;
+}
+
+void MidiDeviceModel::setPreviewConnected(const QString &name)
+{
+    stopConnectionPoll();
+    m_previewConnected = true;
+    m_connected = true;
+    m_connectedName = name;
+    setStatus(QStringLiteral("Connected: %1").arg(name));
+    emit connectedChanged();
 }
 
 void MidiDeviceModel::disconnectDevice()
 {
     stopConnectionPoll();
+    m_previewConnected = false;
     if (m_platform) m_platform->closeMidiConnection();
     const bool wasConnected = m_connected;
     m_connected = false;
@@ -248,6 +333,8 @@ bool MidiDeviceModel::connectedPortStillPresent() const
 
 void MidiDeviceModel::startConnectionPoll()
 {
+    m_unhealthyPolls = 0;
+    m_pollGraceUntilMs = QDateTime::currentMSecsSinceEpoch() + 5000;
     if (!m_connectionPoll.isActive())
         m_connectionPoll.start();
 }
@@ -259,11 +346,15 @@ void MidiDeviceModel::stopConnectionPoll()
 
 void MidiDeviceModel::pollConnection()
 {
-    if (!m_connected)
+    if (!m_connected || m_previewConnected)
+        return;
+    if (QDateTime::currentMSecsSinceEpoch() < m_pollGraceUntilMs)
         return;
 
     QVector<MidiPortInfo> inputs,outputs; QString discoveryError;
     if (!m_platform || !m_platform->discoverMidiPorts(&inputs,&outputs,&discoveryError)) {
+        if (++m_unhealthyPolls < 3)
+            return;
         stopConnectionPoll();
         if (m_platform) m_platform->closeMidiConnection();
         m_connected = false;
@@ -279,6 +370,8 @@ void MidiDeviceModel::pollConnection()
     const bool healthy = m_platform && m_platform->midiConnectionHealthy();
 
     if (!namePresent || !healthy) {
+        if (++m_unhealthyPolls < 3)
+            return;
         stopConnectionPoll();
         if (m_platform) m_platform->closeMidiConnection();
         m_connected = false;
@@ -286,7 +379,9 @@ void MidiDeviceModel::pollConnection()
         setStatus(QStringLiteral("Instrument disconnected — cable unplugged or powered off"));
         emit connectedChanged();
         refresh();
+        return;
     }
+    m_unhealthyPolls = 0;
 }
 
 bool MidiDeviceModel::probeIdentity()
@@ -299,7 +394,7 @@ bool MidiDeviceModel::probeIdentity()
         return false;
     QString err;
     quint8 dev = 0x10;
-    if (m_platform->detectDevice(&dev,1500,&err)) {
+    if (m_platform->detectDevice(&dev, 2500, &err)) {
         setStatus(QStringLiteral("%1 Identity OK (device %2)").arg(m_platform->profile().model).arg(dev, 2, 16, QChar('0')));
         return true;
     }

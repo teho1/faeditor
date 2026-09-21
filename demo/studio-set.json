@@ -1,0 +1,53 @@
+{
+  "studioSet": {
+    "name": "Live Band",
+    "soloPart": 0,
+    "parts": [
+      {"receiveChannel": 0, "partSwitch": true, "bankMsb": 95, "bankLsb": 64, "program": 0, "level": 108, "pan": 64, "coarseTune": 64, "octaveShift": 64, "velocityLow": 1, "velocityHigh": 127, "mute": false, "chorusSend": 20, "reverbSend": 32, "outputAssign": 0, "keyLow": 0, "keyHigh": 127, "keyboardSwitch": true, "toneName": "SuperSaw Pad"},
+      {"receiveChannel": 1, "partSwitch": true, "bankMsb": 95, "bankLsb": 64, "program": 12, "level": 118, "pan": 64, "coarseTune": 64, "octaveShift": 61, "velocityLow": 1, "velocityHigh": 127, "mute": false, "chorusSend": 0, "reverbSend": 8, "outputAssign": 0, "keyLow": 0, "keyHigh": 127, "keyboardSwitch": true, "toneName": "Analog Bass"},
+      {"receiveChannel": 2, "partSwitch": true, "bankMsb": 87, "bankLsb": 64, "program": 4, "level": 96, "pan": 54, "coarseTune": 64, "octaveShift": 64, "velocityLow": 1, "velocityHigh": 127, "mute": false, "chorusSend": 40, "reverbSend": 28, "outputAssign": 0, "keyLow": 0, "keyHigh": 127, "keyboardSwitch": true, "toneName": "Stage EP"},
+      {"receiveChannel": 3, "partSwitch": true, "bankMsb": 87, "bankLsb": 64, "program": 0, "level": 92, "pan": 64, "coarseTune": 64, "octaveShift": 64, "velocityLow": 1, "velocityHigh": 127, "mute": false, "chorusSend": 18, "reverbSend": 22, "outputAssign": 0, "keyLow": 0, "keyHigh": 127, "keyboardSwitch": true, "toneName": "Concert Piano"},
+      {"receiveChannel": 4, "partSwitch": true, "bankMsb": 89, "bankLsb": 64, "program": 24, "level": 90, "pan": 78, "coarseTune": 64, "octaveShift": 64, "velocityLow": 1, "velocityHigh": 127, "mute": false, "chorusSend": 12, "reverbSend": 36, "outputAssign": 0, "keyLow": 0, "keyHigh": 127, "keyboardSwitch": true, "toneName": "Nylon Guitar"},
+      {"receiveChannel": 5, "partSwitch": true, "bankMsb": 87, "bankLsb": 64, "program": 29, "level": 86, "pan": 48, "coarseTune": 64, "octaveShift": 64, "velocityLow": 1, "velocityHigh": 127, "mute": false, "chorusSend": 24, "reverbSend": 18, "outputAssign": 0, "keyLow": 0, "keyHigh": 127, "keyboardSwitch": true, "toneName": "Crunch Gtr"},
+      {"receiveChannel": 6, "partSwitch": true, "bankMsb": 87, "bankLsb": 64, "program": 48, "level": 78, "pan": 40, "coarseTune": 64, "octaveShift": 64, "velocityLow": 1, "velocityHigh": 127, "mute": false, "chorusSend": 36, "reverbSend": 48, "outputAssign": 0, "keyLow": 0, "keyHigh": 127, "keyboardSwitch": true, "toneName": "Studio Strings"},
+      {"receiveChannel": 7, "partSwitch": true, "bankMsb": 87, "bankLsb": 64, "program": 61, "level": 74, "pan": 88, "coarseTune": 64, "octaveShift": 64, "velocityLow": 1, "velocityHigh": 127, "mute": false, "chorusSend": 16, "reverbSend": 40, "outputAssign": 0, "keyLow": 0, "keyHigh": 127, "keyboardSwitch": true, "toneName": "Brass Section"},
+      {"receiveChannel": 8, "partSwitch": true, "bankMsb": 87, "bankLsb": 64, "program": 52, "level": 70, "pan": 64, "coarseTune": 64, "octaveShift": 64, "velocityLow": 1, "velocityHigh": 127, "mute": false, "chorusSend": 28, "reverbSend": 54, "outputAssign": 0, "keyLow": 0, "keyHigh": 127, "keyboardSwitch": true, "toneName": "Choir Aahs"},
+      {"receiveChannel": 9, "partSwitch": true, "bankMsb": 86, "bankLsb": 64, "program": 0, "level": 112, "pan": 64, "coarseTune": 64, "octaveShift": 64, "velocityLow": 1, "velocityHigh": 127, "mute": false, "chorusSend": 0, "reverbSend": 16, "outputAssign": 0, "keyLow": 0, "keyHigh": 127, "keyboardSwitch": true, "toneName": "Studio Kit"},
+      {"receiveChannel": 10, "partSwitch": true, "bankMsb": 95, "bankLsb": 64, "program": 80, "level": 84, "pan": 72, "coarseTune": 64, "octaveShift": 64, "velocityLow": 1, "velocityHigh": 127, "mute": false, "chorusSend": 22, "reverbSend": 20, "outputAssign": 0, "keyLow": 0, "keyHigh": 127, "keyboardSwitch": true, "toneName": "Sync Lead"},
+      {"receiveChannel": 11, "partSwitch": true, "bankMsb": 95, "bankLsb": 64, "program": 38, "level": 80, "pan": 58, "coarseTune": 64, "octaveShift": 64, "velocityLow": 1, "velocityHigh": 127, "mute": false, "chorusSend": 30, "reverbSend": 24, "outputAssign": 0, "keyLow": 0, "keyHigh": 127, "keyboardSwitch": true, "toneName": "Pluck Seq"},
+      {"receiveChannel": 12, "partSwitch": true, "bankMsb": 89, "bankLsb": 64, "program": 16, "level": 76, "pan": 64, "coarseTune": 64, "octaveShift": 64, "velocityLow": 1, "velocityHigh": 127, "mute": false, "chorusSend": 8, "reverbSend": 18, "outputAssign": 0, "keyLow": 0, "keyHigh": 127, "keyboardSwitch": true, "toneName": "Jazz Organ"},
+      {"receiveChannel": 13, "partSwitch": true, "bankMsb": 87, "bankLsb": 64, "program": 88, "level": 64, "pan": 36, "coarseTune": 64, "octaveShift": 64, "velocityLow": 1, "velocityHigh": 127, "mute": false, "chorusSend": 44, "reverbSend": 60, "outputAssign": 0, "keyLow": 0, "keyHigh": 127, "keyboardSwitch": true, "toneName": "Atmosphere"},
+      {"receiveChannel": 14, "partSwitch": true, "bankMsb": 87, "bankLsb": 64, "program": 11, "level": 68, "pan": 92, "coarseTune": 64, "octaveShift": 64, "velocityLow": 1, "velocityHigh": 127, "mute": true, "chorusSend": 14, "reverbSend": 26, "outputAssign": 0, "keyLow": 0, "keyHigh": 127, "keyboardSwitch": false, "toneName": "Vibraphone"},
+      {"receiveChannel": 15, "partSwitch": true, "bankMsb": 87, "bankLsb": 64, "program": 98, "level": 58, "pan": 64, "coarseTune": 64, "octaveShift": 64, "velocityLow": 1, "velocityHigh": 127, "mute": false, "chorusSend": 10, "reverbSend": 70, "outputAssign": 0, "keyLow": 0, "keyHigh": 127, "keyboardSwitch": true, "toneName": "FX Sweep"}
+    ],
+    "effects": {
+      "chorusType": 1,
+      "chorusLevel": 72,
+      "reverbType": 2,
+      "reverbLevel": 88,
+      "masterCompSwitch": true,
+      "masterCompAttack": 20,
+      "masterCompRelease": 48,
+      "masterCompThreshold": 36,
+      "masterCompRatio": 4,
+      "masterCompGain": 8
+    }
+  },
+  "audioFx": {
+    "inputReverbSwitch": true,
+    "inputReverbType": 1,
+    "inputReverbTime": 64,
+    "inputReverbLevel": 40,
+    "nsSwitch": true,
+    "nsThreshold": 24,
+    "nsRelease": 40,
+    "tfxSwitch": true,
+    "tfxType": 3,
+    "tfxParamA": 64,
+    "tfxParamB": 48,
+    "tfxParamC": 32,
+    "tfxParamD": 16,
+    "tfxLocation": 0,
+    "tfxInputGain": 1
+  }
+}

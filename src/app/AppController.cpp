@@ -5,6 +5,12 @@
 #include <QThread>
 #include <QTimer>
 #include <QGuiApplication>
+#include <QCoreApplication>
+#include <QFile>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QUrlQuery>
+#include <QDebug>
 
 AppController::AppController(QObject *parent)
     : QObject(parent)
@@ -65,6 +71,14 @@ AppController::AppController(QObject *parent)
             m_keepInstrumentConnection = true;
             return;
         }
+        // iPhone lock drops USB MIDI while Qt still reports ApplicationActive.
+        // Keep the session so we reconnect on return; only Disconnect clears it.
+        if (isMobileUi()) {
+            if (m_keepInstrumentConnection && !m_reconnectingForeground
+                && qGuiApp && qGuiApp->applicationState() == Qt::ApplicationActive)
+                startForegroundReconnect();
+            return;
+        }
         if (!m_reconnectingForeground
             && qGuiApp
             && qGuiApp->applicationState() == Qt::ApplicationActive) {
@@ -81,11 +95,15 @@ AppController::AppController(QObject *parent)
     m_foregroundReconnectTimer.setSingleShot(true);
     connect(&m_foregroundReconnectTimer, &QTimer::timeout, this, &AppController::tryForegroundReconnect);
 
+    consumeLaunchArguments();
+
     if (isMobileUi()) {
-        setHint(QStringLiteral("Connect MIDI to read your FA. Use GENERIC USB mode."));
+        setHint(m_storeScreenshotView.isEmpty()
+                    ? QStringLiteral("Connect MIDI to read your FA. Use GENERIC USB mode.")
+                    : m_workflowHint);
         connect(qGuiApp, &QGuiApplication::applicationStateChanged,
                 this, &AppController::handleApplicationState);
-    } else {
+    } else if (m_storeScreenshotView.isEmpty()) {
         // After the desktop UI is up, auto-connect and pull Temporary data.
         QTimer::singleShot(500, this, &AppController::startupConnect);
     }
@@ -105,20 +123,29 @@ bool AppController::isMobileUi() const
         || QCoreApplication::arguments().contains(QStringLiteral("--mobile-ui"));
 }
 
+void AppController::pauseInstrumentForBackground()
+{
+    m_foregroundReconnectTimer.stop();
+    m_reconnectingForeground = false;
+    m_autosaveTimer.stop();
+    if (m_library)
+        m_library->autosave();
+    if (m_studioSets)
+        m_studioSets->cancelScan();
+    if (m_midi && m_midi->connected())
+        m_keepInstrumentConnection = true;
+    if (m_midi)
+        m_midi->disconnectDevice();
+    if (m_keepInstrumentConnection)
+        setHint(QStringLiteral("MIDI paused — will reconnect when you return."));
+}
+
 void AppController::handleApplicationState(Qt::ApplicationState state)
 {
-    if (state == Qt::ApplicationSuspended || state == Qt::ApplicationHidden) {
-        m_foregroundReconnectTimer.stop();
-        m_reconnectingForeground = false;
-        m_autosaveTimer.stop();
-        m_library->autosave();
-        m_studioSets->cancelScan();
-        if (m_midi && m_midi->connected())
-            m_keepInstrumentConnection = true;
-        if (m_midi)
-            m_midi->disconnectDevice();
-        if (m_keepInstrumentConnection)
-            setHint(QStringLiteral("MIDI paused — will reconnect when you return."));
+    if (state == Qt::ApplicationInactive
+        || state == Qt::ApplicationSuspended
+        || state == Qt::ApplicationHidden) {
+        pauseInstrumentForBackground();
         return;
     }
 
@@ -136,7 +163,9 @@ void AppController::startForegroundReconnect()
     m_foregroundReconnectTimer.stop();
     m_foregroundReconnectAttempt = 0;
     m_reconnectingForeground = true;
-    tryForegroundReconnect();
+    setHint(QStringLiteral("Reconnecting MIDI…"));
+    // USB class-compliant MIDI is not enumerable immediately after iPhone unlock.
+    m_foregroundReconnectTimer.start(1500);
 }
 
 void AppController::tryForegroundReconnect()
@@ -146,16 +175,24 @@ void AppController::tryForegroundReconnect()
         m_foregroundReconnectTimer.stop();
         return;
     }
+    if (qGuiApp && qGuiApp->applicationState() != Qt::ApplicationActive) {
+        m_reconnectingForeground = false;
+        m_foregroundReconnectTimer.stop();
+        return;
+    }
 
     setHint(QStringLiteral("Reconnecting MIDI…"));
     if (m_midi->autoConnectFa()) {
         m_reconnectingForeground = false;
         m_foregroundReconnectTimer.stop();
-        finishSessionAfterMidiConnect();
+        QTimer::singleShot(600, this, [this]() {
+            if (m_midi && m_midi->connected() && m_keepInstrumentConnection)
+                finishSessionAfterMidiConnect();
+        });
         return;
     }
 
-    static const int kDelaysMs[] = {400, 800, 1500, 2500, 4000};
+    static const int kDelaysMs[] = {1500, 2000, 3000, 5000, 8000, 12000, 15000, 15000};
     if (m_foregroundReconnectAttempt < int(sizeof(kDelaysMs) / sizeof(kDelaysMs[0]))) {
         const int delay = kDelaysMs[m_foregroundReconnectAttempt++];
         m_foregroundReconnectTimer.start(delay);
@@ -405,6 +442,145 @@ bool AppController::loadLibrary(int row)
         return false;
     }
     setHint(QStringLiteral("Loaded “%1” from library.").arg(m_library->currentName()));
+    return true;
+}
+
+void AppController::consumeLaunchArguments()
+{
+    const QString envView = qEnvironmentVariable("FAEDITOR_DEMO_SCENARIO");
+    if (!envView.isEmpty())
+        applyStoreScreenshot(envView);
+
+    const auto args = QCoreApplication::arguments();
+    for (int i = 1; i < args.size(); ++i) {
+        const QString &arg = args.at(i);
+        if (arg.startsWith(QLatin1String("faeditor://"))) {
+            handleLaunchUrl(QUrl(arg));
+            continue;
+        }
+        QString view;
+        if (arg.startsWith(QLatin1String("--demo-scenario=")))
+            view = arg.section(QLatin1Char('='), 1);
+        else if (arg.startsWith(QLatin1String("--store-screenshot=")))
+            view = arg.section(QLatin1Char('='), 1);
+        else if ((arg == QLatin1String("--demo-scenario")
+                  || arg == QLatin1String("--store-screenshot"))
+                 && i + 1 < args.size()) {
+            view = args.at(++i);
+        }
+        if (!view.isEmpty())
+            applyStoreScreenshot(view);
+    }
+}
+
+QString AppController::normalizeStoreScreenshotView(const QString &view) const
+{
+    const QString v = view.trimmed().toLower();
+    static const QStringList allowed = {
+        QStringLiteral("sets"), QStringLiteral("mixer"), QStringLiteral("mixer-part"),
+        QStringLiteral("effects"), QStringLiteral("tone"), QStringLiteral("tone-filter"),
+        QStringLiteral("tone-amp"), QStringLiteral("library")
+    };
+    if (allowed.contains(v))
+        return v;
+    return {};
+}
+
+bool AppController::handleLaunchUrl(const QUrl &url)
+{
+    if (url.scheme() != QLatin1String("faeditor"))
+        return false;
+    if (url.host() != QLatin1String("demo") && url.path() != QLatin1String("/demo"))
+        return false;
+    const QUrlQuery query(url);
+    QString view = query.queryItemValue(QStringLiteral("scenario"));
+    if (view.isEmpty())
+        view = query.queryItemValue(QStringLiteral("view"));
+    if (view.isEmpty())
+        view = QStringLiteral("sets");
+    return applyStoreScreenshot(view);
+}
+
+bool AppController::loadStoreScreenshotFixture()
+{
+    static const QStringList paths = {
+        QStringLiteral(":/qt/qml/FAEditor/demo/studio-set.json"),
+        QStringLiteral(":/FAEditor/demo/studio-set.json"),
+        QStringLiteral(":/demo/studio-set.json")
+    };
+    QByteArray bytes;
+    for (const auto &path : paths) {
+        QFile f(path);
+        if (f.open(QIODevice::ReadOnly)) {
+            bytes = f.readAll();
+            break;
+        }
+    }
+    if (bytes.isEmpty()) {
+        setHint(QStringLiteral("Store screenshot fixture is missing."));
+        return false;
+    }
+    const auto doc = QJsonDocument::fromJson(bytes);
+    if (!doc.isObject())
+        return false;
+    const auto root = doc.object();
+    const auto studio = root.value(QStringLiteral("studioSet")).toObject();
+    if (studio.isEmpty() || !m_studioSet || !m_studioSet->fromJson(studio))
+        return false;
+    if (m_audioFx)
+        m_audioFx->fromJson(root.value(QStringLiteral("audioFx")).toObject());
+    m_studioSet->setSelectedPart(0);
+    if (m_tone)
+        m_tone->setSelectedStage(QStringLiteral("osc"));
+    if (m_library) {
+        m_studioSet->setName(QStringLiteral("Soundtrack"));
+        m_library->saveNamedCopy(QStringLiteral("Soundtrack"));
+        m_studioSet->setName(QStringLiteral("Piano Stack"));
+        m_library->saveNamedCopy(QStringLiteral("Piano Stack"));
+        m_studioSet->fromJson(studio);
+        m_library->saveNamedCopy(QStringLiteral("Live Band"));
+    }
+    return true;
+}
+
+bool AppController::applyStoreScreenshot(const QString &view)
+{
+    const QString normalized = normalizeStoreScreenshotView(view);
+    if (normalized.isEmpty()) {
+        qWarning() << "Unknown store screenshot view:" << view;
+        return false;
+    }
+    if (!loadStoreScreenshotFixture())
+        return false;
+    if (m_midi)
+        m_midi->setPreviewConnected(QStringLiteral("FA-08"));
+    m_keepInstrumentConnection = false;
+    if (normalized == QLatin1String("library"))
+        setMainTab(0);
+    else if (normalized == QLatin1String("mixer") || normalized == QLatin1String("mixer-part"))
+        setMainTab(1);
+    else if (normalized == QLatin1String("effects"))
+        setMainTab(2);
+    else if (normalized == QLatin1String("tone")
+             || normalized == QLatin1String("tone-filter")
+             || normalized == QLatin1String("tone-amp")) {
+        setMainTab(3);
+        if (m_tone) {
+            if (normalized == QLatin1String("tone-filter"))
+                m_tone->setSelectedStage(QStringLiteral("filter"));
+            else if (normalized == QLatin1String("tone-amp"))
+                m_tone->setSelectedStage(QStringLiteral("amp"));
+            else
+                m_tone->setSelectedStage(QStringLiteral("osc"));
+        }
+    } else
+        setMainTab(0);
+    setHint(QStringLiteral("Ready — “%1”.").arg(m_studioSet->name()));
+    m_storeScreenshotView = normalized;
+    emit storeScreenshotViewChanged();
+    QTimer::singleShot(800, this, [this, normalized]() {
+        qInfo().noquote() << QStringLiteral("DEMO_READY:store:%1:en_US").arg(normalized);
+    });
     return true;
 }
 

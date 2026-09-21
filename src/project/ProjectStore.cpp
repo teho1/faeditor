@@ -218,6 +218,27 @@ bool ProjectStore::saveAs(const QString &name)
     return save(safe);
 }
 
+bool ProjectStore::saveNamedCopy(const QString &name)
+{
+    const auto safe = sanitizeName(name);
+    const auto path = libraryDir() + QLatin1Char('/') + safe + QStringLiteral(".json");
+    const auto root = buildLibraryRoot(safe, false);
+    QFile f(path);
+    if (!f.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        setError(QStringLiteral("Could not write library copy."));
+        return false;
+    }
+    f.write(QJsonDocument(root).toJson(QJsonDocument::Indented));
+    m_currentPath = path;
+    m_currentName = safe;
+    emit currentPathChanged();
+    if (m_studioSet)
+        m_studioSet->markClean();
+    refresh();
+    setError({});
+    return true;
+}
+
 bool ProjectStore::load(int row)
 {
     if (row < 0 || row >= m_entries.size()) {

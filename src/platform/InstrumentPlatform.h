@@ -48,6 +48,8 @@ public:
     virtual bool openMidiConnection(int inputIndex, int outputIndex,
                                     QString *error = nullptr) = 0;
     virtual void closeMidiConnection() = 0;
+    /** Recreate the host MIDI stack (CoreMIDI MIDIRestart on Apple). */
+    virtual void resetMidiHost() {}
     virtual bool midiConnectionHealthy() const = 0;
     virtual bool detectDevice(quint8 *deviceId, int timeoutMs = 1500,
                               QString *error = nullptr) = 0;

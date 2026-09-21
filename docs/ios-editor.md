@@ -30,15 +30,19 @@ it does not reproduce UIKit, iOS file pickers, or iOS suspension behavior.
 - Effects/Tone: shared editors, horizontally scrollable on narrow displays.
 - Library: separate tab, using the app's sandbox storage.
 - The action menu provides local save, temporary push, SVD import and exports.
-- Lock/sleep saves local state and closes MIDI (iOS suspends USB MIDI). When
-  you unlock, the app retries auto-connect and pull for a few seconds. Use
-  Disconnect in the menu if you do not want that. Background MIDI is not
-  enabled.
+- Lock/sleep saves local state and closes MIDI (iOS suspends USB MIDI). USB
+  ports often vanish while the app is still marked active, so the session is
+  kept until you tap Disconnect. After unlock the app waits for the FA to
+  reappear (about a minute) before asking you to Connect. A successful
+  reconnect delays Pull slightly so SysEx is not sent on a half-open port.
 
 This is an initial device-test build. Full transfer operations still use the
 existing synchronous model APIs and may pause interaction during a pull/push.
 Native document import/export and a physical iPad still need device validation.
 The full phone layout is secondary to the iPad layout; dense editors can scroll.
+
+Simulator App Store screenshots (fixture views, no USB MIDI) are documented in
+`docs/ios-screenshots.md`.
 
 ## Hardware acceptance checks
 

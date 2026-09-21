@@ -22,6 +22,31 @@ ApplicationWindow {
         if (!showLibrary) App.mainTab = index
     }
 
+    function applyStoreScreenshotView() {
+        const view = App.storeScreenshotView
+        if (!view.length)
+            return
+        inspector.close()
+        if (view === "library")
+            selectPage(4)
+        else if (view === "mixer" || view === "mixer-part") {
+            selectPage(1)
+            if (view === "mixer-part")
+                Qt.callLater(function() { inspector.open() })
+        }         else if (view === "effects")
+            selectPage(2)
+        else if (view === "tone" || view === "tone-filter" || view === "tone-amp")
+            selectPage(3)
+        else
+            selectPage(0)
+    }
+
+    Component.onCompleted: applyStoreScreenshotView()
+    Connections {
+        target: App
+        function onStoreScreenshotViewChanged() { root.applyStoreScreenshotView() }
+    }
+
     header: ToolBar {
         ColumnLayout {
             anchors.fill: parent

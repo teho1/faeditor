@@ -5,6 +5,12 @@
 #include <QThread>
 #include <QDateTime>
 #include <QDebug>
+#include <atomic>
+#include <string>
+
+#if defined(Q_OS_IOS)
+#include <CoreMIDI/CoreMIDI.h>
+#endif
 
 SysexEngine::SysexEngine(QObject *parent)
     : QObject(parent)
@@ -20,8 +26,10 @@ bool SysexEngine::openPorts(int inIndex, int outIndex, QString *error)
 {
     closePorts();
     try {
-        m_in = std::make_unique<RtMidiIn>(RtMidi::MACOSX_CORE, "FAEditor");
-        m_out = std::make_unique<RtMidiOut>(RtMidi::MACOSX_CORE, "FAEditor");
+        static std::atomic<int> clientSerial{0};
+        const auto clientName = std::string("FAEditor-") + std::to_string(++clientSerial);
+        m_in = std::make_unique<RtMidiIn>(RtMidi::MACOSX_CORE, clientName);
+        m_out = std::make_unique<RtMidiOut>(RtMidi::MACOSX_CORE, clientName + "-out");
         m_in->ignoreTypes(false, false, false);
         m_in->setCallback(&SysexEngine::rtMidiCallback, this);
         m_in->openPort(static_cast<unsigned int>(inIndex), "FAEditor In");
@@ -34,6 +42,14 @@ bool SysexEngine::openPorts(int inIndex, int outIndex, QString *error)
         closePorts();
         return false;
     }
+}
+
+void SysexEngine::resetHostMidi()
+{
+    closePorts();
+#if defined(Q_OS_IOS)
+    MIDIRestart();
+#endif
 }
 
 void SysexEngine::closePorts()
@@ -88,12 +104,14 @@ void SysexEngine::setModelId(const QByteArray &modelId)
 void SysexEngine::rtMidiCallback(double deltaTime, std::vector<unsigned char> *message, void *userData)
 {
     auto *self = static_cast<SysexEngine *>(userData);
+    if (!self || !self->m_open.load())
+        return;
     self->onMidiMessage(deltaTime, message);
 }
 
 void SysexEngine::onMidiMessage(double, std::vector<unsigned char> *message)
 {
-    if (!message || message->empty())
+    if (!m_open.load() || !message || message->empty())
         return;
 
     QByteArray raw(reinterpret_cast<const char *>(message->data()),
