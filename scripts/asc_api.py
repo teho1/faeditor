@@ -71,7 +71,7 @@ def jwt_token() -> str:
     return f"{header}.{payload}.{_b64url(_der_to_p1363(der))}"
 
 
-def request(method: str, path: str, body: dict | None = None):
+def request(method: str, path: str, body: dict | None = None, *, fatal: bool = True):
     data = None if body is None else json.dumps(body).encode()
     req = urllib.request.Request(
         API + path,
@@ -89,7 +89,16 @@ def request(method: str, path: str, body: dict | None = None):
             return json.loads(raw) if raw else {}
     except urllib.error.HTTPError as error:
         detail = error.read().decode()
-        raise SystemExit(f"App Store Connect {method} {path} failed ({error.code}): {detail}") from error
+        message = f"App Store Connect {method} {path} failed ({error.code}): {detail}"
+        if fatal:
+            raise SystemExit(message) from error
+        print(message, flush=True)
+        try:
+            parsed = json.loads(detail) if detail else {}
+        except json.JSONDecodeError:
+            parsed = {}
+        parsed["_http_status"] = error.code
+        return parsed
 
 
 def find_app(bundle_id: str) -> dict | None:
