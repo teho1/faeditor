@@ -182,6 +182,11 @@ void StudioSetModel::setSelectedPart(int v)
         return;
     m_selectedPart = v;
     emit selectedPartChanged();
+    if (!m_suppressUndo && m_platform && m_platform->isConnected()) {
+        QByteArray d(1, static_cast<char>(m_selectedPart));
+        m_platform->writeStudioParameter(InstrumentPlatform::StudioBlock::Common, 0,
+                                         roland::commonOff::CurrentPart, d);
+    }
 }
 
 void StudioSetModel::setSoloPart(int v)
@@ -387,6 +392,8 @@ bool StudioSetModel::pullFromDevice()
     }
     if (common.size() > roland::commonOff::SoloPart)
         setSoloPart(static_cast<quint8>(common[roland::commonOff::SoloPart]));
+    if (common.size() > roland::commonOff::CurrentPart)
+        setSelectedPart(static_cast<quint8>(common[roland::commonOff::CurrentPart]));
 
     for (int i = 0; i < 16; ++i) {
         const auto partData = m_sysexBlobs.blob(TemporarySysexStore::partKey(i));

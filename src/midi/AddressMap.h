@@ -351,6 +351,7 @@ namespace commonOff {
 inline constexpr quint8 NameStart = 0x00;
 inline constexpr quint8 NameLength = 16;
 inline constexpr quint8 SoloPart = 0x39;
+inline constexpr quint8 CurrentPart = 0x54; // 0–15
 } // namespace commonOff
 
 /** Temporary Tone / MFX sizes (MIDI Implementation; size 00 00 01 11 → 145). */

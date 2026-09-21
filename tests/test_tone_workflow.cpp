@@ -40,6 +40,10 @@ private slots:
         RolandFAPlatform platform(&fake);
         StudioSetModel studio(&platform, &undo);
         studio.setSelectedPart(5);
+        QCOMPARE(fake.writes.size(), 1);
+        QCOMPARE(fake.writes.constFirst().address,
+                 roland::addr::commonParam(roland::commonOff::CurrentPart));
+        QCOMPARE(fake.writes.constFirst().data, QByteArray(1, char(5)));
         studio.selectedPartModel()->setBankMsb(87);
         fake.writes.clear();
         TemporaryToneModel tone(&fake, &platform, &studio);
