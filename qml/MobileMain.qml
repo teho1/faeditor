@@ -58,7 +58,7 @@ ApplicationWindow {
                     MenuItem { text: "Export Studio Set MIDI…"; onTriggered: midiFileDialog.open() }
                     MenuItem { text: "Export tone names…"; onTriggered: namesFileDialog.open() }
                     MenuSeparator {}
-                    MenuItem { text: "Disconnect"; enabled: App.midi.connected; onTriggered: App.midi.disconnectDevice() }
+                    MenuItem { text: "Disconnect"; enabled: App.midi.connected; onTriggered: App.disconnectInstrument() }
                     MenuItem { text: "About"; onTriggered: aboutDialog.open() }
                 }
             }

@@ -20,7 +20,7 @@ You control these files. Uninstalling the app or deleting that folder removes th
 
 ## MIDI and USB
 
-When you connect a Roland FA, the app exchanges MIDI SysEx with the instrument to read and write Studio Set and related parameters. That traffic stays between your device and the instrument. The app does not send MIDI data to external servers. On iPad and iPhone the editor disconnects MIDI while it is in the background.
+When you connect a Roland FA, the app exchanges MIDI SysEx with the instrument to read and write Studio Set and related parameters. That traffic stays between your device and the instrument. The app does not send MIDI data to external servers. On iPad and iPhone the editor pauses MIDI while it is in the background and reconnects when you return to the app.
 
 ## Network use
 

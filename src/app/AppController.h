@@ -78,6 +78,8 @@ public:
     Q_INVOKABLE bool loadLibrary(int row);
     /** Open MIDI dialog (refreshes ports; clears stale connection). */
     Q_INVOKABLE void openMidiDialog();
+    /** User-requested disconnect (does not auto-reconnect after lock/sleep). */
+    Q_INVOKABLE void disconnectInstrument();
     /** Auto-connect FA and pull Temporary + Audio FX. */
     Q_INVOKABLE void startupConnect();
     Q_INVOKABLE bool exportStudioSetMidi(const QUrl &url);
@@ -92,6 +94,11 @@ signals:
 
 private:
     void setHint(const QString &h);
+    bool isMobileUi() const;
+    void handleApplicationState(Qt::ApplicationState state);
+    void startForegroundReconnect();
+    void tryForegroundReconnect();
+    void finishSessionAfterMidiConnect();
 
     SysexEngine *m_engine = nullptr;
     AutoDetectRolandPlatform *m_platform = nullptr;
@@ -107,7 +114,11 @@ private:
     SvdImportModel *m_svdImport = nullptr;
     FantomSceneModel *m_scene = nullptr;
     QTimer m_autosaveTimer;
+    QTimer m_foregroundReconnectTimer;
+    int m_foregroundReconnectAttempt = 0;
     int m_mainTab = 0;
     bool m_connectDialogOpen = false;
+    bool m_keepInstrumentConnection = false;
+    bool m_reconnectingForeground = false;
     QString m_workflowHint;
 };

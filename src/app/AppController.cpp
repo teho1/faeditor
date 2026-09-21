@@ -61,30 +61,30 @@ AppController::AppController(QObject *parent)
 
     connect(m_midi, &MidiDeviceModel::connectedChanged, this, [this]() {
         QTimer::singleShot(0,this,[this](){emit deviceFamilyChanged();});
-        if (!m_midi->connected())
-            setHint(m_midi->statusText().isEmpty()
-                        ? QStringLiteral("FA disconnected — cable unplugged or powered off")
-                        : m_midi->statusText());
+        if (m_midi->connected()) {
+            m_keepInstrumentConnection = true;
+            return;
+        }
+        if (!m_reconnectingForeground
+            && qGuiApp
+            && qGuiApp->applicationState() == Qt::ApplicationActive) {
+            m_keepInstrumentConnection = false;
+        }
+        setHint(m_midi->statusText().isEmpty()
+                    ? QStringLiteral("FA disconnected — cable unplugged or powered off")
+                    : m_midi->statusText());
     });
 
     m_library->recoverAutosaveIfNeeded();
     setHint(QStringLiteral("Looking for a Roland FA or FANTOM-0…"));
 
-    if (QGuiApplication::platformName() == QStringLiteral("ios")
-        || QCoreApplication::arguments().contains(QStringLiteral("--mobile-ui"))) {
+    m_foregroundReconnectTimer.setSingleShot(true);
+    connect(&m_foregroundReconnectTimer, &QTimer::timeout, this, &AppController::tryForegroundReconnect);
+
+    if (isMobileUi()) {
         setHint(QStringLiteral("Connect MIDI to read your FA. Use GENERIC USB mode."));
-        connect(qGuiApp, &QGuiApplication::applicationStateChanged, this,
-                [this](Qt::ApplicationState state) {
-            if (state == Qt::ApplicationSuspended || state == Qt::ApplicationHidden) {
-                m_autosaveTimer.stop();
-                m_library->autosave();
-                m_studioSets->cancelScan();
-                m_midi->disconnectDevice();
-                setHint(QStringLiteral("MIDI paused. Reconnect to read the current instrument state."));
-            } else if (state == Qt::ApplicationActive) {
-                m_midi->refresh();
-            }
-        });
+        connect(qGuiApp, &QGuiApplication::applicationStateChanged,
+                this, &AppController::handleApplicationState);
     } else {
         // After the desktop UI is up, auto-connect and pull Temporary data.
         QTimer::singleShot(500, this, &AppController::startupConnect);
@@ -97,6 +97,83 @@ void AppController::setHint(const QString &h)
         return;
     m_workflowHint = h;
     emit workflowHintChanged();
+}
+
+bool AppController::isMobileUi() const
+{
+    return QGuiApplication::platformName() == QStringLiteral("ios")
+        || QCoreApplication::arguments().contains(QStringLiteral("--mobile-ui"));
+}
+
+void AppController::handleApplicationState(Qt::ApplicationState state)
+{
+    if (state == Qt::ApplicationSuspended || state == Qt::ApplicationHidden) {
+        m_foregroundReconnectTimer.stop();
+        m_reconnectingForeground = false;
+        m_autosaveTimer.stop();
+        m_library->autosave();
+        m_studioSets->cancelScan();
+        if (m_midi && m_midi->connected())
+            m_keepInstrumentConnection = true;
+        if (m_midi)
+            m_midi->disconnectDevice();
+        if (m_keepInstrumentConnection)
+            setHint(QStringLiteral("MIDI paused — will reconnect when you return."));
+        return;
+    }
+
+    if (state != Qt::ApplicationActive)
+        return;
+
+    if (m_keepInstrumentConnection)
+        startForegroundReconnect();
+    else if (m_midi)
+        m_midi->refresh();
+}
+
+void AppController::startForegroundReconnect()
+{
+    m_foregroundReconnectTimer.stop();
+    m_foregroundReconnectAttempt = 0;
+    m_reconnectingForeground = true;
+    tryForegroundReconnect();
+}
+
+void AppController::tryForegroundReconnect()
+{
+    if (!m_midi || !m_keepInstrumentConnection) {
+        m_reconnectingForeground = false;
+        m_foregroundReconnectTimer.stop();
+        return;
+    }
+
+    setHint(QStringLiteral("Reconnecting MIDI…"));
+    if (m_midi->autoConnectFa()) {
+        m_reconnectingForeground = false;
+        m_foregroundReconnectTimer.stop();
+        finishSessionAfterMidiConnect();
+        return;
+    }
+
+    static const int kDelaysMs[] = {400, 800, 1500, 2500, 4000};
+    if (m_foregroundReconnectAttempt < int(sizeof(kDelaysMs) / sizeof(kDelaysMs[0]))) {
+        const int delay = kDelaysMs[m_foregroundReconnectAttempt++];
+        m_foregroundReconnectTimer.start(delay);
+        return;
+    }
+
+    m_reconnectingForeground = false;
+    setHint(QStringLiteral("MIDI did not return after sleep — tap Connect."));
+}
+
+void AppController::disconnectInstrument()
+{
+    m_keepInstrumentConnection = false;
+    m_reconnectingForeground = false;
+    m_foregroundReconnectTimer.stop();
+    if (m_midi)
+        m_midi->disconnectDevice();
+    setHint(QStringLiteral("Disconnected. Tap Connect when the FA is ready."));
 }
 
 void AppController::openMidiDialog()
@@ -128,7 +205,12 @@ void AppController::startupConnect()
         setHint(QStringLiteral("No supported Roland found — power on / plug in USB, then click MIDI."));
         return;
     }
+    finishSessionAfterMidiConnect();
+}
 
+void AppController::finishSessionAfterMidiConnect()
+{
+    m_keepInstrumentConnection = true;
     emit deviceFamilyChanged();
 
     if (fantomDevice()) {

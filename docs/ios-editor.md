@@ -30,8 +30,10 @@ it does not reproduce UIKit, iOS file pickers, or iOS suspension behavior.
 - Effects/Tone: shared editors, horizontally scrollable on narrow displays.
 - Library: separate tab, using the app's sandbox storage.
 - The action menu provides local save, temporary push, SVD import and exports.
-- Backgrounding saves local state and disconnects MIDI; reconnect on return.
-  Background MIDI is not enabled.
+- Lock/sleep saves local state and closes MIDI (iOS suspends USB MIDI). When
+  you unlock, the app retries auto-connect and pull for a few seconds. Use
+  Disconnect in the menu if you do not want that. Background MIDI is not
+  enabled.
 
 This is an initial device-test build. Full transfer operations still use the
 existing synchronous model APIs and may pause interaction during a pull/push.
@@ -45,6 +47,7 @@ The full phone layout is secondary to the iPad layout; dense editors can scroll.
 3. Select a tone for one part and confirm the change on the keyboard.
 4. Open Effects and Tone, verify their parameters match the selected part.
 5. Save/load a local copy; test imported/exported documents through Files.
-6. Disconnect/reconnect USB and background/foreground the app, then reconnect.
+6. Disconnect/reconnect USB. Lock and unlock the phone: MIDI should come back
+   without tapping Connect.
 7. Repeat at iPad portrait and landscape sizes. Mac testing cannot verify touch
    accuracy, keyboard avoidance or physical iPad USB behavior.
