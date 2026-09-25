@@ -21,4 +21,6 @@ release builds this source on a runner that later loads the certificate.
 
 Production App Store review is not started by a tag. Use that private
 workflow with **Submit the iOS build for App Store review** after TestFlight
-processing and iPad screenshots exist in App Store Connect.
+processing and iPad screenshots exist in App Store Connect. The iOS binary is
+iPad-only (`UIDeviceFamily` 2), so App Store Connect does not require iPhone
+screenshot sizes.

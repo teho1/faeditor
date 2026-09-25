@@ -24,6 +24,10 @@
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>UIDeviceFamily</key>
+	<array>
+		<integer>2</integer>
+	</array>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>FA Editor can use Bluetooth MIDI to connect to a Roland FA or FANTOM-0 workstation.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>

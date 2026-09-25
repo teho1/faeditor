@@ -109,6 +109,9 @@ private slots:
         QVERIFY(products.contains("FAEditor;FA Editor;com.righthere.faeditor;1.2;5;FAEditor;Main"));
         QVERIFY(read(root+QStringLiteral("qml/views/AboutDialog.qml")).contains("appVersion: \"1.2\""));
         QVERIFY(read(root+QStringLiteral("qml/Main.qml")).contains("appVersion: Qt.application.version"));
+        QVERIFY(read(root+QStringLiteral("CMakeLists.txt")).contains("XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY \"2\""));
+        QVERIFY(!read(root+QStringLiteral("CMakeLists.txt")).contains("TARGETED_DEVICE_FAMILY \"1,2\""));
+        QVERIFY(read(root+QStringLiteral("cmake/IosInfo.plist.in")).contains("<integer>2</integer>"));
     }
 };
 
