@@ -18,6 +18,21 @@ private slots:
         QCOMPARE(roland::addr::kTemporaryStudioSet[0], quint8(0x18));
     }
 
+    void currentPartIsStudioSetCommon0054()
+    {
+        const auto a = roland::addr::commonParam(roland::commonOff::CurrentPart);
+        QCOMPARE(a[0], quint8(0x18));
+        QCOMPARE(a[1], quint8(0x00));
+        QCOMPARE(a[2], quint8(0x00));
+        QCOMPARE(a[3], quint8(0x54));
+        const auto viaOffset = roland::addOffset(roland::addr::kStudioSetCommon,
+                                                 roland::commonOff::CurrentPart);
+        QCOMPARE(viaOffset[0], quint8(0x18));
+        QCOMPARE(viaOffset[3], quint8(0x54));
+        const quint8 body[] = {0x18, 0x00, 0x00, 0x54, 0x04}; // Part 5
+        QCOMPARE(roland::computeChecksum(body, 5), quint8(0x10));
+    }
+
     void partAddresses()
     {
         QCOMPARE(roland::addr::part(0)[2], quint8(0x20));
@@ -48,6 +63,17 @@ private slots:
             QVERIFY2(file.open(QIODevice::ReadOnly),qPrintable(file.errorString()));
             QVERIFY2(file.readAll().contains("preventStealing: true"),qPrintable(name));
         }
+        QFile mixer(QStringLiteral(FAEDITOR_SOURCE_DIR "/qml/views/MixerView.qml"));
+        QVERIFY(mixer.open(QIODevice::ReadOnly));
+        const auto mixerSrc = mixer.readAll();
+        QVERIFY(mixerSrc.contains("OverflowFlickable"));
+        QVERIFY(mixerSrc.contains("HorizontalFlick"));
+        QFile viewport(QStringLiteral(FAEDITOR_SOURCE_DIR "/qml/components/MobileEditorViewport.qml"));
+        QVERIFY(viewport.open(QIODevice::ReadOnly));
+        QVERIFY(viewport.readAll().contains("applyScrollPolicy"));
+        QFile guard(QStringLiteral(FAEDITOR_SOURCE_DIR "/qml/components/FlickableGuard.js"));
+        QVERIFY(guard.open(QIODevice::ReadOnly));
+        QVERIFY(guard.readAll().contains("function lockFrom"));
     }
 
     void channelStripHasNoFakeLevelMeter()

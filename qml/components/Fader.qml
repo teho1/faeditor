@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import FAEditor
+import "FlickableGuard.js" as FlickableGuard
 
 Item {
     id: root
@@ -51,11 +52,13 @@ Item {
         }
     }
 
+    property var _lockedFlickables: []
+
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.SizeVerCursor
-        // The mixer lives in a ScrollView. Keep the pointer grab after Qt's
-        // drag threshold instead of letting the parent Flickable cancel us.
+        // Keep the pointer grab after Qt's drag threshold instead of letting
+        // a parent Flickable cancel the fader.
         preventStealing: true
         onPositionChanged: (mouse) => {
             if (!pressed) return
@@ -64,9 +67,18 @@ Item {
             root.moved(root.value)
         }
         onPressed: (mouse) => {
+            root._lockedFlickables = FlickableGuard.lockFrom(root)
             const t = 1 - Math.min(1, Math.max(0, mouse.y / height))
             root.value = Math.round(root.from + t * (root.to - root.from))
             root.moved(root.value)
+        }
+        onReleased: {
+            FlickableGuard.unlock(root._lockedFlickables)
+            root._lockedFlickables = []
+        }
+        onCanceled: {
+            FlickableGuard.unlock(root._lockedFlickables)
+            root._lockedFlickables = []
         }
     }
 }

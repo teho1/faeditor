@@ -11,11 +11,11 @@ Rectangle {
             App.audioFx.pullFromDevice()
     }
 
-    Flickable {
+    OverflowFlickable {
         anchors.fill: parent
         anchors.margins: 16
         contentHeight: col.height
-        clip: true
+        flickableDirection: Flickable.VerticalFlick
 
         ColumnLayout {
             id: col
@@ -97,7 +97,7 @@ Rectangle {
                     }
 
                     Label { text: "Reverb Time"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
-                    Slider {
+                    FaSlider {
                         from: 0; to: 127
                         value: App.audioFx.inputReverbTime
                         onMoved: App.audioFx.inputReverbTime = Math.round(value)
@@ -105,7 +105,7 @@ Rectangle {
                     }
 
                     Label { text: "Reverb Level"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
-                    Slider {
+                    FaSlider {
                         from: 0; to: 127
                         value: App.audioFx.inputReverbLevel
                         onMoved: App.audioFx.inputReverbLevel = Math.round(value)
@@ -119,7 +119,7 @@ Rectangle {
                     }
 
                     Label { text: "NS Threshold"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
-                    Slider {
+                    FaSlider {
                         from: 0; to: 127
                         value: App.audioFx.nsThreshold
                         onMoved: App.audioFx.nsThreshold = Math.round(value)
@@ -127,7 +127,7 @@ Rectangle {
                     }
 
                     Label { text: "NS Release"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
-                    Slider {
+                    FaSlider {
                         from: 0; to: 127
                         value: App.audioFx.nsRelease
                         onMoved: App.audioFx.nsRelease = Math.round(value)
@@ -161,7 +161,7 @@ Rectangle {
                     }
 
                     Label { text: "Ctrl 1 (Cutoff / …)"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
-                    Slider {
+                    FaSlider {
                         from: 0; to: 127
                         value: App.audioFx.tfxParamA
                         onMoved: App.audioFx.tfxParamA = Math.round(value)
@@ -169,7 +169,7 @@ Rectangle {
                     }
 
                     Label { text: "Ctrl 2 (Reso / …)"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
-                    Slider {
+                    FaSlider {
                         from: 0; to: 127
                         value: App.audioFx.tfxParamB
                         onMoved: App.audioFx.tfxParamB = Math.round(value)
@@ -177,7 +177,7 @@ Rectangle {
                     }
 
                     Label { text: "Ctrl 3 (Drive / …)"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
-                    Slider {
+                    FaSlider {
                         from: 0; to: 127
                         value: App.audioFx.tfxParamC
                         onMoved: App.audioFx.tfxParamC = Math.round(value)

@@ -3,10 +3,9 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import FAEditor
 
-Flickable {
+OverflowFlickable {
     id: root
     contentHeight: col.height
-    clip: true
     flickableDirection: Flickable.VerticalFlick
 
     readonly property var part: App.studioSet.selectedPartModel
@@ -87,7 +86,7 @@ Flickable {
             }
 
             Label { text: "Volume"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
-            Slider {
+            FaSlider {
                 from: 0; to: 127
                 value: part ? part.level : 100
                 onMoved: if (part) part.level = Math.round(value)
@@ -95,7 +94,7 @@ Flickable {
             }
 
             Label { text: "Pan"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
-            Slider {
+            FaSlider {
                 from: 0; to: 127
                 value: part ? part.pan : 64
                 onMoved: if (part) part.pan = Math.round(value)

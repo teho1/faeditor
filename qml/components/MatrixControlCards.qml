@@ -276,7 +276,7 @@ ColumnLayout {
                             color: LogicTheme.textSecondary
                             font.pixelSize: LogicTheme.fontSizeSmall
                         }
-                        Slider {
+                        FaSlider {
                             id: amtSlider
                             Layout.fillWidth: true
                             from: -63

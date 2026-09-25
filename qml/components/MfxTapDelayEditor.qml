@@ -474,7 +474,7 @@ ColumnLayout {
                 color: LogicTheme.textSecondary
                 font.pixelSize: LogicTheme.fontSizeSmall
             }
-            Slider {
+            FaSlider {
                 id: fbSlider
                 Layout.fillWidth: true
                 Layout.preferredHeight: 36

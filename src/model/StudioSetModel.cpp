@@ -5,6 +5,7 @@
 
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QDebug>
 #include <algorithm>
 
 StudioSetModel::StudioSetModel(InstrumentPlatform *platform, UndoController *undo, QObject *parent)
@@ -182,11 +183,43 @@ void StudioSetModel::setSelectedPart(int v)
         return;
     m_selectedPart = v;
     emit selectedPartChanged();
-    if (!m_suppressUndo && m_platform && m_platform->isConnected()) {
-        QByteArray d(1, static_cast<char>(m_selectedPart));
-        m_platform->writeStudioParameter(InstrumentPlatform::StudioBlock::Common, 0,
-                                         roland::commonOff::CurrentPart, d);
+    if (!m_suppressUndo)
+        sendSelectedPartToDevice();
+}
+
+void StudioSetModel::selectPart(int v)
+{
+    v = std::clamp(v, 0, 15);
+    if (m_selectedPart != v) {
+        m_selectedPart = v;
+        emit selectedPartChanged();
     }
+    if (!m_suppressUndo)
+        sendSelectedPartToDevice();
+}
+
+void StudioSetModel::sendSelectedPartToDevice()
+{
+    const int partNumber = m_selectedPart + 1;
+    if (!m_platform || !m_platform->isConnected()) {
+        m_deviceTrace = QStringLiteral("Part %1: MIDI not connected, Current Part not sent").arg(partNumber);
+        qInfo().noquote() << m_deviceTrace;
+        emit deviceTraceChanged();
+        return;
+    }
+    QString err;
+    QByteArray current(1, static_cast<char>(m_selectedPart));
+    const bool wrote = m_platform->writeStudioParameter(InstrumentPlatform::StudioBlock::Common, 0,
+                                                        roland::commonOff::CurrentPart, current, &err);
+    m_deviceTrace = wrote
+        ? QStringLiteral("Part %1: sent Current Part DT1 18 00 00 54 data %2")
+              .arg(partNumber)
+              .arg(m_selectedPart, 2, 16, QLatin1Char('0'))
+        : QStringLiteral("Part %1: Current Part write failed%2")
+              .arg(partNumber)
+              .arg(err.isEmpty() ? QString() : QStringLiteral(" (%1)").arg(err));
+    qInfo().noquote() << m_deviceTrace;
+    emit deviceTraceChanged();
 }
 
 void StudioSetModel::setSoloPart(int v)

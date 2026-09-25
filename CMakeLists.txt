@@ -125,6 +125,9 @@ if(FAEDITOR_PRODUCT STREQUAL "FA")
         qml/MobileMain.qml
         qml/views/MobileSetsView.qml
         qml/components/MobileEditorViewport.qml
+        qml/components/FlickableGuard.js
+        qml/components/OverflowFlickable.qml
+        qml/components/FaSlider.qml
         qml/theme/LogicTheme.qml
         qml/theme/FaIcons.qml
         qml/components/ChannelStrip.qml

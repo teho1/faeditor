@@ -17,6 +17,8 @@
 #include <QObject>
 #include <QTimer>
 #include <QUrl>
+#include <QByteArray>
+#include <QStringList>
 
 class AppController : public QObject
 {
@@ -109,6 +111,8 @@ private:
     void consumeLaunchArguments();
     QString normalizeStoreScreenshotView(const QString &view) const;
     bool loadStoreScreenshotFixture();
+    void onIncomingMidi(const QByteArray &raw);
+    void flushMidiListen();
 
     SysexEngine *m_engine = nullptr;
     AutoDetectRolandPlatform *m_platform = nullptr;
@@ -125,6 +129,8 @@ private:
     FantomSceneModel *m_scene = nullptr;
     QTimer m_autosaveTimer;
     QTimer m_foregroundReconnectTimer;
+    QTimer m_midiListenFlush;
+    QStringList m_midiListenBurst;
     int m_foregroundReconnectAttempt = 0;
     int m_mainTab = 0;
     bool m_connectDialogOpen = false;

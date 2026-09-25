@@ -41,22 +41,36 @@ Item {
             }
         }
         ComboBox {
+            id: partPicker
             visible: !root.wide
             Layout.fillWidth: true
-            Layout.leftMargin: 12; Layout.rightMargin: 12
+            Layout.leftMargin: 12
+            Layout.rightMargin: 12
             implicitHeight: 44
             model: App.studioSet
             textRole: "toneName"
-            currentIndex: App.studioSet.selectedPart
-            displayText: "Part " + (currentIndex + 1) + " · " + (App.studioSet.selectedPartModel ? App.studioSet.selectedPartModel.toneName : "")
-            onActivated: index => App.studioSet.selectedPart = index
+            displayText: {
+                const n = App.studioSet.selectedPart + 1
+                const p = App.studioSet.selectedPartModel
+                const name = p && p.toneName ? p.toneName : ""
+                return name.length ? ("Part " + n + " · " + name) : ("Part " + n)
+            }
+            Component.onCompleted: currentIndex = App.studioSet.selectedPart
+            Connections {
+                target: App.studioSet
+                function onSelectedPartChanged() {
+                    partPicker.currentIndex = App.studioSet.selectedPart
+                }
+            }
             delegate: ItemDelegate {
                 required property int index
                 required property string toneName
-                width: parent ? parent.width : 300
+                width: partPicker.width
                 implicitHeight: 48
                 text: (index + 1) + " · " + toneName
+                highlighted: partPicker.highlightedIndex === index
             }
+            onActivated: (index) => App.studioSet.selectPart(index)
         }
         RowLayout {
             Layout.fillWidth: true
@@ -78,7 +92,7 @@ Item {
                     implicitHeight: 48
                     text: (index + 1) + " · " + toneName
                     highlighted: App.studioSet.selectedPart === index
-                    onClicked: App.studioSet.selectedPart = index
+                    onClicked: App.studioSet.selectPart(index)
                 }
             }
             ToneBrowser {

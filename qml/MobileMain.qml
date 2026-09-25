@@ -93,7 +93,8 @@ ApplicationWindow {
                 text: App.workflowHint
                 color: LogicTheme.textSecondary
                 font.pixelSize: 12
-                elide: Text.ElideRight
+                wrapMode: Text.Wrap
+                maximumLineCount: 5
             }
         }
     }

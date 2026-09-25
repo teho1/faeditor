@@ -106,7 +106,7 @@ Rectangle {
 
                             MouseArea {
                                 anchors.fill: parent
-                                onClicked: App.studioSet.selectedPart = index
+                                onClicked: App.studioSet.selectPart(index)
                             }
                         }
                     }

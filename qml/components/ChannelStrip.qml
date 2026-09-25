@@ -19,20 +19,32 @@ Rectangle {
         anchors.margins: 4
         spacing: 4
 
-        Label {
-            Layout.alignment: Qt.AlignHCenter
-            text: (partIndex + 1).toString()
-            color: LogicTheme.textSecondary
-            font.pixelSize: LogicTheme.fontSizeSmall
-        }
-
-        Label {
+        MouseArea {
             Layout.fillWidth: true
-            text: part ? part.toneName : ""
-            color: LogicTheme.textPrimary
-            font.pixelSize: LogicTheme.fontSizeSmall
-            elide: Text.ElideRight
-            horizontalAlignment: Text.AlignHCenter
+            Layout.preferredHeight: 48
+            onClicked: App.studioSet.selectPart(root.partIndex)
+
+            ColumnLayout {
+                anchors.fill: parent
+                spacing: 2
+
+                Label {
+                    Layout.alignment: Qt.AlignHCenter
+                    text: (partIndex + 1).toString()
+                    color: LogicTheme.textSecondary
+                    font.pixelSize: LogicTheme.fontSizeSmall
+                    font.bold: root.selected
+                }
+
+                Label {
+                    Layout.fillWidth: true
+                    text: part ? part.toneName : ""
+                    color: LogicTheme.textPrimary
+                    font.pixelSize: LogicTheme.fontSizeSmall
+                    elide: Text.ElideRight
+                    horizontalAlignment: Text.AlignHCenter
+                }
+            }
         }
 
         PanKnob {
@@ -94,11 +106,5 @@ Rectangle {
                 }
             }
         }
-    }
-
-    MouseArea {
-        anchors.fill: parent
-        z: -1
-        onClicked: App.studioSet.selectedPart = partIndex
     }
 }

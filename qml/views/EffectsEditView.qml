@@ -309,7 +309,7 @@ Rectangle {
                                 }
                             }
                             onActivated: (index) => {
-                                App.studioSet.selectedPart = index
+                                App.studioSet.selectPart(index)
                                 currentIndex = index
                             }
                         }
@@ -605,11 +605,10 @@ Rectangle {
             border.width: 1
             clip: true
 
-            Flickable {
+            OverflowFlickable {
                 anchors.fill: parent
                 anchors.margins: 12
                 contentHeight: editorCol.height
-                clip: true
                 flickableDirection: Flickable.VerticalFlick
 
                 ColumnLayout {
@@ -738,7 +737,7 @@ Rectangle {
                         Label { text: "Level"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
                         RowLayout {
                             Layout.fillWidth: true
-                            Slider {
+                            FaSlider {
                                 from: 0; to: 127
                                 value: fx.chorusLevel
                                 onMoved: fx.chorusLevel = Math.round(value)
@@ -753,7 +752,7 @@ Rectangle {
                         Label { text: "Part send"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
                         RowLayout {
                             Layout.fillWidth: true
-                            Slider {
+                            FaSlider {
                                 from: 0; to: 127
                                 value: part ? part.chorusSend : 0
                                 enabled: !!part
@@ -786,7 +785,7 @@ Rectangle {
                         Label { text: "Level"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
                         RowLayout {
                             Layout.fillWidth: true
-                            Slider {
+                            FaSlider {
                                 from: 0; to: 127
                                 value: fx.reverbLevel
                                 onMoved: fx.reverbLevel = Math.round(value)
@@ -801,7 +800,7 @@ Rectangle {
                         Label { text: "Part send"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
                         RowLayout {
                             Layout.fillWidth: true
-                            Slider {
+                            FaSlider {
                                 from: 0; to: 127
                                 value: part ? part.reverbSend : 0
                                 enabled: !!part
@@ -830,35 +829,35 @@ Rectangle {
                             onToggled: fx.masterCompSwitch = checked
                         }
                         Label { text: "Attack"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
-                        Slider {
+                        FaSlider {
                             from: 0; to: 127
                             value: fx.masterCompAttack
                             onMoved: fx.masterCompAttack = Math.round(value)
                             Layout.fillWidth: true
                         }
                         Label { text: "Release"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
-                        Slider {
+                        FaSlider {
                             from: 0; to: 127
                             value: fx.masterCompRelease
                             onMoved: fx.masterCompRelease = Math.round(value)
                             Layout.fillWidth: true
                         }
                         Label { text: "Threshold"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
-                        Slider {
+                        FaSlider {
                             from: 0; to: 127
                             value: fx.masterCompThreshold
                             onMoved: fx.masterCompThreshold = Math.round(value)
                             Layout.fillWidth: true
                         }
                         Label { text: "Ratio"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
-                        Slider {
+                        FaSlider {
                             from: 0; to: 127
                             value: fx.masterCompRatio
                             onMoved: fx.masterCompRatio = Math.round(value)
                             Layout.fillWidth: true
                         }
                         Label { text: "Gain"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
-                        Slider {
+                        FaSlider {
                             from: 0; to: 127
                             value: fx.masterCompGain
                             onMoved: fx.masterCompGain = Math.round(value)
@@ -894,21 +893,21 @@ Rectangle {
                             Layout.fillWidth: true
                         }
                         Label { text: "Ctrl 1 (Cutoff / …)"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
-                        Slider {
+                        FaSlider {
                             from: 0; to: 127
                             value: audio.tfxParamA
                             onMoved: audio.tfxParamA = Math.round(value)
                             Layout.fillWidth: true
                         }
                         Label { text: "Ctrl 2 (Reso / …)"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
-                        Slider {
+                        FaSlider {
                             from: 0; to: 127
                             value: audio.tfxParamB
                             onMoved: audio.tfxParamB = Math.round(value)
                             Layout.fillWidth: true
                         }
                         Label { text: "Ctrl 3 (Drive / …)"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
-                        Slider {
+                        FaSlider {
                             from: 0; to: 127
                             value: audio.tfxParamC
                             onMoved: audio.tfxParamC = Math.round(value)
@@ -937,14 +936,14 @@ Rectangle {
                             Layout.fillWidth: true
                         }
                         Label { text: "Reverb Time"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
-                        Slider {
+                        FaSlider {
                             from: 0; to: 127
                             value: audio.inputReverbTime
                             onMoved: audio.inputReverbTime = Math.round(value)
                             Layout.fillWidth: true
                         }
                         Label { text: "Reverb Level"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
-                        Slider {
+                        FaSlider {
                             from: 0; to: 127
                             value: audio.inputReverbLevel
                             onMoved: audio.inputReverbLevel = Math.round(value)
@@ -966,14 +965,14 @@ Rectangle {
                             onToggled: audio.nsSwitch = checked
                         }
                         Label { text: "NS Threshold"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
-                        Slider {
+                        FaSlider {
                             from: 0; to: 127
                             value: audio.nsThreshold
                             onMoved: audio.nsThreshold = Math.round(value)
                             Layout.fillWidth: true
                         }
                         Label { text: "NS Release"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
-                        Slider {
+                        FaSlider {
                             from: 0; to: 127
                             value: audio.nsRelease
                             onMoved: audio.nsRelease = Math.round(value)

@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import FAEditor
+import "FlickableGuard.js" as FlickableGuard
 
 /**
  * Compact mixer-style vertical fader for MFX params.
@@ -24,34 +25,15 @@ ColumnLayout {
 
     signal moved(int v)
 
-    function _findParentFlickable() {
-        let p = parent
-        while (p) {
-            // Flickable exposes interactive + contentY; ScrollView contentItem is also a Flickable.
-            if (p.interactive !== undefined && p.contentY !== undefined
-                    && typeof p.cancelFlick === "function")
-                return p
-            p = p.parent
-        }
-        return null
-    }
-
-    property var _pausedFlickable: null
+    property var _lockedFlickables: []
 
     function _pauseParentFlick() {
-        const fl = root._findParentFlickable()
-        if (!fl || !fl.interactive)
-            return
-        fl.cancelFlick()
-        fl.interactive = false
-        root._pausedFlickable = fl
+        root._lockedFlickables = FlickableGuard.lockFrom(root)
     }
 
     function _resumeParentFlick() {
-        if (root._pausedFlickable) {
-            root._pausedFlickable.interactive = true
-            root._pausedFlickable = null
-        }
+        FlickableGuard.unlock(root._lockedFlickables)
+        root._lockedFlickables = []
     }
 
     Layout.preferredWidth: Math.max(root.faderWidth + 8, 44)

@@ -60,6 +60,8 @@ public:
     void setName(const QString &n);
     int selectedPart() const { return m_selectedPart; }
     void setSelectedPart(int v);
+    /** Select a part in the editor and make it current on the FA (always sends). */
+    Q_INVOKABLE void selectPart(int v);
     PartModel *selectedPartModel() const;
     EffectsModel *effects() const { return m_effects; }
     bool busy() const { return m_busy; }
@@ -89,6 +91,7 @@ public:
     bool hasSysexBlobs() const { return !m_sysexBlobs.isEmpty(); }
 
     void setToneNameResolver(const std::function<QString(int, int, int)> &fn);
+    QString deviceTrace() const { return m_deviceTrace; }
 
 signals:
     void nameChanged();
@@ -99,6 +102,7 @@ signals:
     void soloPartChanged();
     void studioSetLoaded();
     void autosaveRequested();
+    void deviceTraceChanged();
 
 private slots:
     void onPartEdited(int partIndex, const QString &param, int value);
@@ -115,6 +119,7 @@ private:
     void seedRawFromSysexBlobs();
     bool pullSystemMasterEq(QString *error);
     bool pushTypedOverlays(QString *error);
+    void sendSelectedPartToDevice();
 
     InstrumentPlatform *m_platform = nullptr;
     UndoController *m_undo = nullptr;
@@ -130,4 +135,5 @@ private:
     QString m_lastError;
     std::function<QString(int, int, int)> m_toneResolver;
     bool m_suppressUndo = false;
+    QString m_deviceTrace;
 };

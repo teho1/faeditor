@@ -239,7 +239,11 @@ Rectangle {
                     text: "Part " + (index + 1)
                     highlighted: partBox.highlightedIndex === index
                 }
-                onActivated: (index) => { App.studioSet.selectedPart = index }
+                onActivated: (index) => { App.studioSet.selectPart(index) }
+                onCurrentIndexChanged: {
+                    if (currentIndex >= 0 && currentIndex !== App.studioSet.selectedPart)
+                        App.studioSet.selectPart(currentIndex)
+                }
             }
 
             Label {
@@ -391,11 +395,10 @@ Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
-            Flickable {
+            OverflowFlickable {
                 anchors.fill: parent
                 anchors.margins: 14
                 contentHeight: editorCol.height
-                clip: true
                 flickableDirection: Flickable.VerticalFlick
                 ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
 
@@ -630,7 +633,7 @@ Rectangle {
                             }
                             RowLayout {
                                 Layout.fillWidth: true
-                                Slider {
+                                FaSlider {
                                     from: 0; to: 127; stepSize: 1; value: sn.oscPulseWidth
                                     onMoved: sn.oscPulseWidth = Math.round(value)
                                     Layout.fillWidth: true
@@ -733,7 +736,7 @@ Rectangle {
                             Label { text: "Fine Tune"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
                             SpinBox { from: 14; to: 114; value: pcm.fineTune; onValueModified: pcm.fineTune = value }
                             Label { text: "Tone Level"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
-                            Slider {
+                            FaSlider {
                                 from: 0; to: 127; value: pcm.toneLevel
                                 onMoved: pcm.toneLevel = Math.round(value)
                                 Layout.fillWidth: true
@@ -837,7 +840,7 @@ Rectangle {
                             }
 
                             Label { text: "Cutoff"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
-                            Slider {
+                            FaSlider {
                                 from: 0; to: 127; value: root.body.filterCutoff
                                 onMoved: root.body.filterCutoff = Math.round(value)
                                 Layout.fillWidth: true
@@ -849,7 +852,7 @@ Rectangle {
                             }
 
                             Label { text: "Resonance"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
-                            Slider {
+                            FaSlider {
                                 from: 0; to: 127; value: root.body.filterResonance
                                 onMoved: root.body.filterResonance = Math.round(value)
                                 Layout.fillWidth: true
@@ -900,7 +903,7 @@ Rectangle {
                             Layout.fillWidth: true
 
                             Label { text: "Level"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
-                            Slider {
+                            FaSlider {
                                 from: 0; to: 127; value: root.body.ampLevel
                                 onMoved: root.body.ampLevel = Math.round(value)
                                 Layout.fillWidth: true
@@ -912,7 +915,7 @@ Rectangle {
                             }
 
                             Label { text: "Pan"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
-                            Slider {
+                            FaSlider {
                                 from: 0; to: 127; value: root.body.ampPan
                                 onMoved: root.body.ampPan = Math.round(value)
                                 Layout.fillWidth: true
@@ -969,7 +972,7 @@ Rectangle {
                                 }
                             }
                             Label { text: "Rate"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
-                            Slider {
+                            FaSlider {
                                 from: 0
                                 to: tone.isPcmSynth ? 149 : 127
                                 value: tone.isSnSynth ? sn.lfoRate : pcm.lfoRate
@@ -1016,7 +1019,7 @@ Rectangle {
                                             opacity: 0.35 + root.depthNorm(tone.isSnSynth ? sn.lfoPitchDepth : pcm.lfoPitchDepth) * 0.65
                                         }
                                     }
-                                    Slider {
+                                    FaSlider {
                                         from: 1; to: 127
                                         value: tone.isSnSynth ? sn.lfoPitchDepth : pcm.lfoPitchDepth
                                         onMoved: {
@@ -1057,7 +1060,7 @@ Rectangle {
                                             opacity: 0.35 + root.depthNorm(tone.isSnSynth ? sn.lfoFilterDepth : pcm.lfoFilterDepth) * 0.65
                                         }
                                     }
-                                    Slider {
+                                    FaSlider {
                                         from: 1; to: 127
                                         value: tone.isSnSynth ? sn.lfoFilterDepth : pcm.lfoFilterDepth
                                         onMoved: {
@@ -1098,7 +1101,7 @@ Rectangle {
                                             opacity: 0.35 + root.depthNorm(tone.isSnSynth ? sn.lfoAmpDepth : pcm.lfoAmpDepth) * 0.65
                                         }
                                     }
-                                    Slider {
+                                    FaSlider {
                                         from: 1; to: 127
                                         value: tone.isSnSynth ? sn.lfoAmpDepth : pcm.lfoAmpDepth
                                         onMoved: {
@@ -1180,7 +1183,7 @@ Rectangle {
                             }
                         }
                         Label { text: "Tone Level"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
-                        Slider {
+                        FaSlider {
                             from: 0; to: 127; value: sna.toneLevel
                             onMoved: sna.toneLevel = Math.round(value)
                             Layout.fillWidth: true
@@ -1196,13 +1199,13 @@ Rectangle {
                             onValueModified: sna.octaveShift = value
                         }
                         Label { text: "Cutoff Offset"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
-                        Slider {
+                        FaSlider {
                             from: 0; to: 127; value: sna.cutoffOffset
                             onMoved: sna.cutoffOffset = Math.round(value)
                             Layout.fillWidth: true
                         }
                         Label { text: "Resonance Offset"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
-                        Slider {
+                        FaSlider {
                             from: 0; to: 127; value: sna.resonanceOffset
                             onMoved: sna.resonanceOffset = Math.round(value)
                             Layout.fillWidth: true
@@ -1280,7 +1283,7 @@ Rectangle {
                                         RowLayout {
                                             visible: !sna.modifyParamHasEnum(modelData)
                                             Layout.fillWidth: true
-                                            Slider {
+                                            FaSlider {
                                                 Layout.fillWidth: true
                                                 from: sna.modifyParamMinValues[modelData]
                                                 to: sna.modifyParamMaxValues[modelData]
@@ -1325,7 +1328,7 @@ Rectangle {
                                     font.pixelSize: LogicTheme.fontSizeSmall
                                     Layout.preferredWidth: 110
                                 }
-                                Slider {
+                                FaSlider {
                                     Layout.fillWidth: true
                                     from: 0; to: 127; stepSize: 1
                                     value: sna.modifyParams[0]
@@ -1378,7 +1381,7 @@ Rectangle {
                                         }
                                         RowLayout {
                                             Layout.fillWidth: true
-                                            Slider {
+                                            FaSlider {
                                                 Layout.fillWidth: true
                                                 from: 0; to: 127; stepSize: 1
                                                 value: sna.modifyParams[modelData]
@@ -1536,7 +1539,7 @@ Rectangle {
                                         horizontalAlignment: Text.AlignHCenter
                                         Layout.fillWidth: true
                                     }
-                                    Slider {
+                                    FaSlider {
                                         orientation: Qt.Vertical
                                         from: 0; to: 8; stepSize: 1
                                         value: root.drawbarValue(modelData.prop)
@@ -1564,7 +1567,7 @@ Rectangle {
                             Layout.fillWidth: true
 
                             Label { text: "Leakage"; color: LogicTheme.textSecondary; font.pixelSize: LogicTheme.fontSizeSmall }
-                            Slider {
+                            FaSlider {
                                 from: 0; to: 127; value: sna.leakageLevel
                                 onMoved: sna.leakageLevel = Math.round(value)
                                 Layout.fillWidth: true
@@ -1678,7 +1681,7 @@ Rectangle {
                                 color: LogicTheme.textSecondary
                                 font.pixelSize: LogicTheme.fontSizeSmall
                             }
-                            Slider {
+                            FaSlider {
                                 visible: root.mfx && root.mfx.uiFamily !== MfxUiFamily.familyMultiTapDelay
                                 from: 0; to: 127; value: root.mfx ? root.mfx.chorusSend : 0
                                 onMoved: if (root.mfx) root.mfx.chorusSend = Math.round(value)
@@ -1690,7 +1693,7 @@ Rectangle {
                                 color: LogicTheme.textSecondary
                                 font.pixelSize: LogicTheme.fontSizeSmall
                             }
-                            Slider {
+                            FaSlider {
                                 visible: root.mfx && root.mfx.uiFamily !== MfxUiFamily.familyMultiTapDelay
                                 from: 0; to: 127; value: root.mfx ? root.mfx.reverbSend : 0
                                 onMoved: if (root.mfx) root.mfx.reverbSend = Math.round(value)

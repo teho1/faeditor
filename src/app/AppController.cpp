@@ -11,6 +11,7 @@
 #include <QJsonObject>
 #include <QUrlQuery>
 #include <QDebug>
+#include <QByteArray>
 
 AppController::AppController(QObject *parent)
     : QObject(parent)
@@ -52,6 +53,15 @@ AppController::AppController(QObject *parent)
     connect(m_studioSet, &StudioSetModel::autosaveRequested, this, [this]() {
         m_autosaveTimer.start(400);
     });
+    connect(m_studioSet, &StudioSetModel::deviceTraceChanged, this, [this]() {
+        if (!m_studioSet->deviceTrace().isEmpty())
+            setHint(m_studioSet->deviceTrace());
+    });
+    m_midiListenFlush.setSingleShot(true);
+    m_midiListenFlush.setInterval(400);
+    connect(&m_midiListenFlush, &QTimer::timeout, this, &AppController::flushMidiListen);
+    connect(m_engine, &SysexEngine::sysexReceived, this, &AppController::onIncomingMidi,
+            Qt::QueuedConnection);
     m_autosaveTimer.setSingleShot(true);
     connect(&m_autosaveTimer, &QTimer::timeout, m_library, &ProjectStore::autosave);
 
@@ -115,6 +125,64 @@ void AppController::setHint(const QString &h)
         return;
     m_workflowHint = h;
     emit workflowHintChanged();
+}
+
+static QString formatIncomingMidi(const QByteArray &raw)
+{
+    if (raw.isEmpty())
+        return {};
+    const auto b0 = static_cast<quint8>(raw[0]);
+    if (b0 == 0xF8 || b0 == 0xFE || b0 == 0xFA || b0 == 0xFB || b0 == 0xFC)
+        return {};
+    if (b0 != 0xF0) {
+        if ((b0 & 0xF0) == 0xC0 && raw.size() >= 2)
+            return QStringLiteral("PC ch%1 %2").arg((b0 & 0x0F) + 1).arg(quint8(raw[1]));
+        return {};
+    }
+    if (raw.size() >= 5 && quint8(raw[1]) == 0x7E && quint8(raw[3]) == 0x06)
+        return {};
+    if (raw.size() >= 14 && quint8(raw[1]) == 0x41 && quint8(raw[6]) == 0x12) {
+        const quint8 a0 = quint8(raw[7]);
+        const quint8 a1 = quint8(raw[8]);
+        const quint8 a2 = quint8(raw[9]);
+        const quint8 a3 = quint8(raw[10]);
+        const quint8 data = quint8(raw[11]);
+        if (a0 == 0x18 && a1 == 0x00 && a2 == 0x00 && a3 == 0x54)
+            return QStringLiteral("CurrentPart %1").arg(data + 1);
+        if (a0 == 0x18 && a1 == 0x00 && a2 >= 0x40 && a2 <= 0x4F && a3 == 0x02)
+            return QStringLiteral("KbdSw P%1=%2").arg(a2 - 0x40 + 1).arg(data);
+        if (a0 == 0x18 && a1 == 0x00 && a2 == 0x50 && a3 == 0x34)
+            return QStringLiteral("PadPartSelect %1").arg(data);
+        return QStringLiteral("%1 %2 %3 %4=%5")
+            .arg(a0, 2, 16, QLatin1Char('0'))
+            .arg(a1, 2, 16, QLatin1Char('0'))
+            .arg(a2, 2, 16, QLatin1Char('0'))
+            .arg(a3, 2, 16, QLatin1Char('0'))
+            .arg(data, 2, 16, QLatin1Char('0'));
+    }
+    return QString::fromLatin1(raw.toHex(' ')).left(72);
+}
+
+void AppController::onIncomingMidi(const QByteArray &raw)
+{
+    const QString line = formatIncomingMidi(raw);
+    if (line.isEmpty())
+        return;
+    m_midiListenBurst.append(line);
+    while (m_midiListenBurst.size() > 24)
+        m_midiListenBurst.removeFirst();
+    if (!m_midiListenFlush.isActive())
+        m_midiListenFlush.start();
+}
+
+void AppController::flushMidiListen()
+{
+    if (m_midiListenBurst.isEmpty())
+        return;
+    const QString text = QStringLiteral("FA→ ") + m_midiListenBurst.join(QStringLiteral(" · "));
+    qInfo().noquote() << text;
+    setHint(text);
+    m_midiListenBurst.clear();
 }
 
 bool AppController::isMobileUi() const
@@ -233,7 +301,7 @@ void AppController::openMidiDialog()
 void AppController::startupConnect()
 {
     if (!m_midi) {
-        setHint(QStringLiteral("1) Connect MIDI  2) Open a Studio Set  3) Change instruments  4) Push"));
+        setHint(QStringLiteral("Connect MIDI, then open a Studio Set."));
         return;
     }
 
@@ -263,7 +331,7 @@ void AppController::finishSessionAfterMidiConnect()
         m_audioFx->pullFromDevice();
 
     if (pulled) {
-        setHint(QStringLiteral("Ready — “%1”. Open a Studio Set or change part tones, then Push.")
+        setHint(QStringLiteral("Ready — “%1”. Change part on the FA pads (Transmit Edit Data ON).")
                     .arg(m_studioSet->name()));
     } else {
         setHint(QStringLiteral("MIDI connected, but pull failed — click Pull Temp (FA must be ready)."));
@@ -324,9 +392,7 @@ void AppController::applyToneToSelectedPart(int toneRow)
     p->setBankLsb(tone.value(QStringLiteral("bankLsb")).toInt());
     p->setProgram(tone.value(QStringLiteral("program")).toInt());
     p->setToneName(tone.value(QStringLiteral("name")).toString());
-    setHint(QStringLiteral("Part %1 → %2 (live on FA). Push to refresh full Temporary if needed; Write on FA to store User set.")
-                .arg(p->partNumber())
-                .arg(p->toneName()));
+    setHint(QStringLiteral("Part %1 → %2").arg(p->partNumber()).arg(p->toneName()));
 }
 
 void AppController::previewTone(int toneRow)
@@ -389,7 +455,7 @@ bool AppController::push()
         setHint(QStringLiteral("Studio Set + Audio FX pushed, but Master EQ push failed."));
         return false;
     }
-    setHint(QStringLiteral("Pushed Temporary Studio Set, tones, Audio FX, and Master EQ. Permanent store: Write on the FA."));
+    setHint(QStringLiteral("Temporary updated on the FA."));
     return true;
 }
 

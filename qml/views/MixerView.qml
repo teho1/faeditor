@@ -6,17 +6,26 @@ import FAEditor
 Rectangle {
     color: LogicTheme.windowBg
 
-    ScrollView {
+    OverflowFlickable {
+        id: mixerFlick
         anchors.fill: parent
-        clip: true
+        flickableDirection: Flickable.HorizontalFlick
+        contentWidth: strips.width
+        contentHeight: height
+        ScrollBar.horizontal: ScrollBar {
+            policy: mixerFlick.contentWidth > mixerFlick.width + 1
+                    ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
+        }
 
         Row {
+            id: strips
+            height: mixerFlick.height
             spacing: 0
             Repeater {
                 model: 16
                 ChannelStrip {
                     partIndex: index
-                    height: Math.max(420, parent.parent ? parent.parent.height : 420)
+                    height: strips.height
                 }
             }
         }

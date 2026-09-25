@@ -1,5 +1,6 @@
 import QtQuick
 import FAEditor
+import "FlickableGuard.js" as FlickableGuard
 
 Item {
     id: root
@@ -44,15 +45,29 @@ Item {
         }
     }
 
+    property var _lockedFlickables: []
+
     MouseArea {
         anchors.fill: parent
-        // Horizontal drags otherwise get stolen by the mixer ScrollView after
+        // Horizontal drags otherwise get stolen by the mixer Flickable after
         // the platform drag threshold (about 10 px).
         preventStealing: true
         cursorShape: Qt.SizeVerCursor
         property real lastY
         property real dragValue
-        onPressed: (mouse) => { lastY = mouse.y; dragValue = root.value }
+        onPressed: (mouse) => {
+            root._lockedFlickables = FlickableGuard.lockFrom(root)
+            lastY = mouse.y
+            dragValue = root.value
+        }
+        onReleased: {
+            FlickableGuard.unlock(root._lockedFlickables)
+            root._lockedFlickables = []
+        }
+        onCanceled: {
+            FlickableGuard.unlock(root._lockedFlickables)
+            root._lockedFlickables = []
+        }
         onPositionChanged: (mouse) => {
             if (!pressed) return
             const fine = (mouse.modifiers & Qt.ShiftModifier) !== 0
